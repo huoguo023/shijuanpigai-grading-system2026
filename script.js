@@ -34,28 +34,28 @@ function loadLesson(id, event) {
     // 2. 特殊处理：使用外部HTML文件的课程
     var externalFiles = {
         // 第一单元
-        'u1-3': '第一单元 第三课：声音是怎样传播的.html',
-        'u1-4': '第一单元第四课：我们是怎样听到声音的.html',
-        'u1-5': '第一单元  第五课.声音的强与弱.html',
-        'u1-6': '第一单元6.声音的高与低.html',
-        'u1-78': '第一单元第七、八课：让弦发出高低不同的声音 & 制作小乐器.html',
+        'u1-3': 'unit1-lesson3-sound-propagation.html',
+        'u1-4': 'unit1-lesson4-hearing.html',
+        'u1-5': 'unit1-lesson5-sound-intensity.html',
+        'u1-6': 'unit1-lesson6-sound-pitch.html',
+        'u1-78': 'unit1-lesson7-8-instruments.html',
         // 第二单元
-        'u2-1': '小学科学四上 第二单元1.感受我们的呼吸 复习.html',
-        'u2-2': '小学科学四上第二单元2.呼吸与健康生活.html',
-        'u2-3': '小学科学四上第二单元3.测量肺活量.html',
-        'u2-4': '小学科学四上第二单元4.一天的食物.html',
-        'u2-5': '小学科学四上第二单元5.食物中的营养.html',
-        'u2-6': '小学科学四上第二单元6.营养要均衡.html',
-        'u2-7': '小学科学四上第二单元7：食物在口腔里的变化.html',
-        'u2-8': '小学科学四上第二单元8.食物在身体里的旅行.html',
+        'u2-1': 'unit2-lesson1-breathing.html',
+        'u2-2': 'unit2-lesson2-healthy-breathing.html',
+        'u2-3': 'unit2-lesson3-lung-capacity.html',
+        'u2-4': 'unit2-lesson4-daily-food.html',
+        'u2-5': 'unit2-lesson5-nutrition.html',
+        'u2-6': 'unit2-lesson6-balanced-diet.html',
+        'u2-7': 'unit2-lesson7-digestion-mouth.html',
+        'u2-8': 'unit2-lesson8-digestion-journey.html',
         // 第三单元
-        'u3-1': '第三单元 第1课 运动和力 .html',
-        'u3-2': '第三单元 新第2课 用气球驱动小车.html',
-        'u3-3': '第三单元 第三课 用橡皮筋驱动小车.html',
-        'u3-4': '第三单元 第四课、弹簧测力计.html',
-        'u3-5': '第三单元 第5课.html',
-        'u3-6': '第三单元 第6课.html',
-        'u3-78': '第三单元 7、 8课.html'
+        'u3-1': 'unit3-lesson1-motion-force.html',
+        'u3-2': 'unit3-lesson2-balloon-car.html',
+        'u3-3': 'unit3-lesson3-rubber-band-car.html',
+        'u3-4': 'unit3-lesson4-spring-scale.html',
+        'u3-5': 'unit3-lesson5-friction.html',
+        'u3-6': 'unit3-lesson6-friction-secrets.html',
+        'u3-78': 'unit3-lesson7-8-car-design.html'
     };
     
     if (externalFiles[id]) {
