@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第六课：声音的高与低 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #E0F7FA; /* 浅青背景 */
+            --card-bg: #FFFFFF;
+            --primary: #00BCD4; /* 科技蓝 */
+            --high-pitch: #FF5252; /* 高音红 */
+            --low-pitch: #3F51B5; /* 低音蓝 */
+            --text: #37474F;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#B2EBF2 15%, transparent 16%);
+            background-size: 25px 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 4px solid #80DEEA;
+            overflow: hidden;
+        }
+
+        h1 { color: #0097A7; margin-top: 0; font-size: 1.6em; margin-bottom: 5px; }
+        .subtitle { color: #FF9800; font-size: 1em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: slideUp 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #E0F2F1;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid #00BCD4;
+            margin-bottom: 20px;
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #00838F; border-bottom: 1px dashed #80DEEA; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { color: #D84315; font-weight: bold; background: #FFCCBC; padding: 0 4px; border-radius: 3px; }
+        .high-mark { color: var(--high-pitch); font-weight: bold; }
+        .low-mark { color: var(--low-pitch); font-weight: bold; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFF;
+            border: 2px dashed #4DD0E1;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+        }
+        .svg-caption { font-size: 0.9em; color: #78909C; margin-top: 5px; font-style: italic; }
+
+        .ctrl-btn {
+            background: #00BCD4; color: white; border: none; padding: 8px 20px; 
+            border-radius: 20px; margin: 5px; cursor: pointer; font-size: 0.9em;
+            box-shadow: 0 3px 0 #0097A7; transition: 0.1s;
+        }
+        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #0097A7; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #0097A7;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0097A7; }
+        .btn-next { background: #FFCA28; box-shadow: 0 4px 0 #F57F17; color: #3E2723; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #ECEFF1; border-radius: 5px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #00BCD4; width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #FAFAFA; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #E0E0E0; margin-top: 10px; }
+        .q-tag { background: #B2EBF2; color: #006064; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; }
+        .q-content { font-size: 1.2em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项 */
+        .option-item {
+            background: white; border: 2px solid #B2DFDB; padding: 12px; border-radius: 8px;
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #B2EBF2; border-color: #00BCD4; font-weight: bold; color: #006064; }
+
+        .fill-input { border: none; border-bottom: 3px solid #00BCD4; background: transparent; width: 120px; text-align: center; font-size: 1.2em; color: #00838F; border-radius: 0; }
+
+        /* 连线题 */
+        .match-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+        .match-col { width: 48%; display: flex; flex-direction: column; gap: 10px; }
+        .match-btn {
+            padding: 10px; background: #FFF; border: 2px solid #B0BEC5; border-radius: 8px;
+            text-align: center; cursor: pointer; font-size: 0.9em;
+        }
+        .match-btn.selected { background: #FFF59D; border-color: #FBC02D; transform: scale(1.05); }
+        .match-btn.matched { background: #C8E6C9; border-color: #43A047; opacity: 0.6; pointer-events: none; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; }
+        .score-display { font-size: 4em; color: #FF9800; font-weight: bold; margin: 10px 0; }
+
+        /* 即时反馈样式 */
+        .feedback-toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: white; padding: 15px 25px; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px;
+            z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .feedback-success { border-left: 5px solid #4CAF50; }
+        .feedback-error { border-left: 5px solid #F44336; }
+        .toast-icon {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 20px; font-weight: bold; color: white;
+        }
+        .feedback-success .toast-icon { background: #4CAF50; }
+        .feedback-error .toast-icon { background: #F44336; }
+        .toast-message { font-size: 15px; font-weight: 500; color: #333; }
+        
+        .confetti {
+            position: fixed; pointer-events: none; z-index: 9999;
+        }
+        @keyframes confetti-fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .correct-feedback {
+            animation: pulse-correct 0.6s ease;
+        }
+        @keyframes pulse-correct {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); background: #C8E6C9; }
+        }
+        
+        .wrong-feedback {
+            animation: shake-wrong 0.5s ease;
+        }
+        @keyframes shake-wrong {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. 复习区 -->
+    <div id="section-review" class="container section active">
+        <h1>🎼 知识复习</h1>
+        <p class="subtitle">第六课：声音的高与低</p>
+
+        <!-- 知识点 1 & 2: 音高与振动快慢 -->
+        <div class="knowledge-box">
+            <h3>1. 音高与振动快慢</h3>
+            <div class="k-point">🎵 <strong>音高</strong>：描述声音的高低。</div>
+            <div class="k-point">⚡ <strong>规律</strong>：
+                <br>振动越<span class="high-mark">快</span> → 声音越<span class="high-mark">高</span>
+                <br>振动越<span class="low-mark">慢</span> → 声音越<span class="low-mark">低</span>
+            </div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 低音波形 -->
+                    <text x="20" y="30" font-size="12" fill="#3F51B5">低音 (慢)</text>
+                    <path d="M20,60 Q45,20 70,60 T120,60" fill="none" stroke="#3F51B5" stroke-width="3"/>
+                    
+                    <!-- 高音波形 -->
+                    <text x="180" y="30" font-size="12" fill="#FF5252">高音 (快)</text>
+                    <path d="M180,60 Q190,40 200,60 T220,60 T240,60 T260,60 T280,60" fill="none" stroke="#FF5252" stroke-width="3"/>
+                    
+                    <!-- 动画指示 -->
+                    <circle cx="70" cy="60" r="5" fill="#3F51B5"><animate attributeName="cy" values="60;40;80;60" dur="1s" repeatCount="indefinite"/></circle>
+                    <circle cx="230" cy="60" r="5" fill="#FF5252"><animate attributeName="cy" values="60;40;80;60" dur="0.2s" repeatCount="indefinite"/></circle>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 3 & 4: 钢尺实验 -->
+        <div class="knowledge-box">
+            <h3>2. 钢尺实验 (长度与高低)</h3>
+            <div class="k-point">📏 <strong>操作</strong>：改变钢尺伸出桌面的<span class="highlight">长度</span>，用力相同。</div>
+            <div class="k-point">📊 <strong>结论</strong>：
+                <br>伸出越<span class="low-mark">长</span> → 振动<span class="low-mark">慢</span> → 声音<span class="low-mark">低</span>
+                <br>伸出越<span class="high-mark">短</span> → 振动<span class="high-mark">快</span> → 声音<span class="high-mark">高</span>
+            </div>
+            <div class="k-point">🔄 <strong>准确性</strong>：每次实验重复<span class="highlight">3次</span>。</div>
+
+            <div class="svg-stage">
+                <button class="ctrl-btn" onclick="animRuler('long')">伸出长 (低音)</button>
+                <button class="ctrl-btn" onclick="animRuler('short')">伸出短 (高音)</button>
+                <svg width="100%" height="140" viewBox="0 0 300 140" id="svg-ruler">
+                    <!-- 桌子 -->
+                    <rect x="0" y="80" width="100" height="60" fill="#8D6E63"/>
+                    <text x="20" y="110" fill="white" font-size="12">桌面</text>
+                    <!-- 手 -->
+                    <ellipse cx="90" cy="75" rx="15" ry="10" fill="#FFCCBC" stroke="#E64A19"/>
+                    <!-- 钢尺 -->
+                    <path id="ruler-blade" d="M100,80 L250,80" stroke="#607D8B" stroke-width="8" stroke-linecap="round"/>
+                    <!-- 文字指示 -->
+                    <text id="vib-text" x="150" y="50" text-anchor="middle" font-size="12" fill="#555">点击按钮开始实验</text>
+                </svg>
+            </div>
+
+            <!-- 柱形图演示 -->
+            <div class="svg-stage">
+                <p style="font-size:0.9em; margin:0;">音高变化柱形图</p>
+                <svg width="100%" height="120" viewBox="0 0 300 120">
+                    <!-- 坐标轴 -->
+                    <line x1="40" y1="100" x2="280" y2="100" stroke="#333" stroke-width="2"/>
+                    <line x1="40" y1="100" x2="40" y2="20" stroke="#333" stroke-width="2"/>
+                    <text x="10" y="60" font-size="10" transform="rotate(-90, 10, 60)">音高</text>
+                    <text x="150" y="115" font-size="10">钢尺伸出桌面的长度</text>
+
+                    <!-- 柱子 -->
+                    <g>
+                        <rect x="60" y="30" width="30" height="70" fill="#FF5252"><animate attributeName="height" from="0" to="70" dur="1s" fill="freeze"/><animate attributeName="y" from="100" to="30" dur="1s" fill="freeze"/></rect>
+                        <text x="65" y="112" font-size="10">8cm</text>
+                        <text x="65" y="25" font-size="10" fill="#FF5252">高</text>
+                    </g>
+                    <g>
+                        <rect x="120" y="50" width="30" height="50" fill="#FF9800"><animate attributeName="height" from="0" to="50" dur="1s" fill="freeze"/><animate attributeName="y" from="100" to="50" dur="1s" fill="freeze"/></rect>
+                        <text x="125" y="112" font-size="10">12cm</text>
+                    </g>
+                    <g>
+                        <rect x="180" y="70" width="30" height="30" fill="#2196F3"><animate attributeName="height" from="0" to="30" dur="1s" fill="freeze"/><animate attributeName="y" from="100" to="70" dur="1s" fill="freeze"/></rect>
+                        <text x="185" y="112" font-size="10">16cm</text>
+                    </g>
+                    <g>
+                        <rect x="240" y="85" width="30" height="15" fill="#3F51B5"><animate attributeName="height" from="0" to="15" dur="1s" fill="freeze"/><animate attributeName="y" from="100" to="85" dur="1s" fill="freeze"/></rect>
+                        <text x="245" y="112" font-size="10">20cm</text>
+                        <text x="245" y="80" font-size="10" fill="#3F51B5">低</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 5 & 6: 长短粗细 -->
+        <div class="knowledge-box">
+            <h3>3. 物体的长短与粗细</h3>
+            <div class="k-point">🔨 <strong>铁钉(长短)</strong>：
+                <br>长 → 振动慢 → <span class="low-mark">低音</span>
+                <br>短 → 振动快 → <span class="high-mark">高音</span>
+            </div>
+            <div class="k-point">⭕ <strong>铁管(粗细)</strong>：
+                <br>粗 → 振动慢 → <span class="low-mark">低音</span>
+                <br>细 → 振动快 → <span class="high-mark">高音</span>
+            </div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 长短对比 -->
+                    <g transform="translate(20, 10)">
+                        <rect x="0" y="0" width="10" height="80" fill="#757575"/>
+                        <text x="15" y="45" font-size="12" fill="#3F51B5">长(低)</text>
+                        <path d="M5,40 L5,40" stroke="#3F51B5" stroke-width="2">
+                            <animate attributeName="d" values="M5,0 L5,80; M0,0 L0,80; M10,0 L10,80; M5,0 L5,80" dur="0.5s" repeatCount="indefinite"/>
+                        </path>
+                    </g>
+                    <g transform="translate(80, 40)">
+                        <rect x="0" y="0" width="10" height="50" fill="#757575"/>
+                        <text x="15" y="30" font-size="12" fill="#FF5252">短(高)</text>
+                        <path d="M5,25 L5,25" stroke="#FF5252" stroke-width="2">
+                             <animate attributeName="d" values="M5,0 L5,50; M0,0 L0,50; M10,0 L10,50; M5,0 L5,50" dur="0.1s" repeatCount="indefinite"/>
+                        </path>
+                    </g>
+
+                    <!-- 粗细对比 -->
+                    <g transform="translate(160, 20)">
+                        <rect x="0" y="0" width="30" height="60" fill="#BDBDBD" stroke="#757575"/>
+                        <text x="35" y="35" font-size="12" fill="#3F51B5">粗(低)</text>
+                         <animate attributeName="opacity" values="1;0.7;1" dur="0.5s" repeatCount="indefinite"/>
+                    </g>
+                    <g transform="translate(240, 20)">
+                        <rect x="0" y="0" width="10" height="60" fill="#BDBDBD" stroke="#757575"/>
+                        <text x="15" y="35" font-size="12" fill="#FF5252">细(高)</text>
+                        <animate attributeName="opacity" values="1;0.5;1" dur="0.1s" repeatCount="indefinite"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 7: 试管空气柱实验 -->
+        <div class="knowledge-box">
+            <h3>4. 试管空气柱实验 🧪</h3>
+            <div class="k-point">🌬️ <strong>实验原理</strong>：对试管口吹气，让管内<span class="highlight">空气柱振动</span>发声。</div>
+            <div class="k-point">📏 <strong>空气柱长度</strong>：
+                <br>空气柱<span class="low-mark">长</span>（水少）→ 振动<span class="low-mark">慢</span> → 音调<span class="low-mark">低</span>
+                <br>空气柱<span class="high-mark">短</span>（水多）→ 振动<span class="high-mark">快</span> → 音调<span class="high-mark">高</span>
+            </div>
+            <div class="k-point">🎼 <strong>应用</strong>：管乐器（长笛、萧、单簧管）就是利用这个原理发出不同音高。</div>
+            
+            <div class="svg-stage">
+                <button class="ctrl-btn" onclick="animTubes('play')">▶ 演奏试管琴</button>
+                <button class="ctrl-btn" onclick="animTubes('stop')">⏸ 停止</button>
+                <svg width="100%" height="180" viewBox="0 0 360 180" id="svg-tubes">
+                    <defs>
+                        <!-- 玻璃渐变 -->
+                        <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%">
+                            <stop offset="0%" style="stop-color:#E3F2FD;stop-opacity:0.6"/>
+                            <stop offset="50%" style="stop-color:#BBDEFB;stop-opacity:0.3"/>
+                            <stop offset="100%" style="stop-color:#E3F2FD;stop-opacity:0.6"/>
+                        </linearGradient>
+                        <!-- 水渐变 -->
+                        <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#0288D1;stop-opacity:0.9"/>
+                        </linearGradient>
+                        <!-- 气流渐变 -->
+                        <radialGradient id="airGrad">
+                            <stop offset="0%" style="stop-color:#B3E5FC;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#B3E5FC;stop-opacity:0"/>
+                        </radialGradient>
+                    </defs>
+
+                    <!-- 试管1: 水最少，空气柱最长，音最低 -->
+                    <g id="tube1">
+                        <rect x="20" y="40" width="30" height="120" rx="3" fill="url(#glassGrad)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="22" y="140" width="26" height="18" fill="url(#waterGrad)"/>
+                        <line x1="35" y1="45" x2="35" y2="138" stroke="#FF9800" stroke-width="1" stroke-dasharray="2,2"/>
+                        <text x="35" y="90" text-anchor="middle" font-size="10" fill="#3F51B5" font-weight="bold">长</text>
+                        <text x="35" y="172" text-anchor="middle" font-size="11" fill="#3F51B5" font-weight="bold">Do (低)</text>
+                        <!-- 气流 -->
+                        <ellipse id="air1" cx="35" cy="35" rx="0" ry="0" fill="url(#airGrad)" opacity="0"/>
+                        <!-- 音符 -->
+                        <text id="note1" x="35" y="20" text-anchor="middle" font-size="16" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 试管2: 水较少，空气柱较长 -->
+                    <g id="tube2">
+                        <rect x="90" y="40" width="30" height="120" rx="3" fill="url(#glassGrad)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="92" y="120" width="26" height="38" fill="url(#waterGrad)"/>
+                        <line x1="105" y1="45" x2="105" y2="118" stroke="#FF9800" stroke-width="1" stroke-dasharray="2,2"/>
+                        <text x="105" y="80" text-anchor="middle" font-size="10" fill="#7B1FA2">较长</text>
+                        <text x="105" y="172" text-anchor="middle" font-size="11" fill="#7B1FA2" font-weight="bold">Re</text>
+                        <ellipse id="air2" cx="105" cy="35" rx="0" ry="0" fill="url(#airGrad)" opacity="0"/>
+                        <text id="note2" x="105" y="20" text-anchor="middle" font-size="16" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 试管3: 水较多，空气柱较短 -->
+                    <g id="tube3">
+                        <rect x="160" y="40" width="30" height="120" rx="3" fill="url(#glassGrad)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="162" y="100" width="26" height="58" fill="url(#waterGrad)"/>
+                        <line x1="175" y1="45" x2="175" y2="98" stroke="#FF9800" stroke-width="1" stroke-dasharray="2,2"/>
+                        <text x="175" y="70" text-anchor="middle" font-size="10" fill="#E91E63">较短</text>
+                        <text x="175" y="172" text-anchor="middle" font-size="11" fill="#E91E63" font-weight="bold">Mi</text>
+                        <ellipse id="air3" cx="175" cy="35" rx="0" ry="0" fill="url(#airGrad)" opacity="0"/>
+                        <text id="note3" x="175" y="20" text-anchor="middle" font-size="16" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 试管4: 水最多，空气柱最短，音最高 -->
+                    <g id="tube4">
+                        <rect x="230" y="40" width="30" height="120" rx="3" fill="url(#glassGrad)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="232" y="80" width="26" height="78" fill="url(#waterGrad)"/>
+                        <line x1="245" y1="45" x2="245" y2="78" stroke="#FF9800" stroke-width="1" stroke-dasharray="2,2"/>
+                        <text x="245" y="60" text-anchor="middle" font-size="10" fill="#FF5252" font-weight="bold">短</text>
+                        <text x="245" y="172" text-anchor="middle" font-size="11" fill="#FF5252" font-weight="bold">Sol (高)</text>
+                        <ellipse id="air4" cx="245" cy="35" rx="0" ry="0" fill="url(#airGrad)" opacity="0"/>
+                        <text id="note4" x="245" y="20" text-anchor="middle" font-size="16" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 标注 -->
+                    <text x="290" y="50" font-size="11" fill="#555">💨 吹气</text>
+                    <text x="290" y="70" font-size="10" fill="#666">空气柱↕</text>
+                    <text x="290" y="90" font-size="9" fill="#3F51B5">长→低音</text>
+                    <text x="290" y="105" font-size="9" fill="#FF5252">短→高音</text>
+                </svg>
+                <div class="svg-caption">💡 空气柱越短，振动越快，音调越高（就像倒水时声音变化）</div>
+            </div>
+        </div>
+
+        <!-- 知识点 8: 敲击试管实验 -->
+        <div class="knowledge-box">
+            <h3>5. 敲击试管实验 🥢</h3>
+            <div class="k-point">🔨 <strong>振动对象</strong>：用木棍敲击试管壁时，振动发声的是<span class="highlight">试管和水的整体</span>。</div>
+            <div class="k-point">⚖️ <strong>质量规律</strong>：
+                <br>水<span class="low-mark">多</span> → 质量<span class="low-mark">大</span> → 振动<span class="low-mark">慢</span> → 音调<span class="low-mark">低</span>
+                <br>水<span class="high-mark">少</span> → 质量<span class="high-mark">小</span> → 振动<span class="high-mark">快</span> → 音调<span class="high-mark">高</span>
+            </div>
+            
+            <div class="svg-stage">
+                <button class="ctrl-btn" onclick="animTap('play')">🥢 敲击演奏</button>
+                <button class="ctrl-btn" onclick="animTap('stop')">⏸ 停止</button>
+                <svg width="100%" height="200" viewBox="0 0 360 200" id="svg-tap">
+                    <defs>
+                        <!-- 玻璃渐变 -->
+                        <linearGradient id="glassGrad2" x1="0%" y1="0%" x2="100%">
+                            <stop offset="0%" style="stop-color:#E3F2FD;stop-opacity:0.6"/>
+                            <stop offset="50%" style="stop-color:#BBDEFB;stop-opacity:0.3"/>
+                            <stop offset="100%" style="stop-color:#E3F2FD;stop-opacity:0.6"/>
+                        </linearGradient>
+                        <!-- 水渐变 -->
+                        <linearGradient id="waterGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#0288D1;stop-opacity:0.9"/>
+                        </linearGradient>
+                        <!-- 振动波纹 -->
+                        <radialGradient id="waveGrad">
+                            <stop offset="0%" style="stop-color:#FFD54F;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#FFD54F;stop-opacity:0"/>
+                        </radialGradient>
+                        <!-- 木棍渐变 -->
+                        <linearGradient id="stickGrad" x1="0%" y1="0%" x2="100%">
+                            <stop offset="0%" style="stop-color:#8D6E63"/>
+                            <stop offset="50%" style="stop-color:#A1887F"/>
+                            <stop offset="100%" style="stop-color:#8D6E63"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- 试管1: 水少，质量小，高音 -->
+                    <g id="tap-tube1">
+                        <rect x="20" y="50" width="35" height="130" rx="3" fill="url(#glassGrad2)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="22" y="150" width="31" height="28" fill="url(#waterGrad2)"/>
+                        <text x="37" y="120" text-anchor="middle" font-size="10" fill="#FF5252" font-weight="bold">水少</text>
+                        <text x="37" y="195" text-anchor="middle" font-size="11" fill="#FF5252" font-weight="bold">高音 ♪</text>
+                        <!-- 木棍 -->
+                        <line id="stick1" x1="60" y1="100" x2="45" y2="100" stroke="url(#stickGrad)" stroke-width="4" stroke-linecap="round"/>
+                        <!-- 振动波纹 -->
+                        <circle id="wave1" cx="37" cy="120" r="0" fill="url(#waveGrad)" opacity="0"/>
+                        <!-- 音符 -->
+                        <text id="tapnote1" x="37" y="35" text-anchor="middle" font-size="18" fill="#FF5252" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 试管2: 水较少 -->
+                    <g id="tap-tube2">
+                        <rect x="95" y="50" width="35" height="130" rx="3" fill="url(#glassGrad2)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="97" y="130" width="31" height="48" fill="url(#waterGrad2)"/>
+                        <text x="112" y="105" text-anchor="middle" font-size="10" fill="#E91E63">较少</text>
+                        <text x="112" y="195" text-anchor="middle" font-size="11" fill="#E91E63" font-weight="bold">较高 ♪</text>
+                        <line id="stick2" x1="135" y1="100" x2="120" y2="100" stroke="url(#stickGrad)" stroke-width="4" stroke-linecap="round"/>
+                        <circle id="wave2" cx="112" cy="120" r="0" fill="url(#waveGrad)" opacity="0"/>
+                        <text id="tapnote2" x="112" y="35" text-anchor="middle" font-size="18" fill="#E91E63" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 试管3: 水较多 -->
+                    <g id="tap-tube3">
+                        <rect x="170" y="50" width="35" height="130" rx="3" fill="url(#glassGrad2)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="172" y="110" width="31" height="68" fill="url(#waterGrad2)"/>
+                        <text x="187" y="85" text-anchor="middle" font-size="10" fill="#7B1FA2">较多</text>
+                        <text x="187" y="195" text-anchor="middle" font-size="11" fill="#7B1FA2" font-weight="bold">较低 ♪</text>
+                        <line id="stick3" x1="210" y1="100" x2="195" y2="100" stroke="url(#stickGrad)" stroke-width="4" stroke-linecap="round"/>
+                        <circle id="wave3" cx="187" cy="120" r="0" fill="url(#waveGrad)" opacity="0"/>
+                        <text id="tapnote3" x="187" y="35" text-anchor="middle" font-size="18" fill="#7B1FA2" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 试管4: 水多，质量大，低音 -->
+                    <g id="tap-tube4">
+                        <rect x="245" y="50" width="35" height="130" rx="3" fill="url(#glassGrad2)" stroke="#1976D2" stroke-width="2"/>
+                        <rect x="247" y="90" width="31" height="88" fill="url(#waterGrad2)"/>
+                        <text x="262" y="70" text-anchor="middle" font-size="10" fill="#3F51B5" font-weight="bold">水多</text>
+                        <text x="262" y="195" text-anchor="middle" font-size="11" fill="#3F51B5" font-weight="bold">低音 ♪</text>
+                        <line id="stick4" x1="285" y1="100" x2="270" y2="100" stroke="url(#stickGrad)" stroke-width="4" stroke-linecap="round"/>
+                        <circle id="wave4" cx="262" cy="120" r="0" fill="url(#waveGrad)" opacity="0"/>
+                        <text id="tapnote4" x="262" y="35" text-anchor="middle" font-size="18" fill="#3F51B5" opacity="0">♪</text>
+                    </g>
+
+                    <!-- 标注 -->
+                    <text x="310" y="60" font-size="10" fill="#555">🥢 敲击</text>
+                    <text x="310" y="80" font-size="9" fill="#666">试管+水</text>
+                    <text x="310" y="100" font-size="9" fill="#FF5252">水少→高</text>
+                    <text x="310" y="115" font-size="9" fill="#3F51B5">水多→低</text>
+                </svg>
+                <div class="svg-caption">💡 敲击时振动的是试管和水的整体，水越多质量越大，振动越慢，音调越低</div>
+            </div>
+        </div>
+
+        <!-- 对比总结表 -->
+        <div class="knowledge-box" style="background: linear-gradient(135deg, #FFF9C4 0%, #F0F4C3 100%); border-left: 5px solid #F57F17;">
+            <h3>📊 两种实验方式对比总结</h3>
+            <div class="svg-stage" style="background: white; padding: 15px;">
+                <svg width="100%" height="200" viewBox="0 0 400 200">
+                    <defs>
+                        <linearGradient id="headerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#42A5F5"/>
+                            <stop offset="100%" style="stop-color:#1E88E5"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- 表格标题 -->
+                    <rect x="10" y="10" width="380" height="30" fill="url(#headerGrad)" rx="5"/>
+                    <text x="200" y="32" text-anchor="middle" font-size="16" fill="white" font-weight="bold">实验方式对比表</text>
+                    
+                    <!-- 表头 -->
+                    <rect x="10" y="45" width="80" height="30" fill="#E3F2FD" stroke="#1976D2" stroke-width="1"/>
+                    <text x="50" y="65" text-anchor="middle" font-size="13" font-weight="bold">操作方式</text>
+                    
+                    <rect x="90" y="45" width="80" height="30" fill="#E3F2FD" stroke="#1976D2" stroke-width="1"/>
+                    <text x="130" y="65" text-anchor="middle" font-size="13" font-weight="bold">振动对象</text>
+                    
+                    <rect x="170" y="45" width="110" height="30" fill="#FFEBEE" stroke="#E53935" stroke-width="1"/>
+                    <text x="225" y="58" text-anchor="middle" font-size="12" font-weight="bold">水量多</text>
+                    <text x="225" y="70" text-anchor="middle" font-size="10" fill="#666">(水位高)</text>
+                    
+                    <rect x="280" y="45" width="110" height="30" fill="#E8F5E9" stroke="#43A047" stroke-width="1"/>
+                    <text x="335" y="58" text-anchor="middle" font-size="12" font-weight="bold">水量少</text>
+                    <text x="335" y="70" text-anchor="middle" font-size="10" fill="#666">(水位低)</text>
+                    
+                    <!-- 第1行：吹气 -->
+                    <rect x="10" y="75" width="80" height="55" fill="#FFF" stroke="#1976D2" stroke-width="1"/>
+                    <text x="50" y="95" text-anchor="middle" font-size="16">🌬️</text>
+                    <text x="50" y="112" text-anchor="middle" font-size="12" font-weight="bold">用嘴吹气</text>
+                    
+                    <rect x="90" y="75" width="80" height="55" fill="#FFF" stroke="#1976D2" stroke-width="1"/>
+                    <text x="130" y="100" text-anchor="middle" font-size="12" font-weight="bold">空气柱</text>
+                    <text x="130" y="115" text-anchor="middle" font-size="10" fill="#666">(管内空气)</text>
+                    
+                    <rect x="170" y="75" width="110" height="55" fill="#FFF" stroke="#E53935" stroke-width="1"/>
+                    <text x="225" y="95" text-anchor="middle" font-size="20" fill="#FF5252">♪</text>
+                    <text x="225" y="112" text-anchor="middle" font-size="14" fill="#FF5252" font-weight="bold">高音</text>
+                    <text x="225" y="124" text-anchor="middle" font-size="9" fill="#666">(空气柱短→快)</text>
+                    
+                    <rect x="280" y="75" width="110" height="55" fill="#FFF" stroke="#43A047" stroke-width="1"/>
+                    <text x="335" y="95" text-anchor="middle" font-size="20" fill="#3F51B5">♪</text>
+                    <text x="335" y="112" text-anchor="middle" font-size="14" fill="#3F51B5" font-weight="bold">低音</text>
+                    <text x="335" y="124" text-anchor="middle" font-size="9" fill="#666">(空气柱长→慢)</text>
+                    
+                    <!-- 第2行：敲击 -->
+                    <rect x="10" y="130" width="80" height="55" fill="#FFF" stroke="#1976D2" stroke-width="1"/>
+                    <text x="50" y="150" text-anchor="middle" font-size="16">🥢</text>
+                    <text x="50" y="167" text-anchor="middle" font-size="12" font-weight="bold">木棍敲击</text>
+                    
+                    <rect x="90" y="130" width="80" height="55" fill="#FFF" stroke="#1976D2" stroke-width="1"/>
+                    <text x="130" y="155" text-anchor="middle" font-size="12" font-weight="bold">试管与水</text>
+                    <text x="130" y="170" text-anchor="middle" font-size="10" fill="#666">(整体振动)</text>
+                    
+                    <rect x="170" y="130" width="110" height="55" fill="#FFF" stroke="#E53935" stroke-width="1"/>
+                    <text x="225" y="150" text-anchor="middle" font-size="20" fill="#3F51B5">♪</text>
+                    <text x="225" y="167" text-anchor="middle" font-size="14" fill="#3F51B5" font-weight="bold">低音</text>
+                    <text x="225" y="179" text-anchor="middle" font-size="9" fill="#666">(质量大→慢)</text>
+                    
+                    <rect x="280" y="130" width="110" height="55" fill="#FFF" stroke="#43A047" stroke-width="1"/>
+                    <text x="335" y="150" text-anchor="middle" font-size="20" fill="#FF5252">♪</text>
+                    <text x="335" y="167" text-anchor="middle" font-size="14" fill="#FF5252" font-weight="bold">高音</text>
+                    <text x="335" y="179" text-anchor="middle" font-size="9" fill="#666">(质量小→快)</text>
+                </svg>
+            </div>
+            <div class="k-point" style="margin-top: 10px; padding: 10px; background: #FFFDE7; border-radius: 8px; border: 2px dashed #F57F17;">
+                <strong>🎯 关键区别</strong>：
+                <br>• <span class="highlight">吹气</span>：振动的是<strong>空气柱</strong>，水多→空气柱短→高音
+                <br>• <span class="highlight">敲击</span>：振动的是<strong>试管+水整体</strong>，水多→质量大→低音
+                <br>• 同样的水量，<strong>操作方式不同，音高相反</strong>！
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入35题闯关塔！🚀</button>
+    </div>
+
+    <!-- 2. 闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="text-align:right; font-size:0.9em; color:#0097A7;">题目：<span id="q-index">1</span> / 35</div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题 ▶</button>
+    </div>
+
+    <!-- 3. 结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- SVG 动画逻辑 ---
+        
+        function animRuler(type) {
+            const blade = document.getElementById('ruler-blade');
+            const text = document.getElementById('vib-text');
+            
+            // 清除旧动画
+            while(blade.firstChild) blade.removeChild(blade.firstChild);
+            
+            const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+            anim.setAttribute("attributeName", "d");
+            anim.setAttribute("repeatCount", "indefinite");
+            
+            if (type === 'long') {
+                // 长：伸出到250，振动慢(0.5s)，幅度大
+                anim.setAttribute("values", "M100,80 Q175,40 250,40; M100,80 Q175,120 250,120; M100,80 L250,80");
+                anim.setAttribute("dur", "0.5s");
+                text.innerHTML = "伸出长 → 振动慢 → 声音低";
+                text.setAttribute("fill", "#3F51B5");
+            } else {
+                // 短：伸出到160，振动快(0.1s)，幅度小
+                anim.setAttribute("values", "M100,80 Q130,60 160,60; M100,80 Q130,100 160,100; M100,80 L160,80");
+                anim.setAttribute("dur", "0.1s");
+                text.innerHTML = "伸出短 → 振动快 → 声音高";
+                text.setAttribute("fill", "#FF5252");
+            }
+            
+            blade.appendChild(anim);
+            anim.beginElement();
+        }
+
+        // 试管动画控制
+        let tubeAnimInterval = null;
+        function animTubes(action) {
+            if (action === 'stop') {
+                if (tubeAnimInterval) clearInterval(tubeAnimInterval);
+                // 重置所有元素
+                for(let i=1; i<=4; i++) {
+                    document.getElementById('air'+i).setAttribute('opacity', '0');
+                    document.getElementById('note'+i).setAttribute('opacity', '0');
+                }
+                return;
+            }
+            
+            // 播放序列：依次吹响4个试管
+            const sequence = [
+                {tube: 1, dur: 1000, freq: 262}, // Do - 低音
+                {tube: 2, dur: 800, freq: 294},  // Re
+                {tube: 3, dur: 600, freq: 330},  // Mi
+                {tube: 4, dur: 400, freq: 392}   // Sol - 高音
+            ];
+            
+            let idx = 0;
+            function playNext() {
+                if (idx >= sequence.length) {
+                    idx = 0; // 循环播放
+                }
+                
+                const s = sequence[idx];
+                const air = document.getElementById('air'+s.tube);
+                const note = document.getElementById('note'+s.tube);
+                
+                // 气流扩散动画
+                air.setAttribute('rx', '0');
+                air.setAttribute('ry', '0');
+                air.setAttribute('opacity', '1');
+                const airAnim1 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                airAnim1.setAttribute("attributeName", "rx");
+                airAnim1.setAttribute("from", "0");
+                airAnim1.setAttribute("to", "15");
+                airAnim1.setAttribute("dur", "0.3s");
+                airAnim1.setAttribute("fill", "freeze");
+                air.appendChild(airAnim1);
+                
+                const airAnim2 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                airAnim2.setAttribute("attributeName", "ry");
+                airAnim2.setAttribute("from", "0");
+                airAnim2.setAttribute("to", "10");
+                airAnim2.setAttribute("dur", "0.3s");
+                airAnim2.setAttribute("fill", "freeze");
+                air.appendChild(airAnim2);
+                
+                const airAnim3 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                airAnim3.setAttribute("attributeName", "opacity");
+                airAnim3.setAttribute("from", "1");
+                airAnim3.setAttribute("to", "0");
+                airAnim3.setAttribute("dur", "0.5s");
+                airAnim3.setAttribute("fill", "freeze");
+                air.appendChild(airAnim3);
+                
+                airAnim1.beginElement();
+                airAnim2.beginElement();
+                airAnim3.beginElement();
+                
+                // 音符上升动画
+                note.setAttribute('y', '20');
+                note.setAttribute('opacity', '1');
+                const noteAnim1 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                noteAnim1.setAttribute("attributeName", "y");
+                noteAnim1.setAttribute("from", "20");
+                noteAnim1.setAttribute("to", "5");
+                noteAnim1.setAttribute("dur", "0.6s");
+                noteAnim1.setAttribute("fill", "freeze");
+                note.appendChild(noteAnim1);
+                
+                const noteAnim2 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                noteAnim2.setAttribute("attributeName", "opacity");
+                noteAnim2.setAttribute("from", "1");
+                noteAnim2.setAttribute("to", "0");
+                noteAnim2.setAttribute("dur", "0.6s");
+                noteAnim2.setAttribute("fill", "freeze");
+                note.appendChild(noteAnim2);
+                
+                noteAnim1.beginElement();
+                noteAnim2.beginElement();
+                
+                // 播放音效
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = s.freq;
+                osc.type = 'sine';
+                const now = audioCtx.currentTime;
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+                
+                idx++;
+            }
+            
+            // 停止之前的动画
+            if (tubeAnimInterval) clearInterval(tubeAnimInterval);
+            
+            // 立即播放第一个
+            playNext();
+            
+            // 设置循环
+            tubeAnimInterval = setInterval(playNext, 1000);
+        }
+
+        // 敲击试管动画控制
+        let tapAnimInterval = null;
+        function animTap(action) {
+            if (action === 'stop') {
+                if (tapAnimInterval) clearInterval(tapAnimInterval);
+                // 重置所有元素
+                for(let i=1; i<=4; i++) {
+                    const stick = document.getElementById('stick'+i);
+                    const wave = document.getElementById('wave'+i);
+                    const note = document.getElementById('tapnote'+i);
+                    stick.setAttribute('x1', (i-1)*75 + 60);
+                    wave.setAttribute('opacity', '0');
+                    wave.setAttribute('r', '0');
+                    note.setAttribute('opacity', '0');
+                }
+                return;
+            }
+            
+            // 播放序列：依次敲击4个试管（水少→水多，高音→低音）
+            const sequence = [
+                {tube: 1, freq: 880, color: '#FF5252'},  // 水少 - 高音
+                {tube: 2, freq: 660, color: '#E91E63'},  // 较少 - 较高
+                {tube: 3, freq: 494, color: '#7B1FA2'},  // 较多 - 较低
+                {tube: 4, freq: 330, color: '#3F51B5'}   // 水多 - 低音
+            ];
+            
+            let idx = 0;
+            function tapNext() {
+                if (idx >= sequence.length) {
+                    idx = 0; // 循环播放
+                }
+                
+                const s = sequence[idx];
+                const stick = document.getElementById('stick'+s.tube);
+                const wave = document.getElementById('wave'+s.tube);
+                const note = document.getElementById('tapnote'+s.tube);
+                
+                // 木棍敲击动画（向左移动）
+                const baseX = (s.tube-1)*75 + 60;
+                const stickAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                stickAnim.setAttribute("attributeName", "x1");
+                stickAnim.setAttribute("values", baseX + ";" + (baseX-10) + ";" + baseX);
+                stickAnim.setAttribute("dur", "0.3s");
+                stickAnim.setAttribute("fill", "freeze");
+                stick.appendChild(stickAnim);
+                stickAnim.beginElement();
+                
+                // 振动波纹扩散
+                wave.setAttribute('r', '0');
+                wave.setAttribute('opacity', '1');
+                const waveAnim1 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                waveAnim1.setAttribute("attributeName", "r");
+                waveAnim1.setAttribute("from", "0");
+                waveAnim1.setAttribute("to", "25");
+                waveAnim1.setAttribute("dur", "0.5s");
+                waveAnim1.setAttribute("fill", "freeze");
+                wave.appendChild(waveAnim1);
+                
+                const waveAnim2 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                waveAnim2.setAttribute("attributeName", "opacity");
+                waveAnim2.setAttribute("from", "1");
+                waveAnim2.setAttribute("to", "0");
+                waveAnim2.setAttribute("dur", "0.5s");
+                waveAnim2.setAttribute("fill", "freeze");
+                wave.appendChild(waveAnim2);
+                
+                waveAnim1.beginElement();
+                waveAnim2.beginElement();
+                
+                // 音符上升动画
+                note.setAttribute('y', '35');
+                note.setAttribute('opacity', '1');
+                const noteAnim1 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                noteAnim1.setAttribute("attributeName", "y");
+                noteAnim1.setAttribute("from", "35");
+                noteAnim1.setAttribute("to", "15");
+                noteAnim1.setAttribute("dur", "0.7s");
+                noteAnim1.setAttribute("fill", "freeze");
+                note.appendChild(noteAnim1);
+                
+                const noteAnim2 = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                noteAnim2.setAttribute("attributeName", "opacity");
+                noteAnim2.setAttribute("from", "1");
+                noteAnim2.setAttribute("to", "0");
+                noteAnim2.setAttribute("dur", "0.7s");
+                noteAnim2.setAttribute("fill", "freeze");
+                note.appendChild(noteAnim2);
+                
+                noteAnim1.beginElement();
+                noteAnim2.beginElement();
+                
+                // 播放敲击音效（更短促）
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = s.freq;
+                osc.type = 'triangle'; // 三角波模拟敲击声
+                const now = audioCtx.currentTime;
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+                
+                idx++;
+            }
+            
+            // 停止之前的动画
+            if (tapAnimInterval) clearInterval(tapAnimInterval);
+            
+            // 立即播放第一个
+            tapNext();
+            
+            // 设置循环
+            tapAnimInterval = setInterval(tapNext, 900);
+        }
+
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 35道题库 ---
+        const quizData = [
+            // 1. 音高与振动快慢 (7题)
+            { type: 'mcq', q: '声音的高低可以用____来描述。', opts: ['音量', '音高', '音色'], a: 1, exp: '高低用音高描述。' },
+            { type: 'mcq', q: '物体振动得越快，发出的声音就____。', opts: ['越低', '越高', '越强'], a: 1, exp: '振动快=声音高。' },
+            { type: 'mcq', q: '物体振动得越慢，发出的声音就____。', opts: ['越低', '越高', '越弱'], a: 0, exp: '振动慢=声音低。' },
+            { type: 'fill', q: '声音的高低和物体振动的____有关。', a: ['快慢'], exp: '快慢决定高低。' },
+            { type: 'matching', q: '请连线规律：', pairs: [{l:'振动快', r:'声音高'}, {l:'振动慢', r:'声音低'}, {l:'振幅大', r:'声音强'}], exp: '区分音高和音量。' },
+            { type: 'mcq', q: '蚊子的叫声虽然弱，但是很____，说明它翅膀振动很快。', opts: ['高', '低'], a: 0, exp: '蚊子声音高（尖）。' },
+            { type: 'mcq', q: '牛的叫声“哞”很粗厚，说明它声带振动比较____。', opts: ['快', '慢'], a: 1, exp: '声音低沉=振动慢。' },
+
+            // 2. 钢尺实验 (10题)
+            { type: 'mcq', q: '研究钢尺音高变化时，我们要改变的是？', opts: ['拨动的力量', '钢尺伸出桌面的长度', '钢尺的宽度'], a: 1, exp: '改变长度来改变振动快慢。' },
+            { type: 'mcq', q: '实验中，拨动钢尺的力度应该？', opts: ['保持相同', '忽大忽小', '越来越大'], a: 0, exp: '控制变量法，力度要一致。' },
+            { type: 'mcq', q: '钢尺伸出桌面越长，振动越____，声音越____。', opts: ['快，高', '慢，低', '慢，高'], a: 1, exp: '长=慢=低。' },
+            { type: 'mcq', q: '钢尺伸出桌面越短，振动越____，声音越____。', opts: ['快，高', '慢，低', '快，低'], a: 0, exp: '短=快=高。' },
+            { type: 'fill', q: '我们可以用____图表示声音高低与钢尺长度的关系。', a: ['柱形', '柱状'], exp: '柱形图直观展示数据。' },
+            { type: 'mcq', q: '为了让实验结果更准确，每次实验要重复____次。', opts: ['1', '3', '100'], a: 1, exp: '重复3次避免偶然性。' },
+            { type: 'matching', q: '连线钢尺实验现象：', pairs: [{l:'伸出8cm', r:'声音最高'}, {l:'伸出12cm', r:'声音较高'}, {l:'伸出20cm', r:'声音最低'}], exp: '越短越高。' },
+            { type: 'mcq', q: '在柱形图中，随着钢尺长度变长，代表音高的柱子高度应该？', opts: ['变高', '变低', '不变'], a: 1, exp: '长度增加，音高降低。' },
+            { type: 'mcq', q: '如果想让钢尺发出最高的声音，应该把伸出部分调到？', opts: ['5cm', '15cm', '25cm'], a: 0, exp: '最短的5cm声音最高。' },
+            { type: 'mcq', q: '用手压住钢尺是为了？', opts: ['改变音色', '防止尺子掉落或产生杂音', '增加难度'], a: 1, exp: '固定尺子。' },
+
+            // 3. 物体的长短与声音 (6题)
+            { type: 'mcq', q: '敲击粗细相同、长短不同的铁钉，长铁钉发出的声音？', opts: ['高', '低', '强'], a: 1, exp: '长=慢=低。' },
+            { type: 'mcq', q: '敲击粗细相同、长短不同的铁钉，短铁钉发出的声音？', opts: ['高', '低', '弱'], a: 0, exp: '短=快=高。' },
+            { type: 'matching', q: '连线物体长短与音高：', pairs: [{l:'长物体', r:'声音低'}, {l:'短物体', r:'声音高'}, {l:'中等物体', r:'声音中等'}], exp: '普遍规律。' },
+            { type: 'mcq', q: '编钟里个头越大的钟，敲击时发出的声音越？', opts: ['高', '低'], a: 1, exp: '大/长物体声音低。' },
+            { type: 'mcq', q: '口琴里长的簧片发出的声音比短簧片？', opts: ['高', '低'], a: 1, exp: '长=低。' },
+            { type: 'fill', q: '声音的高低和发声物体的____有关。', a: ['长短', '长度'], exp: '长度影响频率。' },
+
+            // 4. 物体的粗细与声音 (6题)
+            { type: 'mcq', q: '敲击长度相同、粗细不同的铁管，粗铁管发出的声音？', opts: ['高', '低'], a: 1, exp: '粗=慢=低。' },
+            { type: 'mcq', q: '敲击长度相同、粗细不同的铁管，细铁管发出的声音？', opts: ['高', '低'], a: 0, exp: '细=快=高。' },
+            { type: 'fill', q: '声音的高低和发声物体的____有关。', a: ['粗细'], exp: '粗细影响频率。' },
+            { type: 'mcq', q: '吉他上比较粗的弦，弹拨时发出的声音？', opts: ['高', '低'], a: 1, exp: '粗弦低音。' },
+            { type: 'matching', q: '连线物体粗细与音高：', pairs: [{l:'粗物体', r:'声音低'}, {l:'细物体', r:'声音高'}], exp: '粗细规律。' },
+            { type: 'mcq', q: '小提琴的四根弦粗细不同，最细的那根弦声音最？', opts: ['高', '低'], a: 0, exp: '越细越高。' },
+
+            // 5. 综合应用 (6题)
+            { type: 'mcq', q: '要使小提琴发出的声音变高，可以？', opts: ['把弦拧松', '把弦拧紧', '换根粗弦'], a: 1, exp: '拧紧=变紧=振动快=高音。' },
+            { type: 'mcq', q: '向暖水瓶倒水时，随着水越来越多（空气柱变短），声音会？', opts: ['变高', '变低', '不变'], a: 0, exp: '空气柱变短=振动快=声音变高。' },
+            { type: 'mcq', q: '吹奏竖笛时，按住的孔越多（空气柱越长），声音越？', opts: ['高', '低'], a: 1, exp: '空气柱长=低音。' },
+            { type: 'mcq', q: '制作“水杯琴”时，水越多的杯子敲击时声音越？', opts: ['高', '低'], a: 1, exp: '敲击时是杯子+水振动，水多=重/长=慢=低。' },
+            { type: 'mcq', q: '越短、越小、越少、越细的物体，振动越____，声音越____。', opts: ['快，高', '慢，低', '快，低'], a: 0, exp: '总结性规律：小/短/细/紧 = 高。' },
+            { type: 'mcq', q: '下列关于声音高低的说法，错误的是？', opts: ['音高由振动快慢决定', '物体越长声音越高', '物体越紧声音越高'], a: 1, exp: '物体越长声音应该越低。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let matchState = { left: null, right: null, matchedCount: 0, userPairs: [] };
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(880, now); osc.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(600, now); gain.gain.setValueAtTime(0.02, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+            selectedOption = null;
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let tagText = qData.type === 'mcq' ? '选择题' : (qData.type === 'fill' ? '填空题' : '连线题');
+            card.innerHTML = `<div class="q-content"><span class="q-tag">${tagText}</span>${qData.q}</div>`;
+
+            if (qData.type === 'mcq') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                // 添加失焦即时反馈
+                input.onblur = () => {
+                    if (selectedOption) {
+                        const isCorrect = qData.a.some(ans => selectedOption.includes(ans));
+                        setTimeout(() => {
+                            if (isCorrect) {
+                                InstantFeedback.onCorrect(input);
+                            } else {
+                                InstantFeedback.onWrong(input, qData.exp);
+                            }
+                        }, 200);
+                    }
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'matching') {
+                renderMatching(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            playSound('click');
+            
+            // 移除其他选项的选中状态
+            document.querySelectorAll('.option-item').forEach(d => {
+                d.classList.remove('selected', 'correct-feedback', 'wrong-feedback');
+            });
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            
+            if (qData.type === 'fill') {
+                if (qData.a.some(ans => idx.includes(ans))) isCorrect = true;
+            } else {
+                if (idx === qData.a) isCorrect = true;
+            }
+            
+            // 延迟反馈，让用户看到选中效果
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            // 启用下一题按钮
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderMatching(card, qData) {
+            const container = document.createElement('div');
+            const leftCol = document.createElement('div'); leftCol.className = 'match-col';
+            const rightCol = document.createElement('div'); rightCol.className = 'match-col';
+            const row = document.createElement('div'); row.className = 'match-row';
+
+            let rItems = [...qData.pairs].sort(()=>Math.random()-0.5);
+            matchState = { left: null, right: null, matchedCount: 0, userPairs: [] };
+
+            qData.pairs.forEach(p => {
+                const btn = document.createElement('div');
+                btn.className = 'match-btn'; btn.innerText = p.l; btn.dataset.val = p.l; btn.dataset.side = 'left';
+                btn.onclick = (e) => handleMatchClick(e.target, qData.pairs.length);
+                leftCol.appendChild(btn);
+            });
+            rItems.forEach(p => {
+                const btn = document.createElement('div');
+                btn.className = 'match-btn'; btn.innerText = p.r; btn.dataset.val = p.r; btn.dataset.side = 'right';
+                btn.onclick = (e) => handleMatchClick(e.target, qData.pairs.length);
+                rightCol.appendChild(btn);
+            });
+
+            row.appendChild(leftCol); row.appendChild(rightCol);
+            card.appendChild(row);
+        }
+
+        function handleMatchClick(el, totalPairs) {
+            playSound('click');
+            const side = el.dataset.side;
+            el.parentElement.querySelectorAll('.match-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            if (side === 'left') matchState.left = el;
+            else matchState.right = el;
+
+            if (matchState.left && matchState.right) {
+                matchState.userPairs.push({l: matchState.left.dataset.val, r: matchState.right.dataset.val});
+                matchState.left.classList.remove('selected'); matchState.left.classList.add('matched');
+                matchState.right.classList.remove('selected'); matchState.right.classList.add('matched');
+                matchState.left = null; matchState.right = null;
+                matchState.matchedCount++;
+                if (matchState.matchedCount === totalPairs) {
+                    document.getElementById('nextBtn').disabled = false;
+                    document.getElementById('nextBtn').style.opacity = 1;
+                }
+            }
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'matching') {
+                let correctCount = 0;
+                matchState.userPairs.forEach(up => {
+                    if (qData.pairs.some(p => p.l === up.l && p.r === up.r)) correctCount++;
+                });
+                if (correctCount === qData.pairs.length) isCorrect = true;
+                myAns = "配对错误";
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 完美！你是高音歌唱家！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！对音高掌握得很棒！";
+            else reward.innerText = "💪 加油！记住：短紧细快高！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="font-size:0.9em; color:#D32F2F">你的回答：${m.my}</span><br><span style="font-size:0.9em; color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

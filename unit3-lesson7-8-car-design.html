@@ -1,0 +1,919 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>七＆八、设计制作小车 - 科学探究</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 25px;
+            margin: 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Knowledge Cards */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+        }
+
+        h2 { color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h3 { color: var(--primary); margin-top: 20px; }
+        .highlight { color: var(--danger); font-weight: bold; }
+
+        /* SVG Styles */
+        .demo-box {
+            background: #eef2f5;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px;
+        }
+
+        /* Animations Definitions */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes moveRight { 0% { transform: translateX(0); } 100% { transform: translateX(200px); } }
+        @keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+        @keyframes grow { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(0.8); } }
+        
+        .anim-spin { transform-origin: center; animation: spin 2s linear infinite; }
+        .anim-drive { animation: moveRight 4s linear infinite; }
+        .anim-wobble { transform-origin: center; animation: wobble 0.5s ease-in-out infinite; }
+        .anim-grow { transform-origin: center; animation: grow 2s infinite; }
+
+        /* Quiz Styles */
+        .quiz-header {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary);
+        }
+
+        .question-block {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+
+        .q-type {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-top-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .q-text { margin-top: 20px; font-weight: 600; font-size: 1.1em; }
+
+        /* Input Styles */
+        .options label { display: block; padding: 10px; cursor: pointer; transition: 0.2s; }
+        .options label:hover { background: #f0f8ff; }
+        input[type="radio"] { margin-right: 10px; }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        /* Drag Sort Styles */
+        .sortable-list {
+            list-style: none;
+            padding: 0;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .sort-item {
+            background: white;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            padding: 10px;
+            cursor: grab;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+        }
+        .sort-btn { cursor: pointer; padding: 0 5px; color: #888; font-weight: bold; }
+        .sort-btn:hover { color: var(--primary); }
+
+        /* Experiment Box */
+        .exp-container {
+            border: 2px dashed #aaa;
+            padding: 15px;
+            background: #fffbf0;
+            margin-top: 10px;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        .btn-submit:hover { background: #27ae60; }
+
+        /* Results */
+        #result-area { display: none; margin-top: 30px; }
+        .score-card {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--primary);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .feedback-item {
+            background: #fff;
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .correct-ans { color: var(--secondary); font-weight: bold; }
+        .explanation { font-style: italic; color: #666; font-size: 0.9rem; margin-top: 5px; }
+
+        /* 即时反馈系统 */
+        .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+        .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+        .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+        .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+        .feedback-success .toast-icon { background: #4CAF50; color: white; }
+        .feedback-error .toast-icon { background: #FF9800; color: white; }
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+        label.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+        label.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+        input[type="text"].correct-feedback, textarea.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+        input[type="text"].wrong-feedback, textarea.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>七＆八、设计制作小车</h1>
+    <div>
+        <button class="nav-btn active" onclick="switchTab('review')">📚 复习巩固</button>
+        <button class="nav-btn" onclick="switchTab('test')">🏰 闯关塔 (100分)</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- ==================== REVIEW SECTION ==================== -->
+    <section id="review" class="active">
+        
+        <!-- Concept 1: Design Steps -->
+        <div class="card">
+            <h3>1. 设计制作的基本步骤</h3>
+            <p>工程师在设计时通常遵循以下流程：</p>
+            <ol>
+                <li><strong>明确问题</strong>：了解用途和具体要求。</li>
+                <li><strong>制订方案</strong>：头脑风暴，绘制设计图，寻找最优解。</li>
+                <li><strong>实施方案</strong>：分工协作，加工组装。</li>
+                <li><strong>评估与改进</strong>：测试打分，反思问题，优化设计。</li>
+            </ol>
+            <div class="demo-box">
+                <svg viewBox="0 0 400 100">
+                    <!-- Step 1 -->
+                    <circle cx="50" cy="50" r="20" fill="#3498db" opacity="0.2">
+                        <animate attributeName="opacity" values="0.2;1;0.2" dur="4s" begin="0s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="50" y="55" text-anchor="middle" fill="#333" font-size="10">1.问题</text>
+                    
+                    <!-- Arrow -->
+                    <path d="M80 50 L110 50" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                    
+                    <!-- Step 2 -->
+                    <circle cx="140" cy="50" r="20" fill="#e67e22" opacity="0.2">
+                         <animate attributeName="opacity" values="0.2;1;0.2" dur="4s" begin="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="140" y="55" text-anchor="middle" fill="#333" font-size="10">2.方案</text>
+
+                    <!-- Arrow -->
+                    <path d="M170 50 L200 50" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+                    <!-- Step 3 -->
+                    <circle cx="230" cy="50" r="20" fill="#2ecc71" opacity="0.2">
+                         <animate attributeName="opacity" values="0.2;1;0.2" dur="4s" begin="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="230" y="55" text-anchor="middle" fill="#333" font-size="10">3.制作</text>
+
+                    <!-- Arrow -->
+                    <path d="M260 50 L290 50" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+                    <!-- Step 4 -->
+                    <circle cx="320" cy="50" r="20" fill="#9b59b6" opacity="0.2">
+                         <animate attributeName="opacity" values="0.2;1;0.2" dur="4s" begin="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="320" y="55" text-anchor="middle" fill="#333" font-size="10">4.改进</text>
+
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                          <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Concept 2: Design Requirements & Structure -->
+        <div class="card">
+            <h3>2. 设计要求与小车结构</h3>
+            <ul>
+                <li><strong>限制条件：</strong>车身<25cm，必须用橡皮筋或气球做动力，只能用限定材料。</li>
+                <li><strong>结构认知：</strong>
+                    <ul>
+                        <li>车架：支撑、固定</li>
+                        <li>车身：美观、载人</li>
+                        <li>车轴：传递动力</li>
+                        <li>轮子：减小摩擦</li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="demo-box">
+                <svg viewBox="0 0 300 120">
+                    <text x="10" y="20" font-size="12" fill="#555">组装示意图</text>
+                    <!-- Exploded View Animation -->
+                    <g transform="translate(50, 40)">
+                        <!-- Body -->
+                        <rect x="20" y="0" width="100" height="30" fill="#3498db" opacity="0.8">
+                            <animate attributeName="y" values="-20;20;20" dur="3s" repeatCount="indefinite"/>
+                        </rect>
+                        <text x="130" y="20" font-size="10" fill="#3498db">车身</text>
+                        <!-- Axles -->
+                        <line x1="30" y1="35" x2="110" y2="35" stroke="#333" stroke-width="3"/>
+                        <text x="130" y="40" font-size="10" fill="#333">车轴</text>
+                        <!-- Wheels -->
+                        <circle cx="30" cy="35" r="15" fill="#2c3e50">
+                             <animate attributeName="cx" values="0;30;30" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="110" cy="35" r="15" fill="#2c3e50">
+                             <animate attributeName="cx" values="140;110;110" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <text x="130" y="60" font-size="10" fill="#2c3e50">轮子</text>
+                        
+                        <!-- Ruler Limit -->
+                        <line x1="20" y1="60" x2="120" y2="60" stroke="red" stroke-dasharray="4"/>
+                        <text x="40" y="70" font-size="10" fill="red">长度 < 25cm</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Concept 3: Testing & Troubleshooting -->
+        <div class="card">
+            <h3>3. 测试并改进 (常见问题解决)</h3>
+            <p>设计不是一蹴而就的，遇到问题要像工程师一样思考。</p>
+            <div class="demo-box" style="display: flex; justify-content: space-around;">
+                <!-- Scenario A: Curving -->
+                <div style="width: 45%;">
+                    <p style="font-size: 12px;">现象：不能走直线</p>
+                    <svg viewBox="0 0 100 100">
+                        <path d="M50 90 Q 50 50 20 10" stroke="#e74c3c" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                        <rect x="40" y="80" width="20" height="10" fill="#3498db" class="anim-wobble"/>
+                        <text x="10" y="10" font-size="8" fill="#e74c3c">车轴不正</text>
+                    </svg>
+                </div>
+                 <!-- Scenario B: Slipping -->
+                 <div style="width: 45%;">
+                    <p style="font-size: 12px;">现象：轮子打滑</p>
+                    <svg viewBox="0 0 100 100">
+                        <line x1="10" y1="80" x2="90" y2="80" stroke="#333"/>
+                        <circle cx="50" cy="70" r="10" fill="none" stroke="#333" stroke-width="2" class="anim-spin"/>
+                        <text x="20" y="50" font-size="8" fill="#e67e22">原地空转:摩擦力太小</text>
+                        <text x="20" y="95" font-size="8" fill="green">对策:增加配重/花纹</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Concept 4: Power & Friction -->
+        <div class="card">
+            <h3>4. 动力与阻力优化</h3>
+            <p><strong>橡皮筋小车：</strong> 动力来自弹力。增加圈数/条数 = 动力↑。防打滑 = 摩擦力↑。</p>
+            <p><strong>气球小车：</strong> 动力来自反冲力。大气球/合适喷管 = 动力↑。</p>
+            <p><strong>通用：</strong> 减小车身重量、使用轴套 = 摩擦力↓ (阻力↓)。</p>
+            <div class="demo-box">
+                <svg viewBox="0 0 400 100">
+                    <!-- Rubber Band Compare -->
+                    <g transform="translate(20, 10)">
+                        <text x="0" y="10" font-size="10">1圈 (慢)</text>
+                        <rect x="0" y="20" width="40" height="20" fill="#3498db"/>
+                        <circle cx="10" cy="40" r="5" fill="#333"/>
+                        <circle cx="30" cy="40" r="5" fill="#333"/>
+                        <animateTransform attributeName="transform" type="translate" from="20 10" to="50 10" dur="3s" repeatCount="indefinite"/>
+                    </g>
+
+                    <g transform="translate(20, 60)">
+                        <text x="0" y="10" font-size="10">多圈 (快)</text>
+                        <rect x="0" y="20" width="40" height="20" fill="#3498db"/>
+                        <path d="M20 30 L30 30" stroke="yellow" stroke-width="3"/>
+                        <circle cx="10" cy="40" r="5" fill="#333"/>
+                        <circle cx="30" cy="40" r="5" fill="#333"/>
+                        <animateTransform attributeName="transform" type="translate" from="20 60" to="150 60" dur="3s" repeatCount="indefinite"/>
+                    </g>
+
+                    <!-- Balloon Compare -->
+                    <g transform="translate(250, 30)">
+                        <text x="0" y="-10" font-size="10">气球越大=动力越大</text>
+                        <rect x="20" y="20" width="40" height="20" fill="#e74c3c"/>
+                        <circle cx="20" cy="30" r="15" fill="#f1c40f" opacity="0.7" class="anim-grow"/>
+                        <line x1="20" y1="30" x2="10" y2="30" stroke="#333" stroke-width="2"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ==================== TEST SECTION ==================== -->
+    <section id="test">
+        <div class="quiz-header">
+            <h2>闯关塔：小车工程师挑战 (100分)</h2>
+            <p>本卷共35道题（本演示页面精选10道代表性题目，涵盖所有题型与分值逻辑）</p>
+        </div>
+
+        <form id="quizForm">
+            
+            <!-- Part 1: Multiple Choice (20 points) -->
+            <div class="question-block">
+                <span class="q-type">选择题</span>
+                <div class="q-text">1. 设计制作小车的第一步是？ (4分)</div>
+                <div class="options">
+                    <label onclick="checkChoiceAnswer('q1','A',this,event)"><input type="radio" name="q1" value="A"> A. 实施方案</label>
+                    <label onclick="checkChoiceAnswer('q1','B',this,event)"><input type="radio" name="q1" value="B"> B. 明确问题</label>
+                    <label onclick="checkChoiceAnswer('q1','C',this,event)"><input type="radio" name="q1" value="C"> C. 评估与改进</label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <span class="q-type">选择题</span>
+                <div class="q-text">2. 橡皮筋小车的动力来自于橡皮筋的什么能量？ (4分)</div>
+                <div class="options">
+                    <label onclick="checkChoiceAnswer('q2','A',this,event)"><input type="radio" name="q2" value="A"> A. 重力</label>
+                    <label onclick="checkChoiceAnswer('q2','B',this,event)"><input type="radio" name="q2" value="B"> B. 反冲力</label>
+                    <label onclick="checkChoiceAnswer('q2','C',this,event)"><input type="radio" name="q2" value="C"> C. 弹力</label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <span class="q-type">选择题</span>
+                <div class="q-text">3. 测试小车时，发现车子总是向左偏，最可能的原因是？ (4分)</div>
+                <div class="options">
+                    <label onclick="checkChoiceAnswer('q3','A',this,event)"><input type="radio" name="q3" value="A"> A. 动力太强</label>
+                    <label onclick="checkChoiceAnswer('q3','B',this,event)"><input type="radio" name="q3" value="B"> B. 车轴不正</label>
+                    <label onclick="checkChoiceAnswer('q3','C',this,event)"><input type="radio" name="q3" value="C"> C. 气球太小</label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <span class="q-type">选择题</span>
+                <div class="q-text">4. 为了减小车轴转动的摩擦力，我们可以？ (4分)</div>
+                <div class="options">
+                    <label onclick="checkChoiceAnswer('q4','A',this,event)"><input type="radio" name="q4" value="A"> A. 安装轴套或加润滑油</label>
+                    <label onclick="checkChoiceAnswer('q4','B',this,event)"><input type="radio" name="q4" value="B"> B. 增加车身重量</label>
+                    <label onclick="checkChoiceAnswer('q4','C',this,event)"><input type="radio" name="q4" value="C"> C. 用更粗糙的轮子</label>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <span class="q-type">选择题</span>
+                <div class="q-text">5. 工程师面对模型失败时的正确态度是？ (4分)</div>
+                <div class="options">
+                    <label onclick="checkChoiceAnswer('q5','A',this,event)"><input type="radio" name="q5" value="A"> A. 放弃制作</label>
+                    <label onclick="checkChoiceAnswer('q5','B',this,event)"><input type="radio" name="q5" value="B"> B. 视其为反思改进的机会</label>
+                    <label onclick="checkChoiceAnswer('q5','C',this,event)"><input type="radio" name="q5" value="C"> C. 隐瞒问题</label>
+                </div>
+            </div>
+
+            <!-- Part 2: Fill in Blanks (20 points) -->
+            <div class="question-block">
+                <span class="q-type">填空题</span>
+                <div class="q-text">6. 小车的结构主要包括车架、<input type="text" name="q6_1" placeholder="填两个字" style="width:80px" onblur="checkFillAnswer('q6_1',this)">、车轴和轮子。车身长度不能超过 <input type="text" name="q6_2" placeholder="填数字" style="width:60px" onblur="checkFillAnswer('q6_2',this)"> 厘米。(10分)</div>
+            </div>
+
+            <div class="question-block">
+                <span class="q-type">填空题</span>
+                <div class="q-text">7. 气球动力小车是利用气球喷气产生的 <input type="text" name="q7" placeholder="三个字" style="width:100px" onblur="checkFillAnswer('q7',this)"> 运动的。要让气球小车行驶得更远，可以换用更 <input type="text" name="q7_2" placeholder="大/小" style="width:60px" onblur="checkFillAnswer('q7_2',this)"> 的气球。(10分)</div>
+            </div>
+
+            <!-- Part 3: Drag & Sort (20 points) -->
+            <div class="question-block">
+                <span class="q-type">排序题</span>
+                <div class="q-text">8. 请按正确的工程设计步骤进行排序。(20分)</div>
+                <ul class="sortable-list" id="sortList">
+                    <li class="sort-item" data-id="B">
+                        2. 制订方案 (绘制设计图)
+                        <div><span class="sort-btn" onclick="moveUp(this)">⬆️</span> <span class="sort-btn" onclick="moveDown(this)">⬇️</span></div>
+                    </li>
+                    <li class="sort-item" data-id="D">
+                        4. 评估与改进
+                        <div><span class="sort-btn" onclick="moveUp(this)">⬆️</span> <span class="sort-btn" onclick="moveDown(this)">⬇️</span></div>
+                    </li>
+                    <li class="sort-item" data-id="A">
+                        1. 明确问题
+                        <div><span class="sort-btn" onclick="moveUp(this)">⬆️</span> <span class="sort-btn" onclick="moveDown(this)">⬇️</span></div>
+                    </li>
+                    <li class="sort-item" data-id="C">
+                        3. 实施方案 (制作)
+                        <div><span class="sort-btn" onclick="moveUp(this)">⬆️</span> <span class="sort-btn" onclick="moveDown(this)">⬇️</span></div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Part 4: Experiment Analysis (40 points) -->
+            <div class="question-block">
+                <span class="q-type">实验探究题</span>
+                <div class="q-text">9. 实验分析：小明的橡皮筋小车遇到了问题。</div>
+                
+                <div class="exp-container">
+                    <svg viewBox="0 0 400 140" style="background:linear-gradient(to bottom, #e3f2fd 0%, #ffffff 100%); border:2px solid #2196F3; border-radius:8px;">
+                        <defs>
+                            <!-- 轮胎花纹渐变 -->
+                            <radialGradient id="wheelGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:#555;stop-opacity:1" />
+                                <stop offset="70%" style="stop-color:#333;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#111;stop-opacity:1" />
+                            </radialGradient>
+                            
+                            <!-- 车身渐变 -->
+                            <linearGradient id="carGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#5dade2;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#2874a6;stop-opacity:1" />
+                            </linearGradient>
+                            
+                            <!-- 橡皮筋 -->
+                            <linearGradient id="rubberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#f39c12;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#e67e22;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#f39c12;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- 背景地面 -->
+                        <rect x="0" y="100" width="400" height="40" fill="#d5d8dc"/>
+                        <line x1="0" y1="100" x2="400" y2="100" stroke="#7f8c8d" stroke-width="2"/>
+                        
+                        <!-- 地面纹理 -->
+                        <line x1="0" y1="105" x2="400" y2="105" stroke="#bdc3c7" stroke-width="1" stroke-dasharray="10,5"/>
+                        <line x1="0" y1="110" x2="400" y2="110" stroke="#bdc3c7" stroke-width="1" stroke-dasharray="5,10"/>
+                        
+                        <!-- 小车主体 -->
+                        <g id="car-body">
+                            <!-- 车身底盘 -->
+                            <rect x="140" y="65" width="80" height="25" rx="3" fill="url(#carGrad)" stroke="#1a5490" stroke-width="2"/>
+                            
+                            <!-- 车顶 -->
+                            <path d="M 155 65 L 165 50 L 195 50 L 205 65 Z" fill="url(#carGrad)" stroke="#1a5490" stroke-width="2"/>
+                            
+                            <!-- 车窗 -->
+                            <path d="M 168 52 L 175 60 L 185 60 L 192 52 Z" fill="#85c1e9" stroke="#1a5490" stroke-width="1" opacity="0.7"/>
+                            
+                            <!-- 车灯 -->
+                            <circle cx="215" cy="75" r="3" fill="#f1c40f" opacity="0.8"/>
+                            <circle cx="145" cy="75" r="3" fill="#e74c3c" opacity="0.8"/>
+                            
+                            <!-- 车轴（后轮） -->
+                            <line x1="155" y1="90" x2="155" y2="95" stroke="#555" stroke-width="3"/>
+                            <!-- 车轴（前轮） -->
+                            <line x1="205" y1="90" x2="205" y2="95" stroke="#555" stroke-width="3"/>
+                            
+                            <!-- 后轮（驱动轮 - 快速旋转） -->
+                            <g id="rear-wheel">
+                                <circle cx="155" cy="95" r="12" fill="url(#wheelGrad)" stroke="#222" stroke-width="2"/>
+                                <!-- 轮胎花纹 - 旋转动画 -->
+                                <g class="anim-spin" style="transform-origin: 155px 95px; animation-duration: 0.3s;">
+                                    <line x1="155" y1="83" x2="155" y2="107" stroke="#888" stroke-width="2"/>
+                                    <line x1="143" y1="95" x2="167" y2="95" stroke="#888" stroke-width="2"/>
+                                    <line x1="147" y1="87" x2="163" y2="103" stroke="#888" stroke-width="1.5"/>
+                                    <line x1="147" y1="103" x2="163" y2="87" stroke="#888" stroke-width="1.5"/>
+                                </g>
+                                <circle cx="155" cy="95" r="4" fill="#444"/>
+                            </g>
+                            
+                            <!-- 前轮（从动轮 - 慢速旋转） -->
+                            <g id="front-wheel">
+                                <circle cx="205" cy="95" r="12" fill="url(#wheelGrad)" stroke="#222" stroke-width="2"/>
+                                <!-- 轮胎花纹 - 旋转动画 -->
+                                <g class="anim-spin" style="transform-origin: 205px 95px; animation-duration: 0.4s;">
+                                    <line x1="205" y1="83" x2="205" y2="107" stroke="#888" stroke-width="2"/>
+                                    <line x1="193" y1="95" x2="217" y2="95" stroke="#888" stroke-width="2"/>
+                                    <line x1="197" y1="87" x2="213" y2="103" stroke="#888" stroke-width="1.5"/>
+                                    <line x1="197" y1="103" x2="213" y2="87" stroke="#888" stroke-width="1.5"/>
+                                </g>
+                                <circle cx="205" cy="95" r="4" fill="#444"/>
+                            </g>
+                            
+                            <!-- 橡皮筋（缠绕在后轮轴上，显示张力） -->
+                            <path d="M 155 90 Q 150 75 155 60" stroke="url(#rubberGrad)" stroke-width="3" fill="none" opacity="0.9"/>
+                            <ellipse cx="155" cy="58" rx="8" ry="5" fill="url(#rubberGrad)" opacity="0.8"/>
+                        </g>
+                        
+                        <!-- 打滑效果 - 轮胎痕迹 -->
+                        <g opacity="0.4">
+                            <ellipse cx="155" cy="100" rx="8" ry="3" fill="#555">
+                                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="0.6s" repeatCount="indefinite"/>
+                            </ellipse>
+                            <ellipse cx="205" cy="100" rx="8" ry="3" fill="#555">
+                                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="0.8s" repeatCount="indefinite"/>
+                            </ellipse>
+                        </g>
+                        
+                        <!-- 运动线条（表示轮子在转但车不动） -->
+                        <g opacity="0.6">
+                            <line x1="130" y1="95" x2="120" y2="95" stroke="#e74c3c" stroke-width="2" stroke-dasharray="3,3">
+                                <animate attributeName="x1" values="130;125;130" dur="0.3s" repeatCount="indefinite"/>
+                                <animate attributeName="x2" values="120;115;120" dur="0.3s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="130" y1="90" x2="122" y2="90" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="2,2">
+                                <animate attributeName="x1" values="130;126;130" dur="0.35s" repeatCount="indefinite"/>
+                                <animate attributeName="x2" values="122;118;122" dur="0.35s" repeatCount="indefinite"/>
+                            </line>
+                        </g>
+                        
+                        <!-- 标题和说明 -->
+                        <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#c0392b">
+                            ⚠️ 现象：车轮快速转动，但小车原地不动
+                        </text>
+                        
+                        <!-- 箭头指示 -->
+                        <g>
+                            <!-- 轮子旋转箭头 -->
+                            <path d="M 125 95 Q 125 85 135 85" stroke="#e74c3c" stroke-width="2" fill="none" marker-end="url(#arrowRed)"/>
+                            <text x="115" y="85" font-size="10" fill="#e74c3c" font-weight="bold">快速旋转</text>
+                            
+                            <!-- 车身不动标记 -->
+                            <line x1="180" y1="45" x2="180" y2="55" stroke="#27ae60" stroke-width="2"/>
+                            <line x1="175" y1="50" x2="185" y2="50" stroke="#27ae60" stroke-width="2"/>
+                            <text x="180" y="40" text-anchor="middle" font-size="10" fill="#27ae60" font-weight="bold">位置不变</text>
+                        </g>
+                        
+                        <!-- 箭头标记定义 -->
+                        <defs>
+                            <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <p><strong>(1) 填空：</strong> 这种现象叫做 <input type="text" name="q9_1" placeholder="两个字" style="width:100px" onblur="checkFillAnswer('q9_1',this)">。(10分)</p>
+                    
+                    <p><strong>(2) 分析：</strong> 造成这种现象的主要原因是驱动轮与地面的 <input type="text" name="q9_2" placeholder="三个字" style="width:100px" onblur="checkFillAnswer('q9_2',this)"> 太小。(10分)</p>
+                    
+                    <p><strong>(3) 科学原理说明：</strong> 请提出两个解决这个问题的具体方法，并说明原理。(20分)</p>
+                    <textarea name="q9_3" rows="3" placeholder="方法1：... 方法2：... 原理：..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="btn-submit" onclick="calculateScore()">提交试卷</button>
+        </form>
+
+        <!-- Result Display -->
+        <div id="result-area">
+            <div class="score-card">
+                得分：<span id="score-display">0</span> / 100
+            </div>
+            <div id="feedback-content"></div>
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+    // --- 即时反馈系统 ---
+    const InstantFeedback = {
+        audioCtx: null,
+        encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+        hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+        
+        init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+        
+        playCorrectSound() {
+            this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            const notes = [523.25, 659.25, 783.99];
+            notes.forEach((freq, i) => {
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                osc.frequency.value = freq; osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                osc.start(start); osc.stop(start + 0.3);
+            });
+        },
+        
+        playWrongSound() {
+            this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+            osc.connect(gain); gain.connect(this.audioCtx.destination);
+            const now = this.audioCtx.currentTime;
+            osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        },
+        
+        showConfetti() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div'); c.className = 'confetti';
+                    c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 4000);
+                }, i * 30);
+            }
+        },
+        
+        showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `feedback-toast feedback-${type}`;
+            toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+        },
+        
+        onCorrect(element) {
+            this.playCorrectSound(); this.showConfetti();
+            const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+            this.showToast(msg, 'success');
+            if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+        },
+        
+        onWrong(element, hint = '') {
+            this.playWrongSound();
+            const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+            this.showToast(msg, 'error');
+            if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+        }
+    };
+    InstantFeedback.init();
+
+    // 即时反馈函数
+    function checkChoiceAnswer(qName,selectedAnswer,labelElement,event){
+        event.preventDefault();
+        const radio=labelElement.querySelector('input[type="radio"]');
+        radio.checked=true;
+        const allLabels=labelElement.parentElement.querySelectorAll('label');
+        allLabels.forEach(l=>l.classList.remove('correct-feedback','wrong-feedback'));
+        const answers={q1:'B',q2:'C',q3:'B',q4:'A',q5:'B'};
+        const isCorrect=selectedAnswer===answers[qName];
+        setTimeout(()=>{
+            if(isCorrect){
+                InstantFeedback.onCorrect(labelElement);
+            }else{
+                InstantFeedback.onWrong(labelElement,'再看看知识点！');
+            }
+        },200);
+    }
+
+    function checkFillAnswer(qName,inputElement){
+        const userAnswer=inputElement.value.trim();
+        if(!userAnswer)return;
+        const answers={q6_1:['车身','车厢'],q6_2:['25'],q7:['反冲力'],q7_2:['大'],q9_1:['打滑'],q9_2:['摩擦力']};
+        const isCorrect=answers[qName]&&answers[qName].some(a=>userAnswer.includes(a));
+        inputElement.classList.remove('correct-feedback','wrong-feedback');
+        setTimeout(()=>{
+            if(isCorrect){
+                InstantFeedback.onCorrect(inputElement);
+            }else{
+                InstantFeedback.onWrong(inputElement,'再想想！');
+            }
+        },200);
+    }
+
+    // --- Tab Switching Logic ---
+    function switchTab(tabId) {
+        document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    // --- Sort List Logic (Simple Swap) ---
+    function moveUp(btn) {
+        let li = btn.closest('li');
+        if (li.previousElementSibling) {
+            li.parentNode.insertBefore(li, li.previousElementSibling);
+        }
+    }
+
+    function moveDown(btn) {
+        let li = btn.closest('li');
+        if (li.nextElementSibling) {
+            li.parentNode.insertBefore(li.nextElementSibling, li);
+        }
+    }
+
+    // --- Scoring Logic ---
+    function calculateScore() {
+        let score = 0;
+        let feedbackHTML = "<h3>📝 错题解析：</h3>";
+        let hasErrors = false;
+
+        const form = document.getElementById('quizForm');
+
+        // 1. Choice Questions (5 * 4 = 20 pts)
+        const answers = {
+            q1: { ans: 'B', correct: '明确问题', desc: '设计的第一步必须是明确我们要解决什么问题。' },
+            q2: { ans: 'C', correct: '弹力', desc: '橡皮筋发生形变产生弹力驱动小车。' },
+            q3: { ans: 'B', correct: '车轴不正', desc: '车轴安装不正会导致轮子方向偏离，无法走直线。' },
+            q4: { ans: 'A', correct: '安装轴套', desc: '轴套或润滑油可以变滑动为滚动或减少接触面粗糙度，减小摩擦。' },
+            q5: { ans: 'B', correct: '反思改进', desc: '失败是成功的阶梯，工程师需要从失败中学习。' }
+        };
+
+        for(let i=1; i<=5; i++) {
+            let qName = 'q' + i;
+            let userVal = form.elements[qName].value;
+            if(userVal === answers[qName].ans) {
+                score += 4;
+            } else {
+                hasErrors = true;
+                feedbackHTML += `<div class="feedback-item">
+                    <strong>第${i}题 (选择):</strong> 错误<br>
+                    你的选择: ${userVal || '未选'}<br>
+                    <span class="correct-ans">正确答案: ${answers[qName].ans} (${answers[qName].correct})</span>
+                    <div class="explanation">${answers[qName].desc}</div>
+                </div>`;
+            }
+        }
+
+        // 2. Fill in Blanks (2 * 10 = 20 pts total, split by inputs)
+        // Q6
+        let q6_1 = form.elements['q6_1'].value.trim();
+        let q6_2 = form.elements['q6_2'].value.trim();
+        if(q6_1.includes('车身') || q6_1.includes('车厢')) score += 5;
+        else feedbackHTML += `<div class="feedback-item"><strong>第6题-1:</strong> 应填“车身”。</div>`;
+        
+        if(q6_2 === '25') score += 5;
+        else feedbackHTML += `<div class="feedback-item"><strong>第6题-2:</strong> 长度限制是 25 厘米。</div>`;
+
+        // Q7
+        let q7 = form.elements['q7'].value.trim();
+        let q7_2 = form.elements['q7_2'].value.trim();
+        if(q7.includes('反冲力')) score += 5;
+        else feedbackHTML += `<div class="feedback-item"><strong>第7题-1:</strong> 气球喷气产生的是“反冲力”。</div>`;
+
+        if(q7_2.includes('大')) score += 5;
+        else feedbackHTML += `<div class="feedback-item"><strong>第7题-2:</strong> 气球越大，储存能量越多，跑得越远。</div>`;
+
+        // 3. Sorting (20 pts)
+        // Correct order: A(1) -> B(2) -> C(3) -> D(4)
+        const listItems = document.querySelectorAll('#sortList li');
+        let orderStr = "";
+        listItems.forEach(item => orderStr += item.getAttribute('data-id'));
+        
+        if(orderStr === "ABCD") {
+            score += 20;
+        } else {
+            hasErrors = true;
+            feedbackHTML += `<div class="feedback-item">
+                <strong>第8题 (排序):</strong> 顺序错误<br>
+                <span class="correct-ans">正确顺序: 明确问题 → 制订方案 → 实施方案 → 评估与改进</span>
+            </div>`;
+        }
+
+        // 4. Experiment Analysis (40 pts)
+        // Q9_1 (10 pts)
+        let q9_1 = form.elements['q9_1'].value.trim();
+        if(q9_1.includes('打滑')) score += 10;
+        else feedbackHTML += `<div class="feedback-item"><strong>第9题(1):</strong> 现象叫“打滑”。</div>`;
+
+        // Q9_2 (10 pts)
+        let q9_2 = form.elements['q9_2'].value.trim();
+        if(q9_2.includes('摩擦力')) score += 10;
+        else feedbackHTML += `<div class="feedback-item"><strong>第9题(2):</strong> 原因是驱动轮与地面“摩擦力”太小。</div>`;
+
+        // Q9_3 (20 pts - Keyword Check)
+        let q9_3 = form.elements['q9_3'].value;
+        let expScore = 0;
+        if(q9_3.includes('重') || q9_3.includes('载重')) expScore += 5;
+        if(q9_3.includes('花纹') || q9_3.includes('粗糙') || q9_3.includes('毛巾')) expScore += 5;
+        if(q9_3.includes('摩擦') || q9_3.includes('增大')) expScore += 10;
+        
+        score += expScore;
+        if(expScore < 20) {
+            feedbackHTML += `<div class="feedback-item">
+                <strong>第9题(3) 原理说明:</strong> 需补充完整。<br>
+                <span class="correct-ans">参考答案: 方法包括在车上加重物、换用有花纹的轮胎或缠绕橡皮筋。原理是：通过增大压力或增大接触面粗糙程度来增大摩擦力。</span>
+            </div>`;
+        }
+
+        // Final Display
+        const resultArea = document.getElementById('result-area');
+        const scoreDisplay = document.getElementById('score-display');
+        const fbContent = document.getElementById('feedback-content');
+        
+        scoreDisplay.innerText = score;
+        if(!hasErrors && score === 100) {
+            feedbackHTML = "<h3 style='color:green; text-align:center'>🎉 完美！你是顶尖的小车工程师！ 🎉</h3>";
+        }
+        fbContent.innerHTML = feedbackHTML;
+        resultArea.style.display = 'block';
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

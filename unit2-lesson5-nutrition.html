@@ -1,0 +1,704 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第五课：食物中的营养 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #E8F5E9; /* 浅绿色背景，代表健康营养 */
+            --card-bg: #FFFFFF;
+            --primary: #4CAF50; /* 核心绿 */
+            --secondary: #2196F3; /* 淀粉蓝 */
+            --accent: #FF9800; /* 脂肪黄 */
+            --danger: #F44336; /* 蛋白质红 */
+            --text: #263238;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#C8E6C9 15%, transparent 16%);
+            background-size: 25px 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 4px solid #A5D6A7;
+            overflow: hidden;
+        }
+
+        h1 { color: #2E7D32; margin-top: 0; font-size: 1.6em; margin-bottom: 5px; }
+        .subtitle { color: #558B2F; font-size: 1em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #F1F8E9;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid var(--primary);
+            margin-bottom: 20px;
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #1B5E20; border-bottom: 1px dashed #C5E1A5; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { color: #C2185B; font-weight: bold; background: #F8BBD0; padding: 0 4px; border-radius: 3px; }
+        .starch-text { color: #1565C0; font-weight: bold; } /* 淀粉蓝 */
+        .fat-text { color: #E65100; font-weight: bold; } /* 脂肪橙 */
+        .protein-text { color: #C62828; font-weight: bold; } /* 蛋白质红 */
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFF;
+            border: 2px dashed #AED581;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .svg-caption { font-size: 0.9em; color: #795548; margin-top: 5px; font-style: italic; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #2E7D32;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #2E7D32; }
+        .btn-next { background: #FF9800; box-shadow: 0 4px 0 #E65100; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #EFEBE9; border-radius: 5px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #FAFAFA; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #E0E0E0; margin-top: 10px; }
+        .q-tag { background: #C8E6C9; color: #2E7D32; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; }
+        .q-content { font-size: 1.2em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项 */
+        .option-item {
+            background: white; border: 2px solid #AED581; padding: 12px; border-radius: 8px;
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #DCEDC8; border-color: #558B2F; font-weight: bold; color: #33691E; }
+
+        .fill-input { border: none; border-bottom: 3px solid var(--primary); background: transparent; width: 150px; text-align: center; font-size: 1.2em; color: #1B5E20; border-radius: 0; }
+
+        /* 排序/拖拽题 */
+        .sort-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sort-item { 
+            background: #E8F5E9; border: 1px solid #4CAF50; color: #2E7D32;
+            padding: 8px 12px; border-radius: 20px; font-size: 0.9em; cursor: pointer;
+        }
+        .sort-box { 
+            min-height: 50px; border: 2px dashed #BDBDBD; border-radius: 8px; 
+            margin-top: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            background: #FAFAFA; align-items: center;
+        }
+        .sort-placeholder { color: #999; font-size: 0.9em; width: 100%; text-align: center; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; }
+        .score-display { font-size: 4em; color: var(--primary); font-weight: bold; margin: 10px 0; }
+
+        /* 动画定义 */
+        @keyframes dropIodine { 0% {opacity:0; transform:translateY(-20px);} 50% {opacity:1; transform:translateY(0);} 100% {opacity:0;} }
+        @keyframes turnBlue { 0% {fill:#FFF9C4;} 50% {fill:#FFF9C4;} 100% {fill:#311B92;} }
+        @keyframes smearOil { 0% {opacity:0; width:0;} 50% {opacity:0.5; width:30px;} 100% {opacity:0.5; width:30px;} }
+        @keyframes burnFire { 0% {transform:scale(0.8);} 50% {transform:scale(1.2);} 100% {transform:scale(1.0);} }
+        @keyframes smellWave { 0% {opacity:0; transform:translateY(0);} 100% {opacity:0; transform:translateY(-20px); opacity:1;} }
+
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 复习区 -->
+    <div id="section-review" class="container section active">
+        <h1>🥗 知识复习</h1>
+        <p class="subtitle">第二单元第五课：食物中的营养</p>
+
+        <!-- 知识点 1: 营养概览 -->
+        <div class="knowledge-box">
+            <h3>1. 营养大家庭</h3>
+            <div class="k-point">🧬 人体所需营养都来自食物。</div>
+            <div class="k-point">🌟 <strong>六大营养素</strong>：<span class="protein-text">蛋白质</span>、<span class="starch-text">糖类</span>、<span class="fat-text">脂肪</span>、维生素、无机盐、水。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <circle cx="150" cy="50" r="40" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+                    <text x="150" y="55" text-anchor="middle" font-size="12" font-weight="bold">人体</text>
+                    <!-- 营养飞入 -->
+                    <circle cx="50" cy="20" r="15" fill="#FFCCBC"><animate attributeName="cx" values="50;110" dur="2s" repeatCount="indefinite"/></circle>
+                    <text x="50" y="25" text-anchor="middle" font-size="8">蛋白质</text>
+                    <circle cx="50" cy="80" r="15" fill="#BBDEFB"><animate attributeName="cx" values="50;110" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
+                    <text x="50" y="85" text-anchor="middle" font-size="8">糖类</text>
+                    <circle cx="250" cy="50" r="15" fill="#FFF9C4"><animate attributeName="cx" values="250;190" dur="2s" begin="1s" repeatCount="indefinite"/></circle>
+                    <text x="250" y="55" text-anchor="middle" font-size="8">脂肪</text>
+                </svg>
+                <div class="svg-caption">身体从食物中获取能量和营养</div>
+            </div>
+        </div>
+
+        <!-- 知识点 2: 淀粉 -->
+        <div class="knowledge-box">
+            <h3>2. 糖类（淀粉）- 能量来源</h3>
+            <div class="k-point">🍚 <strong>作用</strong>：身体能量的主要来源。</div>
+            <div class="k-point">🍞 <strong>食物</strong>：米饭、面条、馒头、土豆、芋头。</div>
+            <div class="k-point">🧪 <strong>检验方法</strong>：滴<span class="starch-text">碘酒</span> → 变<span class="starch-text">蓝色 (或蓝紫色)</span>。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="120" viewBox="0 0 300 120">
+                    <!-- 土豆片 -->
+                    <ellipse cx="150" cy="90" rx="40" ry="20" fill="#FFF9C4" stroke="#FBC02D" style="animation: turnBlue 3s infinite;"/>
+                    <text x="150" y="120" text-anchor="middle" font-size="12">土豆</text>
+                    <!-- 滴管 -->
+                    <path d="M145,10 L155,10 L155,50 L150,60 L145,50 Z" fill="#BCAAA4" stroke="#5D4037"/>
+                    <circle cx="150" cy="65" r="4" fill="#5D4037" style="animation: dropIodine 3s infinite;"/>
+                    <text x="220" y="60" font-size="12" fill="#311B92">变蓝 = 有淀粉</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 3: 脂肪 -->
+        <div class="knowledge-box">
+            <h3>3. 脂肪 - 能量仓库</h3>
+            <div class="k-point">🥜 <strong>作用</strong>：能量来源，身体可储存大量脂肪。</div>
+            <div class="k-point">🥓 <strong>食物</strong>：肥肉、花生、核桃、芝麻、食用油、巧克力。</div>
+            <div class="k-point">🧪 <strong>检验方法</strong>：在纸上涂抹 → 留下<span class="fat-text">不会消失的油迹</span>。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 纸 -->
+                    <rect x="100" y="20" width="100" height="70" fill="white" stroke="#CCC"/>
+                    <!-- 花生 -->
+                    <ellipse cx="120" cy="60" rx="10" ry="6" fill="#D7CCC8" stroke="#5D4037">
+                        <animate attributeName="cx" values="120;180;120" dur="2s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <!-- 油迹 -->
+                    <rect x="130" y="50" width="0" height="20" fill="#FFECB3" opacity="0.6" style="animation: smearOil 2s infinite;"/>
+                    <text x="220" y="60" font-size="12" fill="#E65100">透明油迹</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 4: 蛋白质 -->
+        <div class="knowledge-box">
+            <h3>4. 蛋白质 - 生长建设</h3>
+            <div class="k-point">🥚 <strong>作用</strong>：构成肌肉、内脏、头发、指甲；支持生长发育。</div>
+            <div class="k-point">🥩 <strong>食物</strong>：瘦肉、鱼、蛋、奶、豆类。</div>
+            <div class="k-point">🧪 <strong>检验方法</strong>：燃烧 → 有<span class="protein-text">烧焦羽毛的气味 (焦臭味)</span>。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="140" viewBox="0 0 320 140" style="background:linear-gradient(to bottom, #FFF3E0 0%, #F5F5F5 100%); border-radius:10px;">
+                    <defs>
+                        <!-- 肉块渐变 -->
+                        <linearGradient id="meatGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FFAB91"/>
+                            <stop offset="100%" style="stop-color:#FF7043"/>
+                        </linearGradient>
+                        <!-- 火焰渐变 -->
+                        <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" style="stop-color:#FF5722"/>
+                            <stop offset="50%" style="stop-color:#FF9800"/>
+                            <stop offset="100%" style="stop-color:#FFC107"/>
+                        </linearGradient>
+                        <!-- 烟雾渐变 -->
+                        <radialGradient id="smokeGrad">
+                            <stop offset="0%" style="stop-color:#757575; stop-opacity:0.6"/>
+                            <stop offset="100%" style="stop-color:#BDBDBD; stop-opacity:0"/>
+                        </radialGradient>
+                    </defs>
+                    
+                    <!-- 实验台 -->
+                    <rect x="80" y="105" width="160" height="8" rx="2" fill="#8D6E63" opacity="0.6"/>
+                    
+                    <!-- 酒精灯底座 -->
+                    <ellipse cx="160" cy="115" rx="18" ry="4" fill="#546E7A"/>
+                    <rect x="152" y="100" width="16" height="15" fill="#78909C" stroke="#455A64" stroke-width="1"/>
+                    
+                    <!-- 酒精灯火焰 (多层) -->
+                    <ellipse cx="160" cy="100" rx="12" ry="3" fill="#FF5722" opacity="0.3">
+                        <animate attributeName="rx" values="12;14;12" dur="0.3s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <path d="M160,100 Q150,85 160,70 Q170,85 160,100" fill="url(#flameGrad)" opacity="0.9">
+                        <animate attributeName="d" values="M160,100 Q150,85 160,70 Q170,85 160,100; M160,100 Q148,83 160,68 Q172,83 160,100; M160,100 Q150,85 160,70 Q170,85 160,100" dur="0.2s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M160,95 Q155,85 160,75 Q165,85 160,95" fill="#FFC107" opacity="0.8">
+                        <animate attributeName="d" values="M160,95 Q155,85 160,75 Q165,85 160,95; M160,95 Q153,83 160,73 Q167,83 160,95; M160,95 Q155,85 160,75 Q165,85 160,95" dur="0.15s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- 铁丝网架 -->
+                    <line x1="140" y1="65" x2="180" y2="65" stroke="#546E7A" stroke-width="2"/>
+                    <line x1="145" y1="65" x2="145" y2="68" stroke="#546E7A" stroke-width="1"/>
+                    <line x1="160" y1="65" x2="160" y2="68" stroke="#546E7A" stroke-width="1"/>
+                    <line x1="175" y1="65" x2="175" y2="68" stroke="#546E7A" stroke-width="1"/>
+                    
+                    <!-- 肉块 (立体) -->
+                    <ellipse cx="160" cy="62" rx="16" ry="4" fill="#D84315" opacity="0.4"/>
+                    <rect x="144" y="50" width="32" height="12" rx="2" fill="url(#meatGrad)" stroke="#D84315" stroke-width="1.5"/>
+                    <!-- 肉块纹理 -->
+                    <line x1="150" y1="52" x2="152" y2="60" stroke="#E64A19" stroke-width="1" opacity="0.5"/>
+                    <line x1="158" y1="52" x2="160" y2="60" stroke="#E64A19" stroke-width="1" opacity="0.5"/>
+                    <line x1="166" y1="52" x2="168" y2="60" stroke="#E64A19" stroke-width="1" opacity="0.5"/>
+                    
+                    <!-- 烟雾 (多层扩散) -->
+                    <circle cx="160" cy="45" r="8" fill="url(#smokeGrad)" opacity="0">
+                        <animate attributeName="cy" values="45;25;5" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="8;15;20" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.8;0" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="155" cy="45" r="6" fill="url(#smokeGrad)" opacity="0">
+                        <animate attributeName="cy" values="45;25;5" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="6;12;16" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.7;0" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="165" cy="45" r="6" fill="url(#smokeGrad)" opacity="0">
+                        <animate attributeName="cy" values="45;25;5" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="6;12;16" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.7;0" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- 气味波纹线 (左侧) -->
+                    <path d="M145,40 Q135,30 145,20" stroke="#795548" stroke-width="2" fill="none" opacity="0">
+                        <animate attributeName="d" values="M145,40 Q135,30 145,20; M140,35 Q125,25 140,15; M135,30 Q115,20 135,10" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.8;0" dur="1.5s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M148,38 Q140,28 148,18" stroke="#8D6E63" stroke-width="1.5" fill="none" opacity="0">
+                        <animate attributeName="d" values="M148,38 Q140,28 148,18; M143,33 Q130,23 143,13; M138,28 Q120,18 138,8" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.7;0" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- 气味波纹线 (右侧) -->
+                    <path d="M175,40 Q185,30 175,20" stroke="#795548" stroke-width="2" fill="none" opacity="0">
+                        <animate attributeName="d" values="M175,40 Q185,30 175,20; M180,35 Q195,25 180,15; M185,30 Q205,20 185,10" dur="1.5s" begin="0.2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.8;0" dur="1.5s" begin="0.2s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M172,38 Q180,28 172,18" stroke="#8D6E63" stroke-width="1.5" fill="none" opacity="0">
+                        <animate attributeName="d" values="M172,38 Q180,28 172,18; M177,33 Q190,23 177,13; M182,28 Q200,18 182,8" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;0.7;0" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- 标注文字 -->
+                    <text x="200" y="35" font-size="13" fill="#5D4037" font-weight="bold">💨 焦臭味</text>
+                    <text x="200" y="50" font-size="10" fill="#795548">(烧焦羽毛味)</text>
+                    
+                    <!-- 箭头指示 -->
+                    <path d="M190,40 L200,40" stroke="#795548" stroke-width="2" marker-end="url(#arrowSmell)"/>
+                    <defs>
+                        <marker id="arrowSmell" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                            <path d="M0,0 L8,4 L0,8 z" fill="#795548"/>
+                        </marker>
+                    </defs>
+                    
+                    <!-- 底部说明 -->
+                    <text x="160" y="132" text-anchor="middle" font-size="10" fill="#666">蛋白质燃烧实验</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 5: 维生素与矿物质 -->
+        <div class="knowledge-box">
+            <h3>5. 调节小卫士</h3>
+            <div class="k-point">🥦 <strong>维生素 & 无机盐</strong>：调节机能，保持健康。来源：蔬菜、水果、盐(矿物质)。</div>
+            <div class="k-point">💧 <strong>水</strong>：人体最基本的营养成分。</div>
+            <div class="k-point">🔍 <strong>其他辨别法</strong>：看食品包装标签、查资料。</div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入35题闯关塔！🚀</button>
+    </div>
+
+    <!-- 2. 闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="text-align:right; font-size:0.9em; color:#2E7D32;">关卡：<span id="q-index">1</span> / 35</div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题 ▶</button>
+    </div>
+
+    <!-- 3. 结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 35道精选题目 ---
+        const quizData = [
+            // 1. 营养总论 (5题)
+            { type: 'mcq', q: '人体所需要的营养是从____得到的。', opts: ['空气中', '食物中', '阳光中'], a: 1, exp: '营养主要来自食物。' },
+            { type: 'mcq', q: '下列不属于食物中主要营养成分的是？', opts: ['蛋白质', '糖类', '色素'], a: 2, exp: '色素不是营养成分。' },
+            { type: 'mcq', q: '人体最基本的营养成分是？', opts: ['水', '脂肪', '维生素'], a: 0, exp: '水是生命之源。' },
+            { type: 'fill', q: '食物中的营养成分通常分为蛋白质、糖类、脂肪、维生素、____和水。', a: ['无机盐', '矿物质'], exp: '六大营养素之一。' },
+            { type: 'mcq', q: '想要知道某种包装食品中含有哪些营养，最准确的方法是？', opts: ['尝一尝', '看食品标签', '用火烧'], a: 1, exp: '看配料表和营养成分表。' },
+
+            // 2. 淀粉/糖类 (8题)
+            { type: 'mcq', q: '____是糖类的重要成员之一。', opts: ['淀粉', '盐', '油'], a: 0, exp: '淀粉属于糖类。' },
+            { type: 'mcq', q: '糖类（含淀粉）对人体的主要作用是？', opts: ['提供能量', '调节机能', '构成头发'], a: 0, exp: '糖类是能量主要来源。' },
+            { type: 'mcq', q: '下列哪种食物富含淀粉？', opts: ['肥肉', '米饭', '青菜'], a: 1, exp: '谷物类富含淀粉。' },
+            { type: 'mcq', q: '检验食物中是否含有淀粉，我们可以使用？', opts: ['酒精', '碘酒', '水'], a: 1, exp: '淀粉遇碘变蓝。' },
+            { type: 'fill', q: '在土豆上滴碘酒，如果变____色，说明含有淀粉。', a: ['蓝', '蓝紫'], exp: '淀粉的特性反应。' },
+            { type: 'mcq', q: '馒头遇到碘酒变成了蓝色，说明馒头里含有？', opts: ['脂肪', '蛋白质', '淀粉'], a: 2, exp: '变蓝是淀粉的特征。' },
+            { type: 'sort', q: '请对淀粉检验步骤排序：', items: ['滴加碘酒', '准备食物', '观察颜色'], answerOrder: ['准备食物', '滴加碘酒', '观察颜色'], exp: '先备物，再滴液，后观察。' },
+            { type: 'mcq', q: '除了米饭，下列也富含淀粉的是？', opts: ['芋头', '牛奶', '鸡蛋'], a: 0, exp: '芋头、薯类富含淀粉。' },
+
+            // 3. 脂肪 (7题)
+            { type: 'mcq', q: '____和糖类是人体能量的主要来源。', opts: ['维生素', '脂肪', '水'], a: 1, exp: '脂肪也是能量来源。' },
+            { type: 'mcq', q: '我们身体可以储存大量的____。', opts: ['维生素', '脂肪', '无机盐'], a: 1, exp: '脂肪是能量储备。' },
+            { type: 'mcq', q: '下列食物中，富含脂肪的是？', opts: ['花生', '苹果', '米饭'], a: 0, exp: '坚果类富含油脂。' },
+            { type: 'mcq', q: '肥肉中含有丰富的？', opts: ['淀粉', '脂肪', '膳食纤维'], a: 1, exp: '肥肉是脂肪。' },
+            { type: 'mcq', q: '检验食物中是否含有脂肪，常用的方法是？', opts: ['滴碘酒', '燃烧闻气味', '在白纸上涂抹'], a: 2, exp: '按压涂抹法。' },
+            { type: 'fill', q: '如果食物在纸上留下不会消失的____，说明含有脂肪。', a: ['油迹', '油渍'], exp: '脂肪会留下半透明油迹。' },
+            { type: 'mcq', q: '下列哪组食物都富含脂肪？', opts: ['芝麻、巧克力', '馒头、土豆', '白菜、西瓜'], a: 0, exp: '芝麻和巧克力含油/脂高。' },
+
+            // 4. 蛋白质 (8题)
+            { type: 'mcq', q: '构成人体肌肉、内脏、头发、指甲的主要成分是？', opts: ['脂肪', '蛋白质', '糖类'], a: 1, exp: '蛋白质是人体建筑材料。' },
+            { type: 'mcq', q: '青少年和重创病人需要多补充哪种营养？', opts: ['蛋白质', '脂肪', '糖类'], a: 0, exp: '促进生长和修复组织。' },
+            { type: 'mcq', q: '下列食物富含蛋白质的是？', opts: ['米饭', '肥肉', '瘦肉'], a: 2, exp: '瘦肉、蛋奶富含蛋白。' },
+            { type: 'mcq', q: '检验蛋白质的常用方法是？', opts: ['烧烤法(燃烧)', '挤压法', '滴碘酒'], a: 0, exp: '燃烧闻气味。' },
+            { type: 'fill', q: '蛋白质燃烧后，会有一股____味。', a: ['焦臭', '烧焦羽毛'], exp: '这是蛋白质特有的气味。' },
+            { type: 'mcq', q: '下列哪种食物燃烧时会有焦臭味？', opts: ['头发/瘦肉', '棉花', '木头'], a: 0, exp: '头发和肉含蛋白质。' },
+            { type: 'mcq', q: '纯牛奶和鸡蛋主要为我们提供？', opts: ['淀粉', '蛋白质', '膳食纤维'], a: 1, exp: '蛋奶是优质蛋白。' },
+            { type: 'sort', q: '按蛋白质含量从高到低排序(大概)：', items: ['牛肉', '白菜', '米饭'], answerOrder: ['牛肉', '米饭', '白菜'], exp: '肉类蛋白最高，米饭次之，蔬菜较少。' },
+
+            // 5. 维生素/矿物质/综合 (7题)
+            { type: 'mcq', q: '具有调节身体机能作用，保持健康不可缺少的营养是？', opts: ['脂肪', '维生素和无机盐', '糖类'], a: 1, exp: '调节类营养素。' },
+            { type: 'mcq', q: '下列食物富含维生素和无机盐的是？', opts: ['红烧肉', '蔬菜和水果', '馒头'], a: 1, exp: '蔬果是主要来源。' },
+            { type: 'mcq', q: '食盐中含有一种极其丰富的矿物质，它是？', opts: ['糖', '盐(钠)', '油'], a: 1, exp: '盐本身就是矿物质。' },
+            { type: 'mcq', q: '如果在白纸上挤压蔬菜，留下的水迹干了后消失了，说明蔬菜含有？', opts: ['脂肪', '水', '淀粉'], a: 1, exp: '水会蒸发消失，油不会。' },
+            { type: 'mcq', q: '关于饮食，下列说法正确的是？', opts: ['只吃肉', '不吃蔬菜', '营养均衡，不挑食'], a: 2, exp: '全面营养。' },
+            { type: 'fill', q: '要想获得丰富的维生素，我们应该多吃____和水果。', a: ['蔬菜', '青菜'], exp: '蔬果富含维生素。' },
+            { type: 'mcq', q: '下列搭配最能体现营养均衡的是？', opts: ['炸鸡+可乐', '米饭+青菜+鱼汤', '薯条+汉堡'], a: 1, exp: '主食+蛋白+维生素。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let sortOrder = []; 
+
+        // 简易音效合成
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(400, now); gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+            selectedOption = null;
+            sortOrder = [];
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let tagText = qData.type === 'mcq' ? '选择题' : (qData.type === 'fill' ? '填空题' : '排序题');
+            card.innerHTML = `<div class="q-content"><span class="q-tag">${tagText}</span>${qData.q}</div>`;
+
+            if (qData.type === 'mcq') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                // 添加失焦即时反馈
+                input.onblur = () => {
+                    if (selectedOption) {
+                        const isCorrect = qData.a.some(ans => selectedOption.includes(ans));
+                        setTimeout(() => {
+                            if (isCorrect) {
+                                InstantFeedback.onCorrect(input);
+                            } else {
+                                InstantFeedback.onWrong(input, qData.exp);
+                            }
+                        }, 200);
+                    }
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'sort') {
+                renderSort(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            playSound('click');
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected', 'correct-feedback', 'wrong-feedback'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            const isCorrect = (idx === qData.a);
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderSort(card, qData) {
+            const container = document.createElement('div');
+            const sourceDiv = document.createElement('div'); sourceDiv.className = 'sort-container';
+            const targetDiv = document.createElement('div'); targetDiv.className = 'sort-box';
+            targetDiv.innerHTML = '<div class="sort-placeholder">点击选项按顺序排列</div>';
+
+            let items = [...qData.items].sort(()=>Math.random()-0.5);
+            
+            items.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'sort-item';
+                btn.innerText = item;
+                btn.onclick = () => {
+                    playSound('click');
+                    if(targetDiv.contains(btn)) {
+                        sourceDiv.appendChild(btn);
+                        sortOrder = sortOrder.filter(i => i !== item);
+                    } else {
+                        if(targetDiv.querySelector('.sort-placeholder')) targetDiv.innerHTML = '';
+                        targetDiv.appendChild(btn);
+                        sortOrder.push(item);
+                    }
+                    if(sortOrder.length === qData.items.length) {
+                         document.getElementById('nextBtn').disabled = false;
+                         document.getElementById('nextBtn').style.opacity = 1;
+                    } else {
+                         document.getElementById('nextBtn').disabled = true;
+                         document.getElementById('nextBtn').style.opacity = 0.5;
+                    }
+                };
+                sourceDiv.appendChild(btn);
+            });
+
+            container.appendChild(sourceDiv); container.appendChild(targetDiv);
+            card.appendChild(container);
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'sort') {
+                if (JSON.stringify(sortOrder) === JSON.stringify(qData.answerOrder)) isCorrect = true;
+                myAns = sortOrder.join(' -> ');
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 完美！你是营养学大师！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！对营养成分很熟悉！";
+            else reward.innerText = "💪 加油！多复习各种检验方法！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="font-size:0.9em; color:#D32F2F">你的回答：${m.my}</span><br><span style="font-size:0.9em; color:#2E7D32">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

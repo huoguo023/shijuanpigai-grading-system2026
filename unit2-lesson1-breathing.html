@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第二单元：感受我们的呼吸 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #E8F5E9; /* 清新呼吸绿 */
+            --card-bg: #FFFFFF;
+            --primary: #66BB6A; /* 活力绿 */
+            --secondary: #42A5F5; /* 氧气蓝 */
+            --accent: #FF7043; /* 警示橙 */
+            --text: #2E7D32;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#C8E6C9 15%, transparent 16%);
+            background-size: 25px 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 4px solid #A5D6A7;
+            overflow: hidden;
+        }
+
+        h1 { color: #2E7D32; margin-top: 0; font-size: 1.6em; margin-bottom: 5px; }
+        .subtitle { color: #43A047; font-size: 1em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #F1F8E9;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid #66BB6A;
+            margin-bottom: 20px;
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #1B5E20; border-bottom: 1px dashed #C8E6C9; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { color: #E65100; font-weight: bold; background: #FFCCBC; padding: 0 4px; border-radius: 3px; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFF;
+            border: 2px dashed #81C784;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+        }
+        .svg-caption { font-size: 0.9em; color: #558B2F; margin-top: 5px; font-style: italic; }
+
+        .ctrl-btn {
+            background: #66BB6A; color: white; border: none; padding: 8px 20px; 
+            border-radius: 20px; margin: 5px; cursor: pointer; font-size: 0.9em;
+            box-shadow: 0 3px 0 #2E7D32; transition: 0.1s;
+        }
+        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2E7D32; }
+        .ctrl-btn.blue { background: #42A5F5; box-shadow: 0 3px 0 #1565C0; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #2E7D32;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #2E7D32; }
+        .btn-next { background: #FF7043; box-shadow: 0 4px 0 #E64A19; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #E0E0E0; border-radius: 5px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #66BB6A; width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #FAFAFA; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #E0E0E0; margin-top: 10px; }
+        .q-tag { background: #C8E6C9; color: #1B5E20; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; }
+        .q-content { font-size: 1.2em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项 */
+        .option-item {
+            background: white; border: 2px solid #A5D6A7; padding: 12px; border-radius: 8px;
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #C8E6C9; border-color: #2E7D32; font-weight: bold; color: #1B5E20; }
+
+        .fill-input { border: none; border-bottom: 3px solid #66BB6A; background: transparent; width: 120px; text-align: center; font-size: 1.2em; color: #2E7D32; border-radius: 0; }
+
+        /* 排序题 (模拟拖拽) */
+        .sort-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sort-item { 
+            background: #E3F2FD; border: 1px solid #2196F3; color: #1565C0;
+            padding: 8px 12px; border-radius: 20px; font-size: 0.9em; cursor: pointer;
+        }
+        .sort-box { 
+            min-height: 50px; border: 2px dashed #BDBDBD; border-radius: 8px; 
+            margin-top: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            background: #FAFAFA; align-items: center;
+        }
+        .sort-placeholder { color: #999; font-size: 0.9em; width: 100%; text-align: center; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; }
+        .score-display { font-size: 4em; color: #FF7043; font-weight: bold; margin: 10px 0; }
+
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 复习区 -->
+    <div id="section-review" class="container section active">
+        <h1>🫁 知识复习</h1>
+        <p class="subtitle">第二单元第一课：感受我们的呼吸</p>
+
+        <!-- 知识点 1: 呼吸器官 -->
+        <div class="knowledge-box">
+            <h3>1. 呼吸器官与过程</h3>
+            <div class="k-point">🌬️ <strong>一次呼吸</strong> = 一呼 + 一吸。</div>
+            <div class="k-point">🛣️ <strong>路径</strong>：鼻腔/口腔 → 气管 → 支气管 → <span class="highlight">肺</span>。</div>
+            <div class="k-point">🔄 <strong>交换</strong>：肺是气体交换的场所（吸入氧气，呼出二氧化碳）。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="150" viewBox="0 0 300 150">
+                    <!-- 人体轮廓简图 -->
+                    <path d="M130,20 Q150,20 170,20 Q180,40 170,60 L170,140 L130,140 L130,60 Q120,40 130,20" fill="none" stroke="#81C784" stroke-width="2"/>
+                    <!-- 呼吸道 -->
+                    <path d="M145,40 L150,40 L150,70" fill="none" stroke="#FF7043" stroke-width="4" stroke-linecap="round"/>
+                    <text x="110" y="45" font-size="10" fill="#E64A19">鼻/口</text>
+                    <text x="110" y="65" font-size="10" fill="#E64A19">气管</text>
+                    <!-- 肺 -->
+                    <path d="M150,70 Q130,90 130,110 Q130,130 150,120" fill="#FFCCBC" stroke="#E64A19"/>
+                    <path d="M150,70 Q170,90 170,110 Q170,130 150,120" fill="#FFCCBC" stroke="#E64A19"/>
+                    <text x="180" y="100" font-size="10" fill="#E64A19">肺</text>
+                    
+                    <!-- 气体颗粒动画 -->
+                    <circle id="air-particle" cx="145" cy="40" r="4" fill="#42A5F5"/>
+                </svg>
+                <button class="ctrl-btn blue" onclick="animRespiration()">演示呼吸路径</button>
+            </div>
+        </div>
+
+        <!-- 知识点 2 & 5: 膈肌与模拟实验 -->
+        <div class="knowledge-box">
+            <h3>2. 膈肌与呼吸运动 (模拟实验)</h3>
+            <div class="k-point">🎈 <strong>吸气</strong>：膈肌<span class="highlight">下压</span> → 肺部扩张 (气球变大)。</div>
+            <div class="k-point">💨 <strong>呼气</strong>：膈肌<span class="highlight">上提</span> → 肺部收缩 (气球变小)。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="160" viewBox="0 0 200 160">
+                    <!-- 瓶子 -->
+                    <path d="M60,140 L60,40 Q100,10 140,40 L140,140" fill="none" stroke="#555" stroke-width="2"/>
+                    <text x="150" y="80" font-size="10">胸腔(瓶子)</text>
+                    <!-- 气管 -->
+                    <line x1="100" y1="20" x2="100" y2="60" stroke="#555" stroke-width="4"/>
+                    <text x="110" y="30" font-size="10">气管</text>
+                    <!-- 肺(气球) -->
+                    <path id="lung-balloon" d="M100,60 Q70,100 100,120 Q130,100 100,60" fill="#EF5350"/>
+                    <text x="150" y="100" font-size="10">肺(气球)</text>
+                    <!-- 膈肌(橡胶膜) -->
+                    <path id="diaphragm" d="M60,140 Q100,120 140,140" fill="none" stroke="#FFA726" stroke-width="4"/>
+                    <text x="150" y="150" font-size="10" fill="#E65100">膈肌(橡胶膜)</text>
+                    <!-- 手 -->
+                    <path id="hand" d="M90,150 L110,150 L100,160 Z" fill="#8D6E63" transform="translate(0, -10)"/>
+                </svg>
+                <br>
+                <button class="ctrl-btn" onclick="animSim('inhale')">👇 拉下 (吸气)</button>
+                <button class="ctrl-btn" onclick="animSim('exhale')">👆 顶上 (呼气)</button>
+            </div>
+        </div>
+
+        <!-- 知识点 3 & 4: 胸腹变化 -->
+        <div class="knowledge-box">
+            <h3>3. 身体的变化</h3>
+            <div class="k-point">📥 <strong>吸气</strong>：含有氧气的空气进入。胸腔<span class="highlight">扩张</span>，腹部收缩。</div>
+            <div class="k-point">📤 <strong>呼气</strong>：废气排出。胸腔<span class="highlight">收缩</span>，腹部放松。</div>
+            <div class="k-point">🌱 <strong>气体作用</strong>：氧气维持生命，二氧化碳是植物养料。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="120" viewBox="0 0 300 120">
+                    <!-- 身体轮廓 -->
+                    <path id="body-outline" d="M120,20 L120,100" stroke="#333" stroke-width="2" fill="none"/>
+                    <!-- 胸部 -->
+                    <path id="chest" d="M120,30 Q150,30 150,60 Q150,90 120,90" fill="#E1F5FE" stroke="#0288D1"/>
+                    <!-- 箭头 -->
+                    <path id="chest-arrow" d="M160,60 L180,60" stroke="#FF7043" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <text x="200" y="50" font-size="12" fill="#333">状态：<tspan id="status-text" font-weight="bold">平静</tspan></text>
+                    <text x="200" y="70" font-size="10" fill="#555">胸腔变化</text>
+
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#FF7043" />
+                        </marker>
+                    </defs>
+                </svg>
+                <button class="ctrl-btn blue" onclick="animBody('in')">吸气演示</button>
+                <button class="ctrl-btn" onclick="animBody('out')">呼气演示</button>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入35题闯关塔！🚀</button>
+    </div>
+
+    <!-- 2. 闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="text-align:right; font-size:0.9em; color:#2E7D32;">题目：<span id="q-index">1</span> / 35</div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题 ▶</button>
+    </div>
+
+    <!-- 3. 结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- SVG 动画逻辑 ---
+        
+        function animRespiration() {
+            const particle = document.getElementById('air-particle');
+            // 简单的路径动画：鼻->气管->支气管->肺
+            // Reset
+            while(particle.firstChild) particle.removeChild(particle.firstChild);
+            
+            const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+            anim.setAttribute("attributeName", "cy");
+            anim.setAttribute("values", "40; 70; 100; 70; 40"); // 进 -> 肺 -> 出
+            anim.setAttribute("dur", "3s");
+            anim.setAttribute("repeatCount", "1");
+            particle.appendChild(anim);
+            anim.beginElement();
+        }
+
+        function animSim(type) {
+            const diaphragm = document.getElementById('diaphragm');
+            const balloon = document.getElementById('lung-balloon');
+            const hand = document.getElementById('hand');
+
+            if (type === 'inhale') {
+                // 拉下：膈肌下移变平，气球变大
+                diaphragm.setAttribute("d", "M60,140 Q100,155 140,140"); // 向下弯曲
+                balloon.setAttribute("d", "M100,60 Q60,110 100,135 Q140,110 100,60"); // 变大
+                hand.setAttribute("transform", "translate(0, 10)");
+            } else {
+                // 顶上：膈肌上拱，气球变小
+                diaphragm.setAttribute("d", "M60,140 Q100,110 140,140"); // 向上拱起
+                balloon.setAttribute("d", "M100,60 Q80,90 100,100 Q120,90 100,60"); // 瘪掉
+                hand.setAttribute("transform", "translate(0, -15)");
+            }
+        }
+
+        function animBody(type) {
+            const chest = document.getElementById('chest');
+            const text = document.getElementById('status-text');
+            const arrow = document.getElementById('chest-arrow');
+
+            // 简单模拟胸腔大小变化
+            if (type === 'in') {
+                // 吸气：胸腔扩张
+                chest.setAttribute("d", "M120,30 Q170,30 170,60 Q170,90 120,90");
+                text.textContent = "吸气 (扩张)";
+                text.setAttribute("fill", "#1E88E5");
+                arrow.setAttribute("d", "M140,60 L170,60"); // 向外箭头
+            } else {
+                // 呼气：胸腔收缩
+                chest.setAttribute("d", "M120,30 Q140,30 140,60 Q140,90 120,90");
+                text.textContent = "呼气 (收缩)";
+                text.setAttribute("fill", "#43A047");
+                arrow.setAttribute("d", "M170,60 L140,60"); // 向内箭头
+            }
+        }
+
+        // --- 35道题库 ---
+        const quizData = [
+            // 1. 基础概念 (5题)
+            { type: 'mcq', q: '人的“一呼一吸”算____次呼吸。', opts: ['1', '2', '0.5'], a: 0, exp: '一呼一吸算一次。' },
+            { type: 'sort', q: '请按空气进入体内的顺序排列器官：', items: ['鼻腔', '肺', '气管'], answerOrder: ['鼻腔', '气管', '肺'], exp: '鼻腔->气管->支气管->肺。' },
+            { type: 'mcq', q: '进行气体交换的“中转站”是？', opts: ['鼻腔', '气管', '肺'], a: 2, exp: '肺是气体交换场所。' },
+            { type: 'fill', q: '无论白天还是夜晚，我们都在____，这是生命的重要活动。', a: ['呼吸'], exp: '呼吸时刻进行。' },
+            { type: 'mcq', q: '下列哪个器官不参与呼吸？', opts: ['胃', '支气管', '鼻腔'], a: 0, exp: '胃是消化器官。' },
+
+            // 2. 呼吸运动机制 (10题)
+            { type: 'mcq', q: '吸气时，胸腔会？', opts: ['收缩', '扩张', '不变'], a: 1, exp: '吸气胸腔扩张。' },
+            { type: 'mcq', q: '吸气时，腹部会？', opts: ['收缩', '放松', '扩张'], a: 0, exp: '吸气时腹部收缩（配合胸腔扩张）。' },
+            { type: 'mcq', q: '呼气时，胸腔会？', opts: ['收缩', '扩张', '不变'], a: 0, exp: '呼气胸腔收缩。' },
+            { type: 'mcq', q: '呼气时，腹部会？', opts: ['收缩', '放松', '不变'], a: 1, exp: '呼气腹部放松。' },
+            { type: 'sort', q: '请排列吸气的过程：', items: ['空气进入', '胸腔扩张', '膈肌下压'], answerOrder: ['膈肌下压', '胸腔扩张', '空气进入'], exp: '肌肉运动导致体积变化，气压改变，空气进入。' },
+            { type: 'mcq', q: '我们呼吸时，气体进出的动力主要来自？', opts: ['肺部自己动', '呼吸肌肉(膈肌等)的运动', '嘴巴张合'], a: 1, exp: '膈肌运动带动肺。' },
+            { type: 'fill', q: '吸气是含有____的空气进入肺的过程。', a: ['氧气'], exp: '吸入氧气。' },
+            { type: 'fill', q: '呼气是含有____等废气排出体外的过程。', a: ['二氧化碳'], exp: '呼出二氧化碳。' },
+            { type: 'mcq', q: '做深呼吸时，我们的胸部起伏会？', opts: ['变小', '变大', '不变'], a: 1, exp: '深呼吸幅度大。' },
+            { type: 'mcq', q: '运动后，呼吸次数会？', opts: ['增加', '减少', '不变'], a: 0, exp: '运动需氧量大，呼吸加快。' },
+
+            // 3. 膈肌与模拟实验 (10题)
+            { type: 'mcq', q: '在呼吸模拟实验中，塑料瓶模拟的是？', opts: ['肺', '胸腔', '气管'], a: 1, exp: '瓶子模拟胸腔。' },
+            { type: 'mcq', q: '在呼吸模拟实验中，气球模拟的是？', opts: ['肺', '膈肌', '胃'], a: 0, exp: '气球模拟肺。' },
+            { type: 'mcq', q: '在呼吸模拟实验中，底部的橡胶膜模拟的是？', opts: ['腹部', '膈肌', '皮肤'], a: 1, exp: '橡胶膜模拟膈肌。' },
+            { type: 'mcq', q: '向下拉动橡胶膜，气球会？', opts: ['变大(吸气)', '变小(呼气)'], a: 0, exp: '下拉->空间变大->吸气。' },
+            { type: 'mcq', q: '向上顶起橡胶膜，气球会？', opts: ['变大(吸气)', '变小(呼气)'], a: 1, exp: '上顶->空间变小->呼气。' },
+            { type: 'fill', q: '膈肌是位于胸腔和____之间的肌肉。', a: ['腹腔'], exp: '分隔胸腹。' },
+            { type: 'mcq', q: '膈肌下压时，身体处于____状态。', opts: ['吸气', '呼气'], a: 0, exp: '下压->吸气。' },
+            { type: 'mcq', q: '膈肌上提时，身体处于____状态。', opts: ['吸气', '呼气'], a: 1, exp: '上提->呼气。' },
+            { type: 'sort', q: '请连接模拟装置与人体器官：', items: ['吸管-气管', '气球-肺', '瓶子-胸腔'], answerOrder: ['吸管-气管', '气球-肺', '瓶子-胸腔'], exp: '装置对应关系。' },
+            { type: 'mcq', q: '如果模拟装置的瓶子破了个洞，实验？', opts: ['能成功', '不能成功'], a: 1, exp: '胸腔需要密封才能改变气压。' },
+
+            // 4. 气体知识 (5题)
+            { type: 'mcq', q: '____是维持生命所必需的物质。', opts: ['氮气', '氧气', '二氧化碳'], a: 1, exp: '氧气维持生命。' },
+            { type: 'mcq', q: '____是植物制造养料所必需的原料。', opts: ['氧气', '二氧化碳', '水蒸气'], a: 1, exp: '植物光合作用需要二氧化碳。' },
+            { type: 'mcq', q: '呼出的气体中，氧气含量比吸入时？', opts: ['多', '少', '一样'], a: 1, exp: '氧气被身体消耗了。' },
+            { type: 'mcq', q: '呼出的气体中，二氧化碳含量比吸入时？', opts: ['多', '少', '一样'], a: 0, exp: '身体产生了二氧化碳。' },
+            { type: 'fill', q: '人呼吸时，吸入氧气，呼出____。', a: ['二氧化碳'], exp: '基本气体交换。' },
+
+            // 5. 综合应用 (5题)
+            { type: 'mcq', q: '下列习惯有利于呼吸器官健康的是？', opts: ['吸烟', '经常开窗通风', '蒙头睡觉'], a: 1, exp: '通风保持空气新鲜。' },
+            { type: 'mcq', q: '为什么睡觉时也要呼吸？', opts: ['习惯了', '身体各器官还需要氧气工作', '因为在做梦'], a: 1, exp: '生命活动不停止，需氧量就在。' },
+            { type: 'sort', q: '空气进入肺的正确路径：', items: ['气管', '支气管', '肺'], answerOrder: ['气管', '支气管', '肺'], exp: '解剖结构顺序。' },
+            { type: 'mcq', q: '当我们潜水时，需要携带？', opts: ['氧气瓶', '灭火器', '风扇'], a: 0, exp: '水下缺氧。' },
+            { type: 'mcq', q: '植物和人类在气体交换上是？', opts: ['互补的', '冲突的'], a: 0, exp: '人呼出二氧化碳给植物，植物产氧气给人。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let sortOrder = []; // For sort questions
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(400, now); gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+            selectedOption = null;
+            sortOrder = [];
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let tagText = qData.type === 'mcq' ? '选择题' : (qData.type === 'fill' ? '填空题' : '排序题');
+            card.innerHTML = `<div class="q-content"><span class="q-tag">${tagText}</span>${qData.q}</div>`;
+
+            if (qData.type === 'mcq') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                // 添加失焦即时反馈
+                input.onblur = () => {
+                    if (selectedOption) {
+                        const isCorrect = qData.a.some(ans => selectedOption.includes(ans));
+                        setTimeout(() => {
+                            if (isCorrect) {
+                                InstantFeedback.onCorrect(input);
+                            } else {
+                                InstantFeedback.onWrong(input, qData.exp);
+                            }
+                        }, 200);
+                    }
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'sort') {
+                renderSort(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            playSound('click');
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected', 'correct-feedback', 'wrong-feedback'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            const isCorrect = (idx === qData.a);
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderSort(card, qData) {
+            const container = document.createElement('div');
+            const sourceDiv = document.createElement('div'); sourceDiv.className = 'sort-container';
+            const targetDiv = document.createElement('div'); targetDiv.className = 'sort-box';
+            targetDiv.innerHTML = '<div class="sort-placeholder">点击选项按顺序排列</div>';
+
+            // 打乱选项
+            let items = [...qData.items].sort(()=>Math.random()-0.5);
+            
+            items.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'sort-item';
+                btn.innerText = item;
+                btn.onclick = () => {
+                    playSound('click');
+                    // 移动到目标区域
+                    if(targetDiv.contains(btn)) {
+                        sourceDiv.appendChild(btn); // 移回
+                        sortOrder = sortOrder.filter(i => i !== item);
+                    } else {
+                        if(targetDiv.querySelector('.sort-placeholder')) targetDiv.innerHTML = '';
+                        targetDiv.appendChild(btn); // 移入
+                        sortOrder.push(item);
+                    }
+                    // 检查是否完成
+                    if(sortOrder.length === qData.items.length) {
+                         document.getElementById('nextBtn').disabled = false;
+                         document.getElementById('nextBtn').style.opacity = 1;
+                    } else {
+                         document.getElementById('nextBtn').disabled = true;
+                         document.getElementById('nextBtn').style.opacity = 0.5;
+                    }
+                };
+                sourceDiv.appendChild(btn);
+            });
+
+            container.appendChild(sourceDiv);
+            container.appendChild(targetDiv);
+            card.appendChild(container);
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'sort') {
+                if (JSON.stringify(sortOrder) === JSON.stringify(qData.answerOrder)) isCorrect = true;
+                myAns = sortOrder.join(' -> ');
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 完美！你是呼吸小专家！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！身体知识掌握得不错！";
+            else reward.innerText = "💪 加油！再复习一下呼吸的秘密！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="font-size:0.9em; color:#D32F2F">你的回答：${m.my}</span><br><span style="font-size:0.9em; color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

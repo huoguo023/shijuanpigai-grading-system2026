@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第三单元第一课：让小车运动起来 - 科学大闯关</title>
+    <style>
+        :root {
+            /* 配色方案：物理蓝 + 活力橙 */
+            --bg-color: #E3F2FD; /* 科技蓝背景 */
+            --card-bg: #FFFFFF;
+            --primary: #1976D2; /* 主色调 */
+            --secondary: #FF9800; /* 强调色（力/摩擦） */
+            --accent: #4CAF50; /* 成功绿 */
+            --text: #37474F;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .5) 25%, rgba(255, 255, 255, .5) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .5) 75%, rgba(255, 255, 255, .5) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .5) 25%, rgba(255, 255, 255, .5) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .5) 75%, rgba(255, 255, 255, .5) 76%, transparent 77%, transparent);
+            background-size: 30px 30px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 3px solid #90CAF9;
+            overflow: hidden;
+        }
+
+        h1 { color: #0D47A1; margin-top: 0; font-size: 1.5em; }
+        .subtitle { color: #E65100; font-size: 0.9em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #E1F5FE;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid var(--primary);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #0277BD; border-bottom: 1px dashed #81D4FA; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { background: #FFF9C4; padding: 0 4px; border-radius: 3px; font-weight: bold; color: #E65100; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FAFAFA;
+            border: 2px dashed #B0BEC5;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+            height: auto;
+            overflow: hidden;
+        }
+        .svg-caption { font-size: 0.85em; color: #546E7A; margin-top: 5px; font-style: italic; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #0D47A1;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0D47A1; }
+        .btn-next { background: var(--secondary); box-shadow: 0 4px 0 #E65100; }
+        
+        .btn-small { width: auto; padding: 8px 20px; font-size: 0.9em; margin: 5px; display: inline-block; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #ECEFF1; border-radius: 5px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #fff; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #90CAF9; margin-top: 10px; }
+        .q-tag { display:inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; color:white;}
+        .tag-choice { background: #2196F3; }
+        .tag-fill { background: #AB47BC; }
+        .tag-sort { background: #FF7043; }
+        .tag-exp { background: #66BB6A; }
+        
+        .q-content { font-size: 1.15em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项样式 */
+        .option-item {
+            background: #FAFAFA; border: 2px solid #E0E0E0; padding: 12px; border-radius: 8px;
+            margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #E3F2FD; border-color: #2196F3; font-weight: bold; color: #1565C0; }
+
+        .fill-input { border: none; border-bottom: 2px solid #2196F3; background: transparent; width: 100px; text-align: center; font-size: 1.1em; color: #1565C0; border-radius: 0; outline: none; }
+
+        /* 排序题容器 */
+        .sort-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sort-item { 
+            background: #BBDEFB; border: 1px solid #1976D2; color: #0D47A1;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.9em; cursor: pointer;
+        }
+        .sort-box { 
+            min-height: 50px; border: 2px dashed #90A4AE; border-radius: 8px; 
+            margin-top: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            background: #ECEFF1; align-items: center; justify-content: center;
+        }
+        .sort-placeholder { color: #999; font-size: 0.8em; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; font-size: 0.95em; }
+        .score-display { font-size: 3.5em; color: var(--primary); font-weight: bold; margin: 10px 0; }
+        
+        /* 模拟实验样式 */
+        .sim-car { transition: left 0.5s linear; }
+
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 第一块：复习巩固 -->
+    <div id="section-review" class="container section active">
+        <h1>🚗 让小车运动起来</h1>
+        <p class="subtitle">复习巩固 & 实验模拟</p>
+
+        <!-- 知识点 1: 重力 -->
+        <div class="knowledge-box">
+            <h3>1. 认识重力 (Gravity)</h3>
+            <div class="k-point">🍎 <strong>定义</strong>：由于<span class="highlight">地球的吸引</span>而使物体受到的力叫重力。</div>
+            <div class="k-point">⬇️ <strong>方向</strong>：总是<span class="highlight">竖直向下</span>的。</div>
+            <div class="k-point">💡 <strong>生活现象</strong>：水往低处流、苹果落地、抛出的球最终落地。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="150" viewBox="0 0 300 150" style="background:linear-gradient(to bottom, #E3F2FD 0%, #F5F5F5 100%); border-radius:10px;">
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#F44336" />
+                        </marker>
+                        <linearGradient id="treeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#81C784"/>
+                            <stop offset="100%" style="stop-color:#4CAF50"/>
+                        </linearGradient>
+                        <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#6D4C41"/>
+                            <stop offset="50%" style="stop-color:#8D6E63"/>
+                            <stop offset="100%" style="stop-color:#6D4C41"/>
+                        </linearGradient>
+                        <radialGradient id="appleGrad">
+                            <stop offset="0%" style="stop-color:#FF5252"/>
+                            <stop offset="70%" style="stop-color:#F44336"/>
+                            <stop offset="100%" style="stop-color:#C62828"/>
+                        </radialGradient>
+                        <linearGradient id="bucketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#42A5F5"/>
+                            <stop offset="100%" style="stop-color:#1976D2"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- 地面 -->
+                    <rect x="0" y="120" width="300" height="30" fill="#A1887F" opacity="0.3"/>
+                    <line x1="20" y1="120" x2="280" y2="120" stroke="#795548" stroke-width="3"/>
+                    
+                    <!-- 树 -->
+                    <ellipse cx="50" cy="50" rx="25" ry="30" fill="url(#treeGrad)"/>
+                    <ellipse cx="40" cy="55" rx="18" ry="22" fill="url(#treeGrad)" opacity="0.8"/>
+                    <ellipse cx="60" cy="55" rx="18" ry="22" fill="url(#treeGrad)" opacity="0.8"/>
+                    <rect x="45" y="80" width="10" height="40" fill="url(#trunkGrad)" rx="2"/>
+                    <line x1="47" y1="85" x2="47" y2="115" stroke="#5D4037" stroke-width="1" opacity="0.5"/>
+                    
+                    <!-- 掉落的苹果 -->
+                    <circle cx="65" cy="50" r="7" fill="url(#appleGrad)">
+                        <animate attributeName="cy" values="50;114;114" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <ellipse cx="66" cy="49" rx="2" ry="3" fill="#FFEBEE" opacity="0.6">
+                        <animate attributeName="cy" values="49;113;113" dur="2s" repeatCount="indefinite" />
+                    </ellipse>
+                    <path d="M65,43 Q65,38 67,36" stroke="#4CAF50" stroke-width="1.5" fill="none">
+                        <animate attributeName="d" values="M65,43 Q65,38 67,36;M65,107 Q65,102 67,100;M65,107 Q65,102 67,100" dur="2s" repeatCount="indefinite" />
+                    </path>
+                    
+                    <!-- 重力箭头 -->
+                    <line x1="65" y1="58" x2="65" y2="85" stroke="#F44336" stroke-width="3" marker-end="url(#arrow)" opacity="0.9">
+                        <animate attributeName="y1" values="58;122;122" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="y2" values="85;135;135" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0;0" dur="2s" repeatCount="indefinite" />
+                    </line>
+                    <text x="75" y="75" font-size="13" fill="#D32F2F" font-weight="bold">重力</text>
+                    <text x="75" y="90" font-size="11" fill="#666">竖直向下</text>
+                    
+                    <!-- 提水桶场景 -->
+                    <g transform="translate(200, 0)">
+                        <!-- 人的手臂 -->
+                        <path d="M30,45 Q25,55 25,65" stroke="#FFB74D" stroke-width="8" fill="none" stroke-linecap="round"/>
+                        <circle cx="30" cy="40" r="6" fill="#FFB74D"/>
+                        
+                        <!-- 水桶 -->
+                        <path d="M15,80 L15,105 Q15,108 18,108 L32,108 Q35,108 35,105 L35,80 Z" fill="url(#bucketGrad)" stroke="#0D47A1" stroke-width="1.5"/>
+                        <ellipse cx="25" cy="80" rx="10" ry="3" fill="#64B5F6"/>
+                        <path d="M15,80 Q25,73 35,80" stroke="#0D47A1" stroke-width="2" fill="none"/>
+                        
+                        <!-- 水波纹 -->
+                        <ellipse cx="25" cy="95" rx="7" ry="2" fill="#90CAF9" opacity="0.6">
+                            <animate attributeName="ry" values="2;2.5;2" dur="1.5s" repeatCount="indefinite"/>
+                        </ellipse>
+                        
+                        <!-- 向下的重力箭头 -->
+                        <line x1="25" y1="110" x2="25" y2="125" stroke="#F44336" stroke-width="3" marker-end="url(#arrow)"/>
+                        <text x="35" y="120" font-size="11" fill="#D32F2F" font-weight="bold">重力</text>
+                        
+                        <!-- 向上的拉力箭头 -->
+                        <line x1="25" y1="78" x2="25" y2="63" stroke="#4CAF50" stroke-width="3">
+                            <path d="M0,6 L0,0 L9,3 z" fill="#4CAF50"/>
+                        </line>
+                        <polygon points="25,63 22,69 28,69" fill="#4CAF50"/>
+                        <text x="-25" y="55" font-size="11" fill="#2E7D32" font-weight="bold">拉力(克服重力)</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 2: 实验 -->
+        <div class="knowledge-box">
+            <h3>2. 实验：拉力大小与小车速度</h3>
+            <div class="k-point">🧪 <strong>动力来源</strong>：<span class="highlight">垫圈的重力</span>转化为绳子的拉力。</div>
+            <div class="k-point">⚖️ <strong>关系</strong>：垫圈越<span class="highlight">多</span> → 拉力越<span class="highlight">大</span> → 速度越<span class="highlight">快</span>。</div>
+            <div class="k-point">🛑 <strong>启动</strong>：拉力必须大到足以克服<span class="highlight">摩擦力</span>，小车才会动。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="140" viewBox="0 0 320 140" style="background:linear-gradient(to bottom, #FFF8E1 0%, #F5F5F5 100%); border-radius:10px;">
+                    <defs>
+                        <linearGradient id="tableGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#D7CCC8"/>
+                            <stop offset="100%" style="stop-color:#A1887F"/>
+                        </linearGradient>
+                        <linearGradient id="carBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FFB74D"/>
+                            <stop offset="100%" style="stop-color:#FF9800"/>
+                        </linearGradient>
+                        <radialGradient id="wheelGrad">
+                            <stop offset="0%" style="stop-color:#616161"/>
+                            <stop offset="60%" style="stop-color:#424242"/>
+                            <stop offset="100%" style="stop-color:#212121"/>
+                        </radialGradient>
+                        <linearGradient id="pulleyGrad">
+                            <stop offset="0%" style="stop-color:#757575"/>
+                            <stop offset="50%" style="stop-color:#424242"/>
+                            <stop offset="100%" style="stop-color:#757575"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- 桌面 -->
+                    <rect x="10" y="75" width="250" height="8" fill="url(#tableGrad)" rx="2"/>
+                    <line x1="10" y1="79" x2="260" y2="79" stroke="#8D6E63" stroke-width="1" opacity="0.5"/>
+                    
+                    <!-- 定滑轮 -->
+                    <circle cx="260" cy="79" r="8" fill="url(#pulleyGrad)" stroke="#212121" stroke-width="1.5"/>
+                    <circle cx="260" cy="79" r="4" fill="#333"/>
+                    <circle cx="260" cy="79" r="2" fill="#666"/>
+                    
+                    <!-- 小车组 -->
+                    <g id="sim-car-group" transform="translate(30, 0)">
+                        <!-- 车身 -->
+                        <rect x="0" y="50" width="55" height="22" fill="url(#carBodyGrad)" rx="4" stroke="#E65100" stroke-width="1.5"/>
+                        <rect x="5" y="54" width="45" height="10" fill="#FFF3E0" opacity="0.4" rx="2"/>
+                        
+                        <!-- 车轮 -->
+                        <circle cx="12" cy="72" r="6" fill="url(#wheelGrad)" stroke="#212121" stroke-width="1"/>
+                        <circle cx="12" cy="72" r="3" fill="#757575"/>
+                        <circle cx="43" cy="72" r="6" fill="url(#wheelGrad)" stroke="#212121" stroke-width="1"/>
+                        <circle cx="43" cy="72" r="3" fill="#757575"/>
+                        
+                        <!-- 车轮花纹 -->
+                        <line x1="12" y1="69" x2="12" y2="75" stroke="#424242" stroke-width="0.5"/>
+                        <line x1="9" y1="72" x2="15" y2="72" stroke="#424242" stroke-width="0.5"/>
+                        <line x1="43" y1="69" x2="43" y2="75" stroke="#424242" stroke-width="0.5"/>
+                        <line x1="40" y1="72" x2="46" y2="72" stroke="#424242" stroke-width="0.5"/>
+                        
+                        <text x="15" y="45" font-size="11" fill="#E65100" font-weight="bold">小车</text>
+                    </g>
+                    
+                    <!-- 绳子 -->
+                    <line id="sim-rope-h" x1="85" y1="61" x2="260" y2="61" stroke="#8D6E63" stroke-width="2" opacity="0.8"/>
+                    <line id="sim-rope-v" x1="260" y1="61" x2="260" y2="95" stroke="#8D6E63" stroke-width="2" opacity="0.8"/>
+                    
+                    <!-- 垫圈篮 -->
+                    <g id="sim-basket" transform="translate(255, 95)">
+                        <path d="M0,0 L-5,8 L5,8 Z" fill="#EF5350" stroke="#C62828" stroke-width="1"/>
+                        <rect x="-4" y="8" width="8" height="10" fill="#F44336" stroke="#C62828" stroke-width="1"/>
+                        <circle cx="0" cy="13" r="2" fill="#FFCDD2"/>
+                    </g>
+                    
+                    <!-- 标注 -->
+                    <text x="270" y="105" font-size="10" fill="#D32F2F" font-weight="bold">垫圈</text>
+                    <text x="15" y="100" font-size="9" fill="#666">起点</text>
+                    <text x="230" y="100" font-size="9" fill="#666">终点</text>
+                    
+                    <!-- 距离标注线 -->
+                    <line x1="30" y1="90" x2="240" y2="90" stroke="#2196F3" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+                    <text x="120" y="105" font-size="10" fill="#1976D2">测量距离</text>
+                </svg>
+                <div style="margin-top:10px;">
+                    <button class="btn btn-small" onclick="runSimulation(1)">挂1个垫圈</button>
+                    <button class="btn btn-small" onclick="runSimulation(5)">挂5个垫圈</button>
+                </div>
+                <div id="sim-msg" class="svg-caption" style="color:#E65100; font-weight:bold; height:20px;">点击按钮开始实验</div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入闯关挑战！🚀</button>
+    </div>
+
+    <!-- 第二块：闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.9em; color:#1565C0;">
+            <span>总分：100分</span>
+            <span>题目：<span id="q-index">1</span> / 15</span>
+        </div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">提交 / 下一题</button>
+    </div>
+
+    <!-- 第三块：结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 题库 (15题，覆盖全课重点) ---
+        const quizData = [
+            // 基础概念
+            { type: 'mcq', q: '树上的苹果成熟后会掉下来，是因为受到了（ ）的作用。', opts: ['弹力', '重力', '摩擦力'], a: 1, exp: '地球引力产生的力叫重力，方向竖直向下。' },
+            { type: 'mcq', q: '重力的方向总是（ ）的。', opts: ['竖直向下', '向四面八方', '垂直向上'], a: 0, exp: '重力指向地心，即竖直向下。' },
+            { type: 'fill', q: '我们提水桶时感到手臂被向下拉，这是因为水桶受到____的作用。', a: ['重力'], exp: '水桶受重力，通过提手对人产生拉力。' },
+            
+            // 实验原理
+            { type: 'mcq', q: '在小车实验中，小车运动的动力来自（ ）。', opts: ['车轮滚动', '绳子长度', '垫圈的重力'], a: 2, exp: '垫圈受重力下落，拉动小车。' },
+            { type: 'mcq', q: '垫圈的数量越多，小车受到的拉力就越（ ）。', opts: ['大', '小', '不变'], a: 0, exp: '垫圈越多，总重力越大。' },
+            { type: 'sort', q: '请按实验步骤排序：', items: ['挂垫圈', '确定起点终点', '记录时间'], answerOrder: ['确定起点终点', '挂垫圈', '记录时间'], exp: '控制变量法：先定距离，再操作，后记录。' },
+            
+            // 实验现象分析
+            { type: 'mcq', q: '如果小车没有运动起来，原因是（ ）。', opts: ['绳子太长', '拉力小于摩擦力', '垫圈太重'], a: 1, exp: '拉力必须克服摩擦力小车才会动。' },
+            { type: 'mcq', q: '挂3个垫圈时小车慢，挂6个垫圈时小车（ ）。', opts: ['变慢', '变快', '一样'], a: 1, exp: '拉力越大，运动速度越快。' },
+            { type: 'fill', q: '实验时，我们要测量小车运动的____来判断快慢。', a: ['时间'], exp: '相同距离，时间越短速度越快。' },
+            
+            // 综合应用
+            { type: 'mcq', q: '足球在草地上滚得越来越慢，是因为受到了（ ）。', opts: ['重力', '拉力', '摩擦力'], a: 2, exp: '摩擦力阻碍物体运动。' },
+            { type: 'mcq', q: '下列物体中，哪个没有受到重力？', opts: ['飞行的飞机', '飘落的树叶', '太空中漂浮的宇航员'], a: 2, exp: '完全失重状态（虽受引力但表现为漂浮），小学阶段常以此区分。' },
+            { type: 'mcq', q: '每次实验我们建议至少测量（ ）次以减小误差。', opts: ['1', '3', '10'], a: 1, exp: '科学实验通常重复3次求平均值。' },
+            
+            // 图表分析
+            { type: 'exp', q: '【数据分析】<br>2个垫圈：5秒<br>4个垫圈：3秒<br>8个垫圈：1秒<br>说明了什么？', opts: ['垫圈越少越快', '拉力越大，速度越快', '没关系'], a: 1, exp: '时间变短说明速度变快。' },
+            { type: 'mcq', q: '小车运动的终点（ ）。', opts: ['可以随意变', '必须保持一致', '越远越好'], a: 1, exp: '对比实验要控制距离不变。' },
+            { type: 'fill', q: '力的单位是____（填汉字）。', a: ['牛顿','牛'], exp: '纪念牛顿，单位为牛顿(N)。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScore = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let sortOrder = []; 
+
+        // 模拟实验动画逻辑
+        function runSimulation(count) {
+            const car = document.getElementById('sim-car-group');
+            const ropeH = document.getElementById('sim-rope-h');
+            const ropeV = document.getElementById('sim-rope-v');
+            const basket = document.getElementById('sim-basket');
+            const msg = document.getElementById('sim-msg');
+
+            // 重置
+            car.setAttribute('transform', 'translate(30, 0)');
+            ropeH.setAttribute('x1', 85);
+            ropeV.setAttribute('y2', 95);
+            basket.setAttribute('transform', 'translate(255, 95)');
+            
+            setTimeout(() => {
+                if(count === 1) {
+                    msg.innerText = "❌ 拉力太小，摩擦力太大，小车不动！";
+                    msg.style.color = "#D32F2F";
+                } else {
+                    msg.innerText = count === 5 ? "⚡ 拉力大，速度快！小车快速前进！" : "✅ 开始运动";
+                    msg.style.color = "#2E7D32";
+                    let duration = count === 5 ? 1.2 : 2.5; 
+                    let distance = count === 5 ? 180 : 120;
+                    
+                    // 使用CSS transition实现平滑动画
+                    car.style.transition = `transform ${duration}s ease-out`;
+                    car.style.transform = `translate(${30 + distance}px, 0)`;
+                    
+                    // 同步更新绳子
+                    let startTime = Date.now();
+                    let animInterval = setInterval(() => {
+                        let elapsed = (Date.now() - startTime) / 1000;
+                        let progress = Math.min(elapsed / duration, 1);
+                        let currentX = 85 + (distance * progress);
+                        
+                        ropeH.setAttribute('x1', currentX);
+                        
+                        if(progress >= 1) {
+                            clearInterval(animInterval);
+                            setTimeout(() => {
+                                msg.innerText = "实验完成！可以重新测试";
+                                msg.style.color = "#1976D2";
+                            }, 500);
+                        }
+                    }, 16);
+                }
+            }, 100);
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.6; nextBtn.innerText = "提交答案";
+            selectedOption = null;
+            sortOrder = [];
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let typeLabel = '';
+            let typeClass = '';
+            if(qData.type==='mcq') { typeLabel='选择题'; typeClass='tag-choice'; }
+            else if(qData.type==='fill') { typeLabel='填空题'; typeClass='tag-fill'; }
+            else if(qData.type==='sort') { typeLabel='排序题'; typeClass='tag-sort'; }
+            else { typeLabel='实验分析'; typeClass='tag-exp'; }
+
+            card.innerHTML = `<div class="q-content"><span class="q-tag ${typeClass}">${typeLabel}</span>${qData.q}</div>`;
+
+            // 渲染选项
+            if (qData.type === 'mcq' || qData.type === 'exp') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.6;
+                };
+                // 添加失焦即时反馈
+                input.onblur = () => {
+                    if (selectedOption) {
+                        const isCorrect = qData.a.some(ans => selectedOption.includes(ans));
+                        setTimeout(() => {
+                            if (isCorrect) {
+                                InstantFeedback.onCorrect(input);
+                            } else {
+                                InstantFeedback.onWrong(input, qData.exp);
+                            }
+                        }, 200);
+                    }
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'sort') {
+                renderSort(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected', 'correct-feedback', 'wrong-feedback'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            const isCorrect = (idx === qData.a);
+            
+            // 延迟反馈，让用户看到选中效果
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderSort(card, qData) {
+            const container = document.createElement('div');
+            const sourceDiv = document.createElement('div'); sourceDiv.className = 'sort-container';
+            const targetDiv = document.createElement('div'); targetDiv.className = 'sort-box';
+            targetDiv.innerHTML = '<div class="sort-placeholder">👆 点击上方选项按顺序排入此处</div>';
+
+            let items = [...qData.items].sort(()=>Math.random()-0.5);
+            
+            items.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'sort-item';
+                btn.innerText = item;
+                btn.onclick = () => {
+                    if(targetDiv.contains(btn)) {
+                        sourceDiv.appendChild(btn);
+                        sortOrder = sortOrder.filter(i => i !== item);
+                    } else {
+                        if(targetDiv.querySelector('.sort-placeholder')) targetDiv.innerHTML = '';
+                        targetDiv.appendChild(btn);
+                        sortOrder.push(item);
+                    }
+                    
+                    const btnNext = document.getElementById('nextBtn');
+                    if(sortOrder.length === qData.items.length) {
+                         btnNext.disabled = false; btnNext.style.opacity = 1;
+                    } else {
+                         btnNext.disabled = true; btnNext.style.opacity = 0.6;
+                    }
+                };
+                sourceDiv.appendChild(btn);
+            });
+
+            container.appendChild(sourceDiv); container.appendChild(targetDiv);
+            card.appendChild(container);
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq' || qData.type === 'exp') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'sort') {
+                if (JSON.stringify(sortOrder) === JSON.stringify(qData.answerOrder)) isCorrect = true;
+                myAns = sortOrder.join(' -> ');
+            }
+
+            if (isCorrect) {
+                userScore += (100 / quizData.length); 
+            } else {
+                userMistakes.push({ q: qData.q.replace(/<br>/g, ' '), my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            const finalScore = Math.round(userScore);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 30);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 完美！你是未来的物理学家！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！掌握了力的秘密！";
+            else reward.innerText = "💪 加油！再复习一下重力和拉力的关系吧！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="color:#D32F2F">你的回答：${m.my || '未作答'}</span><br><span style="color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

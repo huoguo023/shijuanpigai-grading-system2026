@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第三课：声音是怎样传播的 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #E3F2FD; /* 浅蓝背景，代表空气/传播 */
+            --card-bg: #FFFFFF;
+            --primary: #2196F3; /* 科技蓝 */
+            --secondary: #FF9800; /* 警示橙 */
+            --text: #37474F;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#BBDEFB 15%, transparent 16%);
+            background-size: 25px 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            text-align: center;
+            border: 4px solid #90CAF9;
+            overflow: hidden;
+        }
+
+        h1 { color: #1565C0; margin-top: 0; font-size: 1.6em; margin-bottom: 5px; }
+        .subtitle { color: #FF9800; font-size: 1em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: slideUp 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #F1F8E9; /* 极淡绿 */
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid #8BC34A;
+            margin-bottom: 20px;
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #558B2F; border-bottom: 1px dashed #C5E1A5; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { color: #E65100; font-weight: bold; background: #FFE0B2; padding: 0 4px; border-radius: 3px; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFF;
+            border: 2px dashed #2196F3;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+        }
+        .svg-caption { font-size: 0.9em; color: #78909C; margin-top: 5px; font-style: italic; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #0D47A1;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0D47A1; }
+        .btn-next { background: #FF9800; box-shadow: 0 4px 0 #E65100; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #ECEFF1; border-radius: 5px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #2196F3; width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #FAFAFA; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #E0E0E0; margin-top: 10px; }
+        .q-tag { background: #E3F2FD; color: #1565C0; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; }
+        .q-content { font-size: 1.2em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项 */
+        .option-item {
+            background: white; border: 2px solid #B0BEC5; padding: 12px; border-radius: 8px;
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #BBDEFB; border-color: #2196F3; font-weight: bold; color: #0D47A1; }
+
+        .fill-input { border: none; border-bottom: 3px solid #2196F3; background: transparent; width: 120px; text-align: center; font-size: 1.2em; color: #E65100; border-radius: 0; }
+
+        /* 连线题 */
+        .match-row { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 10px; }
+        .match-col { width: 45%; display: flex; flex-direction: column; gap: 10px; }
+        .match-btn {
+            padding: 12px; background: #FFF; border: 2px solid #90A4AE; border-radius: 8px;
+            text-align: center; cursor: pointer; font-size: 0.9em;
+        }
+        .match-btn.selected { background: #FFF9C4; border-color: #FBC02D; transform: scale(1.05); }
+        .match-btn.matched { background: #C8E6C9; border-color: #43A047; opacity: 0.6; pointer-events: none; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; }
+        .score-display { font-size: 4em; color: #FF5722; font-weight: bold; margin: 10px 0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 即时反馈系统样式 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+
+    <!-- 1. 复习区 -->
+    <div id="section-review" class="container section active">
+        <h1>📡 知识复习</h1>
+        <p class="subtitle">第三课：声音是怎样传播的</p>
+
+        <!-- 知识点1 & 5: 方向与波 -->
+        <div class="knowledge-box">
+            <h3>1. 传播方向与形式</h3>
+            <div class="k-point">🔊 <strong>四面八方</strong>：教室里任何位置都能听到鼓声。</div>
+            <div class="k-point">🌊 <strong>波的形式</strong>：声音像水波一样，通过周围物质（气体、液体、固体）振动传播。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="120" viewBox="0 0 300 120" style="background:linear-gradient(to bottom, #E3F2FD 0%, #F5F5F5 100%); border-radius:10px;">
+                    <defs>
+                        <linearGradient id="drumGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF7043"/>
+                            <stop offset="100%" style="stop-color:#D84315"/>
+                        </linearGradient>
+                        <radialGradient id="drumTop">
+                            <stop offset="0%" style="stop-color:#FFCCBC"/>
+                            <stop offset="100%" style="stop-color:#FF8A65"/>
+                        </radialGradient>
+                    </defs>
+                    <!-- 立体鼓身 -->
+                    <ellipse cx="150" cy="80" rx="20" ry="8" fill="#BF360C" opacity="0.3"/>
+                    <rect x="130" y="40" width="40" height="40" rx="5" fill="url(#drumGrad)" stroke="#BF360C" stroke-width="2"/>
+                    <!-- 鼓面 -->
+                    <ellipse cx="150" cy="40" rx="20" ry="6" fill="url(#drumTop)" stroke="#D84315" stroke-width="2"/>
+                    <text x="150" y="65" text-anchor="middle" font-size="10" fill="white" font-weight="bold">鼓</text>
+                    <!-- 多层波纹动画 -->
+                    <circle cx="150" cy="60" r="25" fill="none" stroke="#2196F3" stroke-width="3" opacity="0">
+                        <animate attributeName="r" values="25; 90" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8; 0" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="60" r="25" fill="none" stroke="#42A5F5" stroke-width="2.5" opacity="0">
+                        <animate attributeName="r" values="25; 90" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.7; 0" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="60" r="25" fill="none" stroke="#64B5F6" stroke-width="2" opacity="0">
+                        <animate attributeName="r" values="25; 90" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.6; 0" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="60" r="25" fill="none" stroke="#90CAF9" stroke-width="1.5" opacity="0">
+                        <animate attributeName="r" values="25; 90" dur="2s" begin="1.2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.5; 0" dur="2s" begin="1.2s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- 听众 -->
+                    <text x="20" y="30" font-size="24">👂</text>
+                    <text x="260" y="30" font-size="24">👂</text>
+                    <text x="20" y="100" font-size="24">👂</text>
+                    <text x="260" y="100" font-size="24">👂</text>
+                    <!-- 标注 -->
+                    <text x="150" y="15" text-anchor="middle" font-size="11" fill="#1565C0" font-weight="bold">声波四面八方传播</text>
+                </svg>
+                <div class="svg-caption">声音向四面八方传播</div>
+            </div>
+        </div>
+
+        <!-- 知识点2 & 6: 真空实验 -->
+        <div class="knowledge-box">
+            <h3>2. 谁能传播声音？</h3>
+            <div class="k-point">✅ <strong>能传播</strong>：气体、液体、固体。</div>
+            <div class="k-point">❌ <strong>不能传播</strong>：<span class="highlight">真空</span>（如玻璃罩抽气实验）。</div>
+
+            <div class="svg-stage">
+                <svg width="100%" height="140" viewBox="0 0 300 140" style="background:linear-gradient(to bottom, #E8F5E9 0%, #F5F5F5 100%); border-radius:10px;">
+                    <defs>
+                        <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#E3F2FD; stop-opacity:0.3"/>
+                            <stop offset="50%" style="stop-color:#BBDEFB; stop-opacity:0.5"/>
+                            <stop offset="100%" style="stop-color:#90CAF9; stop-opacity:0.3"/>
+                        </linearGradient>
+                        <radialGradient id="clockGrad">
+                            <stop offset="0%" style="stop-color:#FF8A65"/>
+                            <stop offset="100%" style="stop-color:#FF5722"/>
+                        </radialGradient>
+                        <linearGradient id="baseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#78909C"/>
+                            <stop offset="100%" style="stop-color:#455A64"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- 底座 -->
+                    <rect x="90" y="120" width="120" height="12" rx="2" fill="url(#baseGrad)" stroke="#37474F" stroke-width="1"/>
+                    <ellipse cx="150" cy="120" rx="60" ry="4" fill="#263238" opacity="0.3"/>
+                    <!-- 玻璃罩 (透明渐变+高光) -->
+                    <path d="M100,120 L100,40 Q150,0 200,40 L200,120 Z" fill="url(#glassGrad)" stroke="#546E7A" stroke-width="3" opacity="0.8"/>
+                    <!-- 高光效果 -->
+                    <ellipse cx="120" cy="50" rx="15" ry="25" fill="white" opacity="0.2"/>
+                    <ellipse cx="180" cy="60" rx="12" ry="20" fill="white" opacity="0.15"/>
+                    
+                    <!-- 闹钟 (立体) -->
+                    <ellipse cx="150" cy="95" rx="16" ry="4" fill="#BF360C" opacity="0.3"/>
+                    <circle cx="150" cy="80" r="16" fill="url(#clockGrad)" stroke="#D84315" stroke-width="2"/>
+                    <circle cx="150" cy="80" r="12" fill="white" opacity="0.9"/>
+                    <!-- 表盘刻度 -->
+                    <line x1="150" y1="72" x2="150" y2="74" stroke="#333" stroke-width="1"/>
+                    <line x1="158" y1="80" x2="156" y2="80" stroke="#333" stroke-width="1"/>
+                    <line x1="150" y1="88" x2="150" y2="86" stroke="#333" stroke-width="1"/>
+                    <line x1="142" y1="80" x2="144" y2="80" stroke="#333" stroke-width="1"/>
+                    <!-- 指针 (旋转) -->
+                    <line x1="150" y1="80" x2="150" y2="73" stroke="#E65100" stroke-width="2" stroke-linecap="round">
+                        <animateTransform attributeName="transform" type="rotate" from="0 150 80" to="360 150 80" dur="2s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="150" y1="80" x2="155" y2="80" stroke="#333" stroke-width="1.5" stroke-linecap="round">
+                        <animateTransform attributeName="transform" type="rotate" from="0 150 80" to="360 150 80" dur="10s" repeatCount="indefinite"/>
+                    </line>
+                    <circle cx="150" cy="80" r="2" fill="#333"/>
+                    
+                    <!-- 空气粒子 (逐渐消失动画) -->
+                    <g id="air-particles">
+                        <circle cx="120" cy="55" r="2.5" fill="#64B5F6"><animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/><animate attributeName="cy" values="55;45" dur="4s" fill="freeze"/></circle>
+                        <circle cx="180" cy="95" r="2.5" fill="#64B5F6"><animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/><animate attributeName="cy" values="95;85" dur="4s" fill="freeze"/></circle>
+                        <circle cx="135" cy="100" r="2.5" fill="#64B5F6"><animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/><animate attributeName="cy" values="100;90" dur="4s" fill="freeze"/></circle>
+                        <circle cx="165" cy="50" r="2.5" fill="#64B5F6"><animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/><animate attributeName="cy" values="50;40" dur="4s" fill="freeze"/></circle>
+                        <circle cx="125" cy="85" r="2.5" fill="#64B5F6"><animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/><animate attributeName="cy" values="85;75" dur="4s" fill="freeze"/></circle>
+                        <circle cx="175" cy="75" r="2.5" fill="#64B5F6"><animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/><animate attributeName="cy" values="75;65" dur="4s" fill="freeze"/></circle>
+                    </g>
+
+                    <!-- 声音波纹 (随空气消失而减弱) -->
+                    <path d="M168,80 Q175,80 175,88" fill="none" stroke="#FF5722" stroke-width="2.5" opacity="1">
+                        <animate attributeName="opacity" values="1;0" dur="4s" fill="freeze"/>
+                    </path>
+                    <path d="M170,78 Q178,78 178,90" fill="none" stroke="#FF7043" stroke-width="2" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0" dur="4s" fill="freeze"/>
+                    </path>
+                    
+                    <!-- 标注 -->
+                    <text x="215" y="60" font-size="11" fill="#D84315" font-weight="bold">空气抽出</text>
+                    <text x="215" y="75" font-size="11" fill="#D84315">粒子↓</text>
+                    <text x="215" y="95" font-size="11" fill="#E65100" font-weight="bold">声音↓</text>
+                    <line x1="200" y1="70" x2="210" y2="70" stroke="#D84315" stroke-width="1" stroke-dasharray="2,2"/>
+                </svg>
+                <div class="svg-caption">真空不能传声实验 - 空气抽出，声音减弱</div>
+            </div>
+        </div>
+
+        <!-- 知识点3 & 8: 固体传声 -->
+        <div class="knowledge-box">
+            <h3>3. 固体的本领</h3>
+            <div class="k-point">📞 <strong>土电话</strong>：棉线（固体）能传声，且必须<span class="highlight">拉直绷紧</span>。</div>
+            <div class="k-point">👂 <strong>挠桌子</strong>：耳朵贴在桌面上听得更清晰，说明桌面（固体）传声效果好。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100" style="background:linear-gradient(to bottom, #FFF9C4 0%, #F5F5F5 100%); border-radius:10px;">
+                    <defs>
+                        <linearGradient id="cupGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FFF59D"/>
+                            <stop offset="100%" style="stop-color:#FBC02D"/>
+                        </linearGradient>
+                        <radialGradient id="cupTop">
+                            <stop offset="0%" style="stop-color:#FFFDE7"/>
+                            <stop offset="100%" style="stop-color:#FFF59D"/>
+                        </radialGradient>
+                        <linearGradient id="stringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8D6E63"/>
+                            <stop offset="50%" style="stop-color:#A1887F"/>
+                            <stop offset="100%" style="stop-color:#8D6E63"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- 左纸杯 (3D效果) -->
+                    <ellipse cx="50" cy="80" rx="12" ry="3" fill="#D7CCC8" opacity="0.4"/>
+                    <path d="M50,30 L30,80 L70,80 L50,30" fill="url(#cupGrad)" stroke="#F57F00" stroke-width="2"/>
+                    <ellipse cx="50" cy="30" rx="10" ry="3" fill="url(#cupTop)" stroke="#F57F00" stroke-width="1"/>
+                    <!-- 杯口细节 -->
+                    <ellipse cx="50" cy="30" rx="8" ry="2" fill="#FFF8E1" opacity="0.6"/>
+                    
+                    <!-- 右纸杯 (3D效果) -->
+                    <ellipse cx="250" cy="80" rx="12" ry="3" fill="#D7CCC8" opacity="0.4"/>
+                    <path d="M250,30 L230,80 L270,80 L250,30" fill="url(#cupGrad)" stroke="#F57F00" stroke-width="2"/>
+                    <ellipse cx="250" cy="30" rx="10" ry="3" fill="url(#cupTop)" stroke="#F57F00" stroke-width="1"/>
+                    <ellipse cx="250" cy="30" rx="8" ry="2" fill="#FFF8E1" opacity="0.6"/>
+                    
+                    <!-- 绷紧的棉线 (振动动画 + 渐变) -->
+                    <path d="M50,55 L250,55" stroke="url(#stringGrad)" stroke-width="3" fill="none">
+                        <animate attributeName="d" values="M50,55 Q150,55 250,55; M50,55 Q150,50 250,55; M50,55 Q150,60 250,55; M50,55 Q150,55 250,55" dur="0.15s" repeatCount="indefinite"/>
+                    </path>
+                    <!-- 振动波纹可视化 -->
+                    <circle cx="150" cy="55" r="3" fill="#FF6F00" opacity="0.6">
+                        <animate attributeName="r" values="3;8;3" dur="0.3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="0.3s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- 声波传导箭头 -->
+                    <path d="M70,45 L130,45" fill="none" stroke="#2196F3" stroke-width="2" marker-end="url(#arrowBlue)">
+                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M170,45 L230,45" fill="none" stroke="#2196F3" stroke-width="2" marker-end="url(#arrowBlue)">
+                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+                    </path>
+                    <defs>
+                        <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#2196F3"/>
+                        </marker>
+                    </defs>
+                    
+                    <!-- 标注 -->
+                    <text x="150" y="35" text-anchor="middle" font-size="10" fill="#5D4037" font-weight="bold">绷紧的线 = 固体传声</text>
+                    <text x="150" y="75" text-anchor="middle" font-size="9" fill="#6D4C41">振动传递声音</text>
+                    
+                    <!-- 人物图标 -->
+                    <text x="25" y="25" font-size="18">🗣️</text>
+                    <text x="260" y="25" font-size="18">👂</text>
+                </svg>
+                <div class="svg-caption">土电话 - 固体(棉线)传声原理</div>
+            </div>
+        </div>
+
+        <!-- 知识点7: 传播速度 -->
+        <div class="knowledge-box">
+            <h3>4. 谁跑得快？(传播速度)</h3>
+            <div class="k-point">🚀 <strong>速度排名</strong>：<span class="highlight">固体 > 液体 > 气体</span></div>
+            <div class="k-point">通常固体中传播最快，气体中最慢。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="120" viewBox="0 0 300 120" style="background:linear-gradient(to right, #E8F5E9 0%, #FFF9C4 50%, #FFEBEE 100%); border-radius:10px;">
+                    <defs>
+                        <linearGradient id="solidTrack" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#BDBDBD"/>
+                            <stop offset="100%" style="stop-color:#E0E0E0"/>
+                        </linearGradient>
+                        <linearGradient id="liquidTrack" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#81D4FA"/>
+                            <stop offset="100%" style="stop-color:#E1F5FE"/>
+                        </linearGradient>
+                        <linearGradient id="gasTrack" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#C5E1A5"/>
+                            <stop offset="100%" style="stop-color:#F1F8E9"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- 固体跑道 -->
+                    <text x="10" y="30" font-size="13" font-weight="bold">🧱 固体</text>
+                    <rect x="60" y="20" width="200" height="15" rx="7" fill="url(#solidTrack)" stroke="#757575" stroke-width="1"/>
+                    <!-- 快速球 -->
+                    <circle cx="70" cy="27" r="6" fill="#FF5722" stroke="#BF360C" stroke-width="2">
+                        <animate attributeName="cx" from="70" to="250" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="270" y="30" font-size="10" fill="#FF5722" font-weight="bold">最快!</text>
+
+                    <!-- 液体跑道 -->
+                    <text x="10" y="65" font-size="13" font-weight="bold">💧 液体</text>
+                    <rect x="60" y="55" width="200" height="15" rx="7" fill="url(#liquidTrack)" stroke="#0288D1" stroke-width="1"/>
+                    <!-- 中速球 -->
+                    <circle cx="70" cy="62" r="6" fill="#2196F3" stroke="#1565C0" stroke-width="2">
+                        <animate attributeName="cx" from="70" to="250" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="270" y="65" font-size="10" fill="#2196F3" font-weight="bold">中速</text>
+
+                    <!-- 气体跑道 -->
+                    <text x="10" y="100" font-size="13" font-weight="bold">💨 气体</text>
+                    <rect x="60" y="90" width="200" height="15" rx="7" fill="url(#gasTrack)" stroke="#689F38" stroke-width="1"/>
+                    <!-- 慢速球 -->
+                    <circle cx="70" cy="97" r="6" fill="#4CAF50" stroke="#2E7D32" stroke-width="2">
+                        <animate attributeName="cx" from="70" to="250" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="270" y="100" font-size="10" fill="#4CAF50" font-weight="bold">最慢</text>
+                    
+                    <!-- 标题 -->
+                    <text x="150" y="12" text-anchor="middle" font-size="11" fill="#1565C0" font-weight="bold">声音传播速度对比</text>
+                </svg>
+                <div class="svg-caption">固体传声最快，气体最慢 (速度: 固体 > 液体 > 气体)</div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入35题闯关塔！🚀</button>
+    </div>
+
+    <!-- 2. 闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="text-align:right; font-size:0.9em; color:#90A4AE;">题目：<span id="q-index">1</span> / 35</div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题 ▶</button>
+    </div>
+
+    <!-- 3. 结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 35道题库 ---
+        const quizData = [
+            // 1. 方向与形式 (5题)
+            { type: 'mcq', q: '在教室任何角落都能听到老师讲课，说明声音是向____传播的。', opts: ['前后', '左右', '四面八方'], a: 2, exp: '声音向四面八方传播。' },
+            { type: 'mcq', q: '声音是以____的形式传播的。', opts: ['波', '直线', '气流'], a: 0, exp: '声音以声波的形式传播。' },
+            { type: 'mcq', q: '将击打后的音叉轻轻接触水面，我们观察到？', opts: ['水面平静', '产生波纹', '水结冰'], a: 1, exp: '音叉振动引起水面产生波纹。' },
+            { type: 'fill', q: '物体振动时会引起周围物质的振动，把声音从一个地方____到另一个地方。', a: ['传播'], exp: '声音的传播过程。' },
+            { type: 'mcq', q: '水面上荡起的波纹，可以帮助我们理解？', opts: ['声波', '光波', '电波'], a: 0, exp: '用水波类比声波。' },
+
+            // 2. 真空实验 (5题)
+            { type: 'mcq', q: '玻璃罩内的空气逐渐被抽出，闹钟的声音会？', opts: ['变大', '变小', '不变'], a: 1, exp: '介质减少，声音变弱。' },
+            { type: 'mcq', q: '如果玻璃罩内完全没有空气（真空），我们____听到闹钟声。', opts: ['能', '不能'], a: 1, exp: '真空不能传声。' },
+            { type: 'mcq', q: '宇航员在月球上即使面对面也听不到声音，是因为？', opts: ['月球没有空气', '耳朵坏了', '不想听'], a: 0, exp: '月球是真空环境，没有传声介质。' },
+            { type: 'mcq', q: '玻璃罩实验说明了声音的传播需要？', opts: ['物质(介质)', '光线', '温度'], a: 0, exp: '声音传播需要气体、液体或固体等物质。' },
+            { type: 'fill', q: '声音可以在气体、液体、固体中传播，____不能传播声音。', a: ['真空'], exp: '真空无介质。' },
+
+            // 3. 固体传声与土电话 (6题)
+            { type: 'mcq', q: '做“土电话”时，连接纸杯的棉线必须？', opts: ['放松', '打结', '拉直绷紧'], a: 2, exp: '绷紧的线才能有效传递振动。' },
+            { type: 'mcq', q: '“土电话”主要利用了____传播声音的原理。', opts: ['空气', '棉线(固体)', '纸杯'], a: 1, exp: '核心是棉线这个固体在传声。' },
+            { type: 'mcq', q: '把耳朵贴在桌面上听抓挠声，比在空气中听得更清楚，说明？', opts: ['桌面传声效果好', '空气传声效果好', '耳朵变灵敏'], a: 0, exp: '固体传声效果通常比气体好。' },
+            { type: 'mcq', q: '古代士兵枕着箭筒睡在地上能听到远处的马蹄声，是利用了____传声。', opts: ['大地(固体)', '空气', '草'], a: 0, exp: '大地是固体，传声快且远。' },
+            { type: 'mcq', q: '如果你捏住“土电话”的棉线，声音会？', opts: ['变大', '停止/变小', '不变'], a: 1, exp: '捏住棉线阻碍了振动传播。' },
+            { type: 'matching', q: '请连接现象与原理：', pairs: [{l:'土电话', r:'固体传声'}, {l:'真空铃', r:'真空不传声'}, {l:'水波纹', r:'声波'}], exp: '对应三个核心实验。' },
+
+            // 4. 传播速度 (5题)
+            { type: 'mcq', q: '声音在下列哪种物质中传播速度最快？', opts: ['空气', '水', '钢铁'], a: 2, exp: '固体(钢铁) > 液体(水) > 气体(空气)。' },
+            { type: 'mcq', q: '声音在下列哪种物质中传播速度最慢？', opts: ['空气', '水', '木头'], a: 0, exp: '气体传播最慢。' },
+            { type: 'fill', q: '声音在固体、液体、气体中的传播速度____（填“相同”或“不同”）。', a: ['不同'], exp: '介质密度不同，速度不同。' },
+            { type: 'mcq', q: '通常情况下，声音传播速度的排序是？', opts: ['固体>液体>气体', '气体>液体>固体', '液体>固体>气体'], a: 0, exp: '固>液>气。' },
+            { type: 'mcq', q: '火车快来时，趴在铁轨上能更早听到声音，是因为？', opts: ['铁轨传声比空气快', '铁轨传声比空气慢', '好玩'], a: 0, exp: '固体(铁轨)传声速度快。' },
+
+            // 5. 液体传声 (4题)
+            { type: 'mcq', q: '钓鱼时，岸边大声说话会吓跑鱼，说明____能传声。', opts: ['鱼竿', '水(液体)', '空气'], a: 1, exp: '声音通过空气传到水，水传给鱼。' },
+            { type: 'mcq', q: '潜水员在水下能听到岸上的声音吗？', opts: ['能', '不能'], a: 0, exp: '水可以传播声音。' },
+            { type: 'mcq', q: '将正在发声的防水手表放入水中，我们在外面能听到声音吗？', opts: ['能', '不能'], a: 0, exp: '水和玻璃/空气都能传声。' },
+            { type: 'fill', q: '音叉接触水面产生波纹，说明声音以____的形式传播，且水能传声。', a: ['波'], exp: '声波。' },
+
+            // 6. 综合应用 (5题)
+            { type: 'mcq', q: '如果在月球上两个宇航员要聊天，他们必须？', opts: ['大声喊', '用无线电', '用土电话'], a: 1, exp: '无线电波可以在真空中传播，声波不行。' },
+            { type: 'matching', q: '声音在下列情景中依靠什么传播？', pairs: [{l:'潜水听声', r:'液体'}, {l:'隔墙有耳', r:'固体'}, {l:'面对面聊天', r:'气体'}], exp: '生活中的介质分辨。' },
+            { type: 'mcq', q: '声音不仅能传播信息，还能传播？', opts: ['能量', '物质', '温度'], a: 0, exp: '声音是一种能量（如震碎玻璃）。' },
+            { type: 'mcq', q: '我们听到雷声通常比看到闪电晚，是因为？', opts: ['光速比声速快', '声速比光速快', '眼睛比耳朵快'], a: 0, exp: '常识补充：光速远快于声速。' },
+            { type: 'fill', q: '只要鼓声足够大，我们在教室____位置都能听到。', a: ['任何', '所有'], exp: '四面八方传播。' },
+
+            // 7. 实验探究 (5题)
+            { type: 'mcq', q: '在做真空铃实验时，闹钟并没有直接接触玻璃罩，是为了？', opts: ['防止闹钟振动传给玻璃底座', '怕闹钟摔坏', '好看'], a: 0, exp: '排除固体传声的干扰，只验证空气。' },
+            { type: 'mcq', q: '土电话的棉线如果松松垮垮，声音？', opts: ['传播清晰', '无法传播/听不清', '变大'], a: 1, exp: '松弛的线无法有效传递振动波。' },
+            { type: 'mcq', q: '想让“土电话”传声效果更好，可以？', opts: ['把线弄湿', '换成金属丝', '把线剪断'], a: 1, exp: '金属丝是更好的固体导体。' },
+            { type: 'matching', q: '给声音赛跑排个序(1最快)：', pairs: [{l:'钢铁', r:'第一名'}, {l:'水', r:'第二名'}, {l:'空气', r:'第三名'}], exp: '速度排序。' },
+            { type: 'mcq', q: '下列物质中，传声效果最好的是？', opts: ['棉花', '铝箔尺', '空气'], a: 1, exp: '铝箔尺是坚硬固体。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let matchState = { left: null, right: null, matchedCount: 0, userPairs: [] };
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(800, now); gain.gain.setValueAtTime(0.02, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+            selectedOption = null;
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let tagText = qData.type === 'mcq' ? '选择题' : (qData.type === 'fill' ? '填空题' : '连线题');
+            card.innerHTML = `<div class="q-content"><span class="q-tag">${tagText}</span>${qData.q}</div>`;
+
+            if (qData.type === 'mcq') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                input.onblur = () => {
+                    if (selectedOption) {
+                        const isCorrect = qData.a.some(ans => selectedOption.includes(ans));
+                        setTimeout(() => {
+                            if (isCorrect) InstantFeedback.onCorrect(input);
+                            else InstantFeedback.onWrong(input, qData.exp);
+                        }, 200);
+                    }
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'matching') {
+                renderMatching(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            playSound('click');
+            
+            // 移除其他选项的选中状态
+            document.querySelectorAll('.option-item').forEach(d => {
+                d.classList.remove('selected', 'correct-feedback', 'wrong-feedback');
+            });
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            
+            if (qData.type === 'fill') {
+                if (qData.a.some(ans => idx.includes(ans))) isCorrect = true;
+            } else {
+                if (idx === qData.a) isCorrect = true;
+            }
+            
+            // 延迟反馈，让用户看到选中效果
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            // 启用下一题按钮
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderMatching(card, qData) {
+            const container = document.createElement('div');
+            const leftCol = document.createElement('div'); leftCol.className = 'match-col';
+            const rightCol = document.createElement('div'); rightCol.className = 'match-col';
+            const row = document.createElement('div'); row.className = 'match-row';
+
+            let rItems = [...qData.pairs].sort(()=>Math.random()-0.5);
+            matchState = { left: null, right: null, matchedCount: 0, userPairs: [] };
+
+            qData.pairs.forEach(p => {
+                const btn = document.createElement('div');
+                btn.className = 'match-btn'; btn.innerText = p.l; btn.dataset.val = p.l; btn.dataset.side = 'left';
+                btn.onclick = (e) => handleMatchClick(e.target, qData.pairs.length);
+                leftCol.appendChild(btn);
+            });
+            rItems.forEach(p => {
+                const btn = document.createElement('div');
+                btn.className = 'match-btn'; btn.innerText = p.r; btn.dataset.val = p.r; btn.dataset.side = 'right';
+                btn.onclick = (e) => handleMatchClick(e.target, qData.pairs.length);
+                rightCol.appendChild(btn);
+            });
+
+            row.appendChild(leftCol); row.appendChild(rightCol);
+            card.appendChild(row);
+        }
+
+        function handleMatchClick(el, totalPairs) {
+            playSound('click');
+            const side = el.dataset.side;
+            el.parentElement.querySelectorAll('.match-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            if (side === 'left') matchState.left = el;
+            else matchState.right = el;
+
+            if (matchState.left && matchState.right) {
+                matchState.userPairs.push({l: matchState.left.dataset.val, r: matchState.right.dataset.val});
+                matchState.left.classList.remove('selected'); matchState.left.classList.add('matched');
+                matchState.right.classList.remove('selected'); matchState.right.classList.add('matched');
+                matchState.left = null; matchState.right = null;
+                matchState.matchedCount++;
+                if (matchState.matchedCount === totalPairs) {
+                    document.getElementById('nextBtn').disabled = false;
+                    document.getElementById('nextBtn').style.opacity = 1;
+                }
+            }
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'matching') {
+                let correctCount = 0;
+                matchState.userPairs.forEach(up => {
+                    if (qData.pairs.some(p => p.l === up.l && p.r === up.r)) correctCount++;
+                });
+                if (correctCount === qData.pairs.length) isCorrect = true;
+                myAns = "配对错误";
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 满分！你是传播大师！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！知识掌握得很牢固！";
+            else reward.innerText = "💪 加油！复习一下错题吧！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="font-size:0.9em; color:#D32F2F">你的回答：${m.my}</span><br><span style="font-size:0.9em; color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

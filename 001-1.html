@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小学科学四上：科学大闯关总站</title>
+    <style>
+        /* === 样式设置开始 === */
+        :root {
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --primary: #4CAF50;
+            --u1-color: #2196F3; /* 第一单元颜色 */
+            --u2-color: #FF9800; /* 第二单元颜色 */
+            --u3-color: #9C27B0; /* 第三单元颜色 */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 隐藏的数据存储区（存放课程代码的地方） */
+        .code-storage { display: none; }
+
+        /* 顶部标题栏 */
+        header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        header h1 { font-size: 1.2rem; color: #333; display: flex; align-items: center; gap: 10px; }
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; margin-right: 15px; }
+
+        /* 主界面布局 */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 左侧菜单栏 */
+        aside {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .unit-title {
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .unit-1 { background: var(--u1-color); }
+        .unit-2 { background: var(--u2-color); }
+        .unit-3 { background: var(--u3-color); }
+
+        /* 课程列表默认样式 */
+        .lesson-list { display: block; }
+        .lesson-list.collapsed { display: none; }
+
+        /* 课程按钮样式 */
+        .lesson-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            color: #555;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        .lesson-btn:hover { background-color: #f0f9ff; color: var(--primary); }
+        .lesson-btn.active { 
+            background-color: #e8f5e9; 
+            color: var(--primary); 
+            font-weight: bold;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* 右侧显示区 */
+        main {
+            flex: 1;
+            background: #e0e0e0;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: white;
+        }
+
+        /* 欢迎界面 */
+        .welcome-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #555;
+            z-index: 1;
+        }
+        .welcome-icon {<!-- 左侧菜单栏开始 -->
+    <aside id="sidebar">
+        
+        <!-- === 第一单元：声音 === -->
+        <div class="unit-title unit-1" onclick="toggleUnit('u1-list')">
+            第一单元：声音 🔊 <span>▼</span>
+        </div>
+        <div id="u1-list" class="lesson-list">
+            <button class="lesson-btn" onclick="loadLesson('u1-1')">1. 听听声音</button>
+            <button class="lesson-btn" onclick="loadLesson('u1-2')">2. 声音是怎样产生的</button>
+            <button class="lesson-btn" onclick="loadLesson('u1-3')">3. 声音是怎样传播的</button>
+            <button class="lesson-btn" onclick="loadLesson('u1-4')">4. 我们是怎样听到声音的</button>
+            <button class="lesson-btn" onclick="loadLesson('u1-5')">5. 声音的强与弱</button>
+            <button class="lesson-btn" onclick="loadLesson('u1-6')">6. 声音的高与低</button>
+            <button class="lesson-btn" onclick="loadLesson('u1-78')">7&8. 弦与小乐器</button>
+        </div>
+
+        <!-- === 第二单元：呼吸与消化 === -->
+        <div class="unit-title unit-2" onclick="toggleUnit('u2-list')">
+            第二单元：呼吸与消化 🫁 <span>▼</span>
+        </div>
+        <div id="u2-list" class="lesson-list">
+            <button class="lesson-btn" onclick="loadLesson('u2-1')">1. 感受我们的呼吸</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-2')">2. 呼吸与健康生活</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-3')">3. 测量肺活量</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-4')">4. 一天的食物</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-5')">5. 食物中的营养</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-6')">6. 营养要均衡</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-7')">7. 食物在口腔里的变化</button>
+            <button class="lesson-btn" onclick="loadLesson('u2-8')">8. 食物在身体里的旅行</button>
+        </div>
+
+        <!-- === 第三单元：运动和力 === -->
+        <div class="unit-title unit-3" onclick="toggleUnit('u3-list')">
+            第三单元：运动和力 🚗 <span>▼</span>
+        </div>
+        <div id="u3-list" class="lesson-list">
+            <button class="lesson-btn" onclick="loadLesson('u3-1')">1. 运动和力(基础)</button>
+            <button class="lesson-btn" onclick="loadLesson('u3-2')">2. 用气球驱动小车</button>
+            <button class="lesson-btn" onclick="loadLesson('u3-3')">3. 用橡皮筋驱动小车</button>
+            <button class="lesson-btn" onclick="loadLesson('u3-4')">4. 弹簧测力计</button>
+            <button class="lesson-btn" onclick="loadLesson('u3-5')">5. 运动与摩擦力</button>
+            <button class="lesson-btn" onclick="loadLesson('u3-6')">6. 运动的小车</button>
+            <button class="lesson-btn" onclick="loadLesson('u3-78')">7&8. 设计制作小车</button>
+        </div>
+    </aside>
+    <!-- 左侧菜单栏结束 -->
+
+    <!-- 右侧显示区开始 -->
+    <main>
+        <!-- 欢迎画面 -->
+        <div id="welcome" class="welcome-screen">
+            <div class="welcome-icon">🚀</div>
+            <h2>欢迎来到科学大闯关！</h2>
+            <p>👈 请点击左侧菜单选择课程</p>
+            <p style="font-size:0.8rem; color:#999; margin-top:30px;">
+                提示：请使用记事本打开本文件，<br>将各课代码粘贴到下方的 textarea 区域中。
+            </p>
+        </div>
+        <!-- 课程内容显示框 -->
+        <iframe id="content-frame" title="Lesson Content"></iframe>
+    </main>
+    <!-- 右侧显示区结束 -->
+</div>
+<!-- 第二部分结束，请紧接着粘贴第三部分 --><!-- ============================================================ -->
+<!-- === 核心区域：课程代码粘贴区 === -->
+<!-- 这里的每一个 textarea 都是一个"盒子"，请把对应课程的完整HTML代码扔进去 -->
+<!-- ============================================================ -->
+
+<!-- 第一单元：声音 -->
+<textarea id="u1-1" class="code-storage"></textarea>
+<textarea id="u1-2" class="code-storage"></textarea>
+<textarea id="u1-3" class="code-storage"></textarea>
+<textarea id="u1-4" class="code-storage"></textarea>
+<textarea id="u1-5" class="code-storage"></textarea>
+<textarea id="u1-6" class="code-storage"></textarea>
+<textarea id="u1-78" class="code-storage"></textarea>
+
+<!-- 第二单元：呼吸与消化 -->
+<textarea id="u2-1" class="code-storage"></textarea>
+<textarea id="u2-2" class="code-storage"></textarea>
+<textarea id="u2-3" class="code-storage"></textarea>
+<textarea id="u2-4" class="code-storage"></textarea>
+<textarea id="u2-5" class="code-storage"></textarea>
+<textarea id="u2-6" class="code-storage"></textarea>
+<textarea id="u2-7" class="code-storage"></textarea>
+<textarea id="u2-8" class="code-storage"></textarea>
+
+<!-- 第三单元：运动和力 -->
+<textarea id="u3-1" class="code-storage"></textarea>
+<textarea id="u3-2" class="code-storage"></textarea>
+<textarea id="u3-3" class="code-storage"></textarea>
+<textarea id="u3-4" class="code-storage"></textarea>
+<textarea id="u3-5" class="code-storage"></textarea>
+<textarea id="u3-6" class="code-storage"></textarea>
+<textarea id="u3-78" class="code-storage"></textarea>
+
+<!-- 控制脚本 -->
+<script>
+    // 点击菜单加载课程的逻辑
+    function loadLesson(id) {
+        // 1. 界面变化
+        document.getElementById('welcome').style.display = 'none';
+        
+        // 移除所有按钮的激活状态，给当前点击的按钮加上激活状态
+        var btns = document.querySelectorAll('.lesson-btn');
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.remove('active');
+        }
+        // event.target 指向被点击的元素
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+
+        // 2. 获取对应ID的 textarea 里的代码
+        var storage = document.getElementById(id);
+        var iframe = document.getElementById('content-frame');
+
+        if (storage && storage.value.trim() !== '') {
+            // 3. 如果里面有代码，就显示出来
+            iframe.srcdoc = storage.value;
+        } else {
+            // 4. 如果里面是空的，显示提示
+            iframe.srcdoc = '<body style="text-align:center; padding:50px; font-family:sans-serif; color:#666;">' +
+                            '<h2>🚧 这里的代码还没放进去</h2>' +
+                            '<p>请用记事本打开主文件，找到 <strong>id="' + id + '"</strong> 的位置，<br>' +
+                            '把对应课程的 HTML 代码粘贴进去。</p></body>';
+        }
+
+        // 5. 手机端：点击后自动收起侧边栏
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    }
+
+    // 手机侧边栏切换
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.querySelector('.overlay');
+        
+        if (sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        } else {
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
+        }
+    }
+
+    // 单元菜单折叠/展开
+    function toggleUnit(listId) {
+        var list = document.getElementById(listId);
+        if (list.classList.contains('collapsed')) {
+            list.classList.remove('collapsed');
+        } else {
+            list.classList.add('collapsed');
+        }
+    }
+</script>
+
+</body>
+</html>

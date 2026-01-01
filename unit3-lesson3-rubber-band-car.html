@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>第三单元 第三课 用橡皮筋驱动小车 - 互动复习+100分闯关塔</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root{--main:#E91E63;--light:#FCE4EC;--dark:#880E4F;--bg:#f5f5f5;--card:#fff;}
+    body{font-family:微软雅黑,Arial,sans-serif;margin:0;background:var(--bg);color:#333;line-height:1.6;padding-bottom:50px;}
+    header{background:var(--main);color:#fff;padding:2rem 1rem;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.2);}
+    h1{font-size:2rem;margin:0;}
+    .container{max-width:960px;margin:0 auto;padding:0 15px;}
+    .card{background:var(--card);border-radius:12px;padding:25px;margin:20px 0;box-shadow:0 4px 12px rgba(0,0,0,.08);}
+    .demo{background:var(--light);border:2px solid var(--main);border-radius:12px;padding:20px;margin:15px 0;text-align:center;}
+    .btn{background:var(--main);color:#fff;border:none;padding:10px 20px;border-radius:30px;cursor:pointer;font-size:1rem;margin:10px;}
+    .btn:hover{background:var(--dark);}
+    
+    .tag{display:inline-block;padding:4px 10px;border-radius:4px;color:#fff;font-size:0.8rem;margin-right:8px;}
+    .tag-choice{background:#2196F3;}
+    .tag-fill{background:#9C27B0;}
+    .tag-drag{background:#FF9800;}
+    .tag-exp{background:#E91E63;}
+    
+    .q{margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid #eee;}
+    .options label{display:block;margin:8px 0;padding:8px;background:#fafafa;border-radius:6px;cursor:pointer;}
+    .options label:hover{background:#e0e0e0;}
+    .options input{margin-right:10px;}
+    
+    .drag-box{display:flex;flex-wrap:wrap;gap:15px;margin:15px 0;}
+    .drop-area{flex:1;min-height:100px;border:2px dashed #ccc;background:#fff;border-radius:8px;padding:10px;}
+    .drop-area h4{margin:0 0 10px;text-align:center;color:#666;font-size:0.9rem;pointer-events:none;}
+    .drop-content{min-height:60px;}
+    .items-pool{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0;padding:10px;background:#f9f9f9;border-radius:8px;}
+    .item{background:#fff;padding:8px 15px;border:1px solid #ddd;border-radius:20px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.1);user-select:none;}
+    .item.used{opacity:0.3;cursor:not-allowed;}
+    
+    .exp{background:#fff9fc;border:2px solid var(--main);border-radius:12px;padding:20px;margin:20px 0;}
+    .exp-svg{background:#fff;padding:15px;border-radius:8px;margin-bottom:15px;text-align:center;}
+    .sub{margin:15px 0;}
+    .sub label{font-weight:bold;color:var(--dark);display:block;margin-bottom:5px;}
+    textarea{width:95%;height:70px;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:inherit;}
+    input[type="text"]{padding:8px;border:1px solid #ddd;border-radius:6px;}
+    
+    .submit-btn{display:block;width:300px;margin:40px auto;padding:15px;background:var(--main);color:#fff;border:none;border-radius:50px;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.3);}
+    .submit-btn:hover{background:var(--dark);transform:scale(1.02);}
+    
+    #result{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;overflow-y:auto;}
+    #result .box{background:#fff;margin:5% auto;padding:30px;width:90%;max-width:700px;border-radius:15px;position:relative;}
+    #result .close{position:absolute;right:20px;top:15px;font-size:2rem;cursor:pointer;color:#999;}
+    #result .close:hover{color:#E91E63;}
+    .score{font-size:4rem;color:var(--main);text-align:center;margin:20px 0;font-weight:bold;}
+    .wrong{background:#ffebee;padding:15px;border-left:5px solid #f44336;margin:15px 0;border-radius:6px;}
+    .correct-msg{text-align:center;color:#4CAF50;font-size:1.5rem;padding:30px;}
+
+    /* 即时反馈系统 */
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    label.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    label.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    input[type="text"].correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    input[type="text"].wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>第三单元 第三课 用橡皮筋驱动小车</h1>
+    <p>互动复习 + 100分闯关塔（35题）</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+    <h2 style="color:var(--main);">一、知识复习与实验演示</h2>
+
+    <div class="demo">
+        <h3>1. 拉长的橡皮筋具有能量，释放后可以产生动力</h3>
+        <svg viewBox="0 0 450 200" width="100%" height="200" style="background:linear-gradient(to bottom, #fce4ec 0%, #f8f9fa 100%); border-radius:10px;">
+            <defs>
+                <linearGradient id="rubberGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ec407a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#c2185b;stop-opacity:1" />
+                </linearGradient>
+                <radialGradient id="ballGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#f48fb1;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#c2185b;stop-opacity:1" />
+                </radialGradient>
+                <marker id="arrowForce" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#4CAF50"/>
+                </marker>
+            </defs>
+            
+            <!-- 左侧：原长状态 -->
+            <g transform="translate(80, 30)">
+                <text x="0" y="0" font-size="13" fill="#666" font-weight="bold">原长状态</text>
+                <!-- 固定点 -->
+                <rect x="-20" y="10" width="40" height="20" rx="5" fill="#546e7a" stroke="#263238" stroke-width="2"/>
+                <circle cx="0" cy="20" r="3" fill="#90a4ae"/>
+                <!-- 橡皮筋（原长） -->
+                <path d="M0,30 L0,80" stroke="url(#rubberGrad1)" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <!-- 小球 -->
+                <circle cx="0" cy="80" r="12" fill="url(#ballGrad)" stroke="#c2185b" stroke-width="2"/>
+                <circle cx="0" cy="80" r="8" fill="#f48fb1" opacity="0.6"/>
+                <text x="0" y="110" text-anchor="middle" font-size="11" fill="#666">长度L₀</text>
+                <text x="0" y="125" text-anchor="middle" font-size="10" fill="#F57C00" font-weight="bold">弹性势能=0</text>
+            </g>
+            
+            <!-- 中间：拉伸状态 -->
+            <g transform="translate(225, 30)">
+                <text x="0" y="0" font-size="13" fill="#E65100" font-weight="bold">拉伸状态</text>
+                <!-- 固定点 -->
+                <rect x="-20" y="10" width="40" height="20" rx="5" fill="#546e7a" stroke="#263238" stroke-width="2"/>
+                <circle cx="0" cy="20" r="3" fill="#90a4ae"/>
+                <!-- 橡皮筋（拉长） -->
+                <path d="M0,30 L0,130" stroke="url(#rubberGrad1)" stroke-width="8" fill="none" stroke-linecap="round">
+                    <animate attributeName="stroke-width" values="8;10;8" dur="1.5s" repeatCount="indefinite"/>
+                </path>
+                <!-- 拉力箭头 -->
+                <line x1="0" y1="135" x2="0" y2="155" stroke="#F44336" stroke-width="3" marker-end="url(#arrowForce)"/>
+                <text x="15" y="145" font-size="10" fill="#F44336" font-weight="bold">拉力F</text>
+                <!-- 小球 -->
+                <circle cx="0" cy="130" r="12" fill="url(#ballGrad)" stroke="#c2185b" stroke-width="2"/>
+                <circle cx="0" cy="130" r="8" fill="#f48fb1" opacity="0.6"/>
+                <!-- 能量指示 -->
+                <g opacity="0.9">
+                    <path d="M 25 70 L 35 70 L 30 60 Z" fill="#ffd54f">
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="40" y="75" font-size="11" fill="#f57c00" font-weight="bold">储能中</text>
+                </g>
+                <text x="0" y="175" text-anchor="middle" font-size="11" fill="#666">长度L₁ > L₀</text>
+                <text x="0" y="190" text-anchor="middle" font-size="10" fill="#E65100" font-weight="bold">弹性势能 > 0</text>
+            </g>
+            
+            <!-- 右侧：释放状态 -->
+            <g transform="translate(370, 30)">
+                <text x="0" y="0" font-size="13" fill="#2E7D32" font-weight="bold">释放状态</text>
+                <!-- 固定点 -->
+                <rect x="-20" y="10" width="40" height="20" rx="5" fill="#546e7a" stroke="#263238" stroke-width="2"/>
+                <circle cx="0" cy="20" r="3" fill="#90a4ae"/>
+                <!-- 橡皮筋（回缩） -->
+                <path d="M0,30 L0,80" stroke="url(#rubberGrad1)" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <!-- 小球（向上运动） -->
+                <g id="ball1">
+                    <circle cx="0" cy="50" r="12" fill="url(#ballGrad)" stroke="#c2185b" stroke-width="2">
+                        <animate attributeName="cy" values="80;50;80" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="0" cy="50" r="8" fill="#f48fb1" opacity="0.6">
+                        <animate attributeName="cy" values="80;50;80" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+                <!-- 运动箭头 -->
+                <line x1="0" y1="95" x2="0" y2="75" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrowForce)"/>
+                <text x="15" y="85" font-size="10" fill="#4CAF50" font-weight="bold">运动</text>
+                <text x="0" y="125" text-anchor="middle" font-size="10" fill="#2E7D32" font-weight="bold">势能→动能</text>
+            </g>
+        </svg>
+        <button class="btn" onclick="playStretch()">▶️ 演示：拉伸 → 释放动力</button>
+    </div>
+
+    <div class="demo">
+        <h3>2. 组装橡皮筋小车 & 缠绕蓄能原理</h3>
+        <svg viewBox="0 0 450 220" width="100%" height="220" id="car-svg" style="background:linear-gradient(to bottom, #e3f2fd 0%, #f5f5f5 100%); border-radius:10px;">
+            <defs>
+                <linearGradient id="carGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#42a5f5;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#1976d2;stop-opacity:1" />
+                </linearGradient>
+                <radialGradient id="wheelGrad2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#424242;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#212121;stop-opacity:1" />
+                </radialGradient>
+                <linearGradient id="axleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#757575"/>
+                    <stop offset="50%" style="stop-color:#9E9E9E"/>
+                    <stop offset="100%" style="stop-color:#757575"/>
+                </linearGradient>
+            </defs>
+            
+            <!-- 地面 -->
+            <rect x="0" y="180" width="450" height="40" fill="#bdbdbd" opacity="0.3"/>
+            <line x1="0" y1="180" x2="450" y2="180" stroke="#757575" stroke-width="2"/>
+            
+            <!-- 小车车身 -->
+            <rect x="100" y="135" width="110" height="45" rx="8" fill="url(#carGrad2)" stroke="#0d47a1" stroke-width="2"/>
+            <!-- 车窗 -->
+            <rect x="130" y="142" width="50" height="20" rx="3" fill="#90caf9" opacity="0.7"/>
+            
+            <!-- 后轮 -->
+            <circle cx="125" cy="180" r="18" fill="url(#wheelGrad2)" stroke="#000" stroke-width="2"/>
+            <circle cx="125" cy="180" r="12" fill="#616161"/>
+            <circle cx="125" cy="180" r="6" fill="#9e9e9e"/>
+            <!-- 轮辐 -->
+            <line x1="125" y1="174" x2="125" y2="186" stroke="#424242" stroke-width="1"/>
+            <line x1="119" y1="180" x2="131" y2="180" stroke="#424242" stroke-width="1"/>
+            
+            <!-- 前轮 -->
+            <circle cx="185" cy="180" r="18" fill="url(#wheelGrad2)" stroke="#000" stroke-width="2"/>
+            <circle cx="185" cy="180" r="12" fill="#616161"/>
+            <circle cx="185" cy="180" r="6" fill="#9e9e9e"/>
+            <!-- 轮辐 -->
+            <line x1="185" y1="174" x2="185" y2="186" stroke="#424242" stroke-width="1"/>
+            <line x1="179" y1="180" x2="191" y2="180" stroke="#424242" stroke-width="1"/>
+            
+            <!-- 车轴（连接两轮） -->
+            <rect x="123" y="178" width="64" height="4" fill="url(#axleGrad)" stroke="#424242" stroke-width="1"/>
+            
+            <!-- 橡皮筋缠绕在车轴上 -->
+            <g id="rubberWinding">
+                <!-- 橡皮筋主体（缠绕状态） -->
+                <ellipse cx="155" cy="180" rx="8" ry="12" fill="#e91e63" opacity="0.7"/>
+                <ellipse cx="155" cy="180" rx="6" ry="10" fill="#c2185b" opacity="0.8"/>
+                <!-- 缠绕圈数指示线 -->
+                <path d="M147,180 Q155,175 163,180" stroke="#ad1457" stroke-width="2" fill="none"/>
+                <path d="M147,180 Q155,185 163,180" stroke="#ad1457" stroke-width="2" fill="none"/>
+            </g>
+            
+            <!-- 橡皮筋固定端（连接到车身） -->
+            <line x1="155" y1="168" x2="155" y2="135" stroke="#e91e63" stroke-width="4" stroke-dasharray="3,2"/>
+            <circle cx="155" cy="135" r="4" fill="#c2185b"/>
+            
+            <!-- 缠绕方向箭头 -->
+            <g transform="translate(155, 180)">
+                <path d="M -25,-25 A 25,25 0 0,1 -25,25" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowGreen)"/>
+                <text x="-45" y="5" font-size="11" fill="#2E7D32" font-weight="bold">缠绕</text>
+                <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="0" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L8,3 z" fill="#4CAF50"/>
+                </marker>
+            </g>
+            
+            <!-- 放大图：缠绕原理 -->
+            <g transform="translate(280, 30)">
+                <rect x="0" y="0" width="150" height="110" rx="8" fill="#FFF" stroke="#1976D2" stroke-width="2"/>
+                <text x="75" y="20" text-anchor="middle" font-size="12" fill="#1976D2" font-weight="bold">缠绕原理放大</text>
+                
+                <!-- 车轴 -->
+                <rect x="60" y="35" width="30" height="50" fill="url(#axleGrad)" stroke="#424242" stroke-width="1" rx="2"/>
+                <text x="75" y="95" text-anchor="middle" font-size="9" fill="#666">车轴</text>
+                
+                <!-- 橡皮筋缠绕层 -->
+                <ellipse cx="75" cy="50" rx="18" ry="8" fill="#e91e63" opacity="0.6"/>
+                <ellipse cx="75" cy="55" rx="18" ry="8" fill="#e91e63" opacity="0.6"/>
+                <ellipse cx="75" cy="60" rx="18" ry="8" fill="#e91e63" opacity="0.6"/>
+                <ellipse cx="75" cy="65" rx="18" ry="8" fill="#e91e63" opacity="0.6"/>
+                <ellipse cx="75" cy="70" rx="18" ry="8" fill="#e91e63" opacity="0.6"/>
+                
+                <!-- 标注 -->
+                <line x1="95" y1="60" x2="110" y2="60" stroke="#F57C00" stroke-width="1"/>
+                <text x="115" y="63" font-size="8" fill="#F57C00">多圈</text>
+            </g>
+            
+            <!-- 圈数显示 -->
+            <g>
+                <rect x="280" y="150" width="120" height="40" rx="8" fill="#fff" stroke="#e91e63" stroke-width="3"/>
+                <text id="turns" x="340" y="177" text-anchor="middle" font-size="20" fill="#e91e63" font-weight="bold">0 圈</text>
+            </g>
+            
+            <!-- 能量指示器 -->
+            <g id="energyBar">
+                <rect x="280" y="200" width="120" height="15" rx="8" fill="#e0e0e0" stroke="#757575" stroke-width="1"/>
+                <rect x="282" y="202" width="0" height="11" rx="6" fill="#4caf50" id="energyFill"/>
+                <text x="340" y="212" text-anchor="middle" font-size="9" fill="#666">弹性势能</text>
+            </g>
+        </svg>
+        <button class="btn" onclick="windRubber(10)">🔄 缠绕10圈</button>
+        <button class="btn" onclick="windRubber(30)">🔄 缠绕30圈</button>
+        <button class="btn" onclick="releaseCar()">🚀 松手观察</button>
+    </div>
+
+    <div class="demo">
+        <h3>3. 弹力产生原理 & 钩码实验</h3>
+        <svg viewBox="0 0 450 240" width="100%" height="240" style="background:linear-gradient(to bottom, #fff3e0 0%, #f5f5f5 100%); border-radius:10px;">
+            <defs>
+                <linearGradient id="springGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff6f00;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#ff9800;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ff6f00;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="weightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#8d6e63;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#5d4037;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- 标题 -->
+            <text x="225" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#e65100">弹簧伸长实验</text>
+            
+            <!-- 固定点 -->
+            <rect x="205" y="35" width="40" height="25" rx="5" fill="#546e7a" stroke="#263238" stroke-width="2"/>
+            <circle cx="225" cy="47" r="3" fill="#90a4ae"/>
+            
+            <!-- 弹簧 -->
+            <g id="springGroup">
+                <path id="spring" d="M225,60 L225,110" stroke="url(#springGrad3)" stroke-width="10" fill="none" stroke-linecap="round">
+                    <animate attributeName="stroke-width" values="10;12;10" dur="1.5s" repeatCount="indefinite"/>
+                </path>
+                <!-- 弹簧圈纹理 -->
+                <g opacity="0.6">
+                    <line x1="220" y1="70" x2="230" y2="70" stroke="#f57c00" stroke-width="1.5"/>
+                    <line x1="220" y1="80" x2="230" y2="80" stroke="#f57c00" stroke-width="1.5"/>
+                    <line x1="220" y1="90" x2="230" y2="90" stroke="#f57c00" stroke-width="1.5"/>
+                    <line x1="220" y1="100" x2="230" y2="100" stroke="#f57c00" stroke-width="1.5"/>
+                </g>
+            </g>
+            
+            <!-- 钩码 -->
+            <g id="weights">
+                <rect x="195" y="110" width="60" height="35" rx="5" fill="url(#weightGrad)" stroke="#3e2723" stroke-width="2"/>
+                <!-- 钩码纹理 -->
+                <line x1="200" y1="115" x2="200" y2="140" stroke="#6d4c41" stroke-width="2"/>
+                <line x1="210" y1="115" x2="210" y2="140" stroke="#6d4c41" stroke-width="2"/>
+                <line x1="220" y1="115" x2="220" y2="140" stroke="#6d4c41" stroke-width="2"/>
+                <line x1="230" y1="115" x2="230" y2="140" stroke="#6d4c41" stroke-width="2"/>
+                <line x1="240" y1="115" x2="240" y2="140" stroke="#6d4c41" stroke-width="2"/>
+                <line x1="250" y1="115" x2="250" y2="140" stroke="#6d4c41" stroke-width="2"/>
+                <!-- 挂钩 -->
+                <circle cx="225" cy="110" r="5" fill="#424242" stroke="#212121" stroke-width="1"/>
+            </g>
+            
+            <!-- 钩码数量显示 -->
+            <g>
+                <rect x="280" y="100" width="140" height="50" rx="8" fill="#fff" stroke="#ff9800" stroke-width="3"/>
+                <text id="weight-text" x="350" y="132" text-anchor="middle" font-size="20" fill="#ff9800" font-weight="bold">1个钩码</text>
+            </g>
+            
+            <!-- 弹力箭头 -->
+            <g opacity="0.8">
+                <defs>
+                    <marker id="arrowUp" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                        <path d="M0,5 L10,5 L5,0 Z" fill="#4caf50" />
+                    </marker>
+                </defs>
+                <line x1="180" y1="90" x2="180" y2="60" stroke="#4caf50" stroke-width="3" marker-end="url(#arrowUp)">
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1s" repeatCount="indefinite"/>
+                </line>
+                <text x="160" y="75" font-size="11" fill="#4caf50" font-weight="bold">弹力↑</text>
+            </g>
+            
+            <!-- 重力箭头 -->
+            <g opacity="0.8">
+                <defs>
+                    <marker id="arrowDown" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                        <path d="M0,5 L10,5 L5,10 Z" fill="#f44336" />
+                    </marker>
+                </defs>
+                <line x1="270" y1="130" x2="270" y2="160" stroke="#f44336" stroke-width="3" marker-end="url(#arrowDown)">
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1s" repeatCount="indefinite"/>
+                </line>
+                <text x="275" y="145" font-size="11" fill="#f44336" font-weight="bold">重力↓</text>
+            </g>
+            
+            <!-- 说明 -->
+            <text x="225" y="200" text-anchor="middle" font-size="13" fill="#666">钩码越多 → 弹簧伸长越多 → 弹力越大</text>
+        </svg>
+        <button class="btn" onclick="addWeight(1)">➕ 挂1个钩码</button>
+        <button class="btn" onclick="addWeight(3)">➕ 挂3个钩码</button>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="color:var(--main);">二、闯关塔 - 100分测试（共35题）</h2>
+    <form id="quiz"></form>
+    <button type="button" class="submit-btn" onclick="checkAnswer()">🎯 提交答案，看成绩！</button>
+</div>
+
+</div>
+
+<div id="result">
+    <div class="box">
+        <span class="close" onclick="closeResult()">×</span>
+        <h2 style="text-align:center;color:var(--main);">测试结果</h2>
+        <div class="score" id="score">0</div>
+        <h3>错题解析</h3>
+        <div id="wrong"></div>
+    </div>
+</div>
+
+<script>
+// --- 即时反馈系统 ---
+const InstantFeedback = {
+    audioCtx: null,
+    encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+    hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+    
+    init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+    
+    playCorrectSound() {
+        this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        const notes = [523.25, 659.25, 783.99];
+        notes.forEach((freq, i) => {
+            const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+            osc.connect(gain); gain.connect(this.audioCtx.destination);
+            const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+            osc.frequency.value = freq; osc.type = 'sine';
+            gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+            osc.start(start); osc.stop(start + 0.3);
+        });
+    },
+    
+    playWrongSound() {
+        this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+        osc.connect(gain); gain.connect(this.audioCtx.destination);
+        const now = this.audioCtx.currentTime;
+        osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+    },
+    
+    showConfetti() {
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => {
+                const c = document.createElement('div'); c.className = 'confetti';
+                c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 4000);
+            }, i * 30);
+        }
+    },
+    
+    showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `feedback-toast feedback-${type}`;
+        toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+    },
+    
+    onCorrect(element) {
+        this.playCorrectSound(); this.showConfetti();
+        const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+        this.showToast(msg, 'success');
+        if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+    },
+    
+    onWrong(element, hint = '') {
+        this.playWrongSound();
+        const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+        this.showToast(msg, 'error');
+        if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+    }
+};
+InstantFeedback.init();
+
+// ==================== SVG动画 ====================
+function playStretch() {
+    const band = document.getElementById('rubber1');
+    const ball = document.getElementById('ball1');
+    // 拉伸
+    band.setAttribute('d', 'M225,40 L225,150');
+    ball.setAttribute('transform', 'translate(0, 40)');
+    setTimeout(() => {
+        // 释放回弹
+        band.setAttribute('d', 'M225,40 L225,60');
+        ball.setAttribute('transform', 'translate(0, -50)');
+    }, 1000);
+    setTimeout(() => {
+        // 恢复原位
+        band.setAttribute('d', 'M225,40 L225,110');
+        ball.setAttribute('transform', 'translate(0, 0)');
+    }, 1500);
+}
+
+let turns = 0;
+function windRubber(n) {
+    turns = n;
+    document.getElementById('turns').textContent = turns + ' 圈';
+    const band = document.getElementById('band');
+    const energyFill = document.getElementById('energyFill');
+    
+    if(n > 20) {
+        band.setAttribute('d', 'M120,110 Q150,80 180,110 Q150,140 120,110');
+        energyFill.setAttribute('width', '116'); // 满能量
+    } else if(n > 0) {
+        band.setAttribute('d', 'M120,110 Q150,95 180,110');
+        energyFill.setAttribute('width', '58'); // 半能量
+    } else {
+        band.setAttribute('d', 'M120,110 L180,110');
+        energyFill.setAttribute('width', '0');
+    }
+}
+
+function releaseCar() {
+    const msg = turns > 20 ? '🚀 行驶距离：约240cm（较远）\n能量充足！' : 
+                turns > 0 ? '🚗 行驶距离：约85cm（较近）\n能量一般' : 
+                '⚠️ 请先缠绕橡皮筋！';
+    alert(msg);
+    // 重置
+    setTimeout(() => {
+        turns = 0;
+        windRubber(0);
+    }, 2000);
+}
+
+function addWeight(n) {
+    const spring = document.getElementById('spring');
+    const weights = document.getElementById('weights');
+    const text = document.getElementById('weight-text');
+    
+    const baseY = 60;
+    const stretchPerWeight = 35;
+    const newY = baseY + (n * stretchPerWeight);
+    
+    spring.setAttribute('d', `M225,60 L225,${newY}`);
+    
+    // 更新钩码位置和数量
+    weights.innerHTML = '';
+    for(let i=0; i<n; i++) {
+        const y = newY + (i * 38);
+        weights.innerHTML += `
+            <rect x="195" y="${y}" width="60" height="35" rx="5" fill="url(#weightGrad)" stroke="#3e2723" stroke-width="2"/>
+            <line x1="200" y1="${y+5}" x2="200" y2="${y+30}" stroke="#6d4c41" stroke-width="2"/>
+            <line x1="210" y1="${y+5}" x2="210" y2="${y+30}" stroke="#6d4c41" stroke-width="2"/>
+            <line x1="220" y1="${y+5}" x2="220" y2="${y+30}" stroke="#6d4c41" stroke-width="2"/>
+            <line x1="230" y1="${y+5}" x2="230" y2="${y+30}" stroke="#6d4c41" stroke-width="2"/>
+            <line x1="240" y1="${y+5}" x2="240" y2="${y+30}" stroke="#6d4c41" stroke-width="2"/>
+            <line x1="250" y1="${y+5}" x2="250" y2="${y+30}" stroke="#6d4c41" stroke-width="2"/>
+        `;
+    }
+    weights.innerHTML += `<circle cx="225" cy="${newY}" r="5" fill="#424242" stroke="#212121" stroke-width="1"/>`;
+    
+    text.textContent = n + '个钩码';
+}
+
+// ==================== 35道题数据 ====================
+const questions = [
+    // 选择题 1-20（每题2分）
+    {id:1,type:'choice',q:'1. 拉长的橡皮筋具有什么能量？',opts:['A. 动能','B. 弹性势能','C. 重力势能'],ans:'B',exp:'弹性势能'},
+    {id:2,type:'choice',q:'2. 橡皮筋小车的动力来自（ ）',opts:['A. 电池','B. 被拉长的橡皮筋','C. 风力'],ans:'B',exp:'橡皮筋'},
+    {id:3,type:'choice',q:'3. 橡皮筋缠绕圈数越多，小车行驶距离（ ）',opts:['A. 越近','B. 越远','C. 不变'],ans:'B',exp:'圈数多储能多'},
+    {id:4,type:'choice',q:'4. 橡皮筋产生的恢复力叫（ ）',opts:['A. 重力','B. 弹力','C. 摩擦力'],ans:'B',exp:'弹力定义'},
+    {id:5,type:'choice',q:'5. 实验中应保持不变的是（ ）',opts:['A. 橡皮筋圈数','B. 小车质量和路面','C. 行驶距离'],ans:'B',exp:'控制变量'},
+    {id:6,type:'choice',q:'6. 橡皮筋一端应固定在（ ）',opts:['A. 车轮','B. 车轴','C. 车顶'],ans:'B',exp:'车轴带动转动'},
+    {id:7,type:'choice',q:'7. 橡皮筋拉得越长，弹力（ ）',opts:['A. 越小','B. 越大','C. 不变'],ans:'B',exp:'形变大弹力大'},
+    {id:8,type:'choice',q:'8. 橡皮筋恢复原长后（ ）',opts:['A. 仍有弹力','B. 弹力消失','C. 变成钢丝'],ans:'B',exp:'无形变无弹力'},
+    {id:9,type:'choice',q:'9. 下列不属于弹力应用的是（ ）',opts:['A. 弓箭','B. 蹦床','C. 水往低处流'],ans:'C',exp:'水流靠重力'},
+    {id:10,type:'choice',q:'10. 缠绕30圈比10圈远的原因是（ ）',opts:['A. 力更大，时间更长','B. 小车变轻','C. 路面变滑'],ans:'A',exp:'能量更多'},
+    {id:11,type:'choice',q:'11. 弹簧测力计原理是（ ）',opts:['A. 伸长与拉力成正比','B. 伸长与质量成正比','C. 无规律'],ans:'A',exp:'胡克定律'},
+    {id:12,type:'choice',q:'12. 松手瞬间，小车获得（ ）',opts:['A. 弹力','B. 动能','C. 重力'],ans:'B',exp:'势能转动能'},
+    {id:13,type:'choice',q:'13. 车轮打滑应（ ）',opts:['A. 增加重量','B. 减少圈数','C. 换细橡皮筋'],ans:'A',exp:'增大摩擦'},
+    {id:14,type:'choice',q:'14. 撑杆跳高利用（ ）',opts:['A. 撑杆弹力','B. 臂力','C. 重力'],ans:'A',exp:'杆弯曲储能'},
+    {id:15,type:'choice',q:'15. 超过弹性限度会（ ）',opts:['A. 弹力更大','B. 永久变形或断裂','C. 自动恢复'],ans:'B',exp:'失去弹性'},
+    {id:16,type:'choice',q:'16. 弹簧枪利用（ ）',opts:['A. 弹性势能→动能','B. 化学能→热能','C. 电能→光能'],ans:'A',exp:'能量转化'},
+    {id:17,type:'choice',q:'17. 小车停下主要因为（ ）',opts:['A. 弹力用完','B. 摩擦力消耗动能','C. 重力太大'],ans:'B',exp:'摩擦做负功'},
+    {id:18,type:'choice',q:'18. 圆珠笔伸缩靠（ ）',opts:['A. 小弹簧弹力','B. 塑料变形','C. 磁力'],ans:'A',exp:'弹簧应用'},
+    {id:19,type:'choice',q:'19. 多次测量为了（ ）',opts:['A. 减小误差','B. 好玩','C. 浪费时间'],ans:'A',exp:'科学方法'},
+    {id:20,type:'choice',q:'20. 拉长橡皮筋松手会（ ）',opts:['A. 慢慢恢复','B. 迅速恢复原长','C. 保持伸长'],ans:'B',exp:'弹性恢复快'},
+
+    // 填空题 21-30（每题2分）
+    {id:21,type:'fill',q:'21. 拉长的橡皮筋具有<u>____</u>势能。',ans:['弹性']},
+    {id:22,type:'fill',q:'22. 橡皮筋小车动力来自被拉长的<u>____</u>。',ans:['橡皮筋']},
+    {id:23,type:'fill',q:'23. 物体形变产生的恢复力叫<u>____</u>。',ans:['弹力']},
+    {id:24,type:'fill',q:'24. 实验中只改变橡皮筋缠绕的<u>____</u>。',ans:['圈数']},
+    {id:25,type:'fill',q:'25. 橡皮筋伸得越长，弹力越<u>____</u>。',ans:['大']},
+    {id:26,type:'fill',q:'26. 圈数越多，储存的<u>____</u>越多。',ans:['能量','弹性势能']},
+    {id:27,type:'fill',q:'27. 弓箭、弹簧、橡皮筋都具有<u>____</u>。',ans:['弹性']},
+    {id:28,type:'fill',q:'28. 橡皮筋恢复时，弹性势能转化为<u>____</u>。',ans:['动能']},
+    {id:29,type:'fill',q:'29. 弹簧测力计利用伸长与<u>____</u>成正比原理。',ans:['拉力','力']},
+    {id:30,type:'fill',q:'30. 结论：圈数越多，距离越<u>____</u>。',ans:['远']},
+
+    // 拖拽题 31-33（每题5分）
+    {id:31,type:'drag',q:'31. 将物品按是否主要靠弹力分类（点击物品，再点击分类框）',cats:['靠弹力','不靠弹力'],items:['蹦床','弓箭','弹簧秤','水杯掉落','拉力器'],correct:[0,0,0,1,0]},
+    {id:32,type:'drag',q:'32. 实验步骤排序（点击拖入对应位置）',cats:['第1步','第2步','第3步','第4步'],items:['固定橡皮筋','缠绕橡皮筋','松手释放','记录距离'],correct:[0,1,2,3]},
+    {id:33,type:'drag',q:'33. 判断行驶距离（点击分类）',cats:['行驶较远','行驶较近'],items:['缠绕30圈','缠绕5圈','橡皮筋很粗','车身很重'],correct:[0,1,0,1]},
+
+    // 实验探究题 34-35（每题12.5分）
+    {id:34,type:'exp',q:'34. 实验记录表如下，请分析：',
+     svg:`<svg viewBox="0 0 380 160" style="background:#fff;border:1px solid #ddd"><text x="190" y="25" text-anchor="middle" font-weight="bold">圈数与距离关系</text><line x1="50" y1="50" x2="330" y2="50" stroke="#333"/><text x="100" y="45">圈数</text><text x="220" y="45">距离(cm)</text><line x1="50" y1="70" x2="330" y2="70" stroke="#ddd"/><text x="100" y="90">10</text><text x="220" y="90">85</text><line x1="50" y1="110" x2="330" y2="110" stroke="#ddd"/><text x="100" y="130">20</text><text x="220" y="130">165</text><line x1="50" y1="150" x2="330" y2="150" stroke="#ddd"/><text x="100" y="170">30</text><text x="220" y="170">240</text></svg>`,
+     subs:[
+         {q:'(1)【填空】实验改变的条件是____。',ans:['圈数','缠绕圈数']},
+         {q:'(2)【分析】数据规律是：圈数越____，距离越____。',ans:['多','远']},
+         {q:'(3)【原理】解释原因（包含能量、力、时间等关键词）',ans:['能量','弹力','时间','做功']}
+     ]},
+    {id:35,type:'exp',q:'35. 钩码实验示意图，请回答：',
+     svg:`<svg viewBox="0 0 300 200"><rect x="130" y="10" width="40" height="20" fill="#666"/><path d="M150,30 L150,80" stroke="#E91E63" stroke-width="6"/><rect x="120" y="80" width="60" height="30" fill="#795548" rx="5"/><text x="150" y="130" text-anchor="middle">1个钩码</text><path d="M150,30 L150,140" stroke="#E91E63" stroke-width="6" transform="translate(100,0)"/><rect x="220" y="140" width="60" height="30" fill="#795548" rx="5"/><rect x="220" y="162" width="60" height="30" fill="#795548" rx="5"/><text x="250" y="200" text-anchor="middle">3个钩码</text></svg>`,
+     subs:[
+         {q:'(1)【填空】钩码越多，橡皮筋越____。',ans:['长']},
+         {q:'(2)【填空】弹力方向向____。',ans:['上']},
+         {q:'(3)【原理】为什么钩码越多弹力越大？',ans:['形变','拉力']}
+     ]}
+];
+
+// ==================== 生成题目 ====================
+const quiz = document.getElementById('quiz');
+questions.forEach(q => {
+    let html = `<div class="q" data-qid="${q.id}">`;
+    
+    if(q.type==='choice'){
+        html += `<span class="tag tag-choice">选择题</span><strong>${q.q}</strong><div class="options">`;
+        q.opts.forEach((o,i)=>html+=`<label onclick="checkChoiceAnswer(${q.id},'${String.fromCharCode(65+i)}',this,event)"><input type="radio" name="q${q.id}" value="${String.fromCharCode(65+i)}">${o}</label>`);
+        html += `</div>`;
+    }
+    else if(q.type==='fill'){
+        const parts = q.q.split('<u>____</u>');
+        html += `<span class="tag tag-fill">填空题</span><strong>${parts[0]}<input type="text" name="q${q.id}" style="width:150px;display:inline-block;margin:0 5px;" onblur="checkFillAnswer(${q.id},this)">${parts[1]||''}</strong>`;
+    }
+    else if(q.type==='drag'){
+        html += `<span class="tag tag-drag">拖拽题</span><strong>${q.q}</strong><div class="drag-box">`;
+        q.cats.forEach((cat,i)=>html+=`<div class="drop-area" data-cat="${i}"><h4>${cat}</h4><div class="drop-content"></div></div>`);
+        html += `</div><div class="items-pool">`;
+        q.items.forEach((item,i)=>html+=`<div class="item" data-item="${i}" onclick="selectItem(this,${q.id})">${item}</div>`);
+        html += `</div><input type="hidden" id="ans${q.id}">`;
+    }
+    else if(q.type==='exp'){
+        html += `<span class="tag tag-exp">实验探究（12.5分）</span><strong>${q.q}</strong><div class="exp">${q.svg}`;
+        q.subs.forEach((s,j)=>{
+            html += `<div class="sub"><label>${s.q}</label>`;
+            if(s.q.includes('填空')) html += `<input type="text" name="exp${q.id}_${j}" style="width:300px;">`;
+            else html += `<textarea name="exp${q.id}_${j}"></textarea>`;
+            html += `</div>`;
+        });
+        html += `</div>`;
+    }
+    html += `</div>`;
+    quiz.innerHTML += html;
+});
+
+// ==================== 拖拽功能（点击式） ====================
+let selectedItem = null;
+let selectedQid = null;
+
+function selectItem(el, qid) {
+    if(el.classList.contains('used')) return;
+    
+    // 取消之前的选中
+    if(selectedItem) selectedItem.style.border = '';
+    
+    selectedItem = el;
+    selectedQid = qid;
+    el.style.border = '3px solid #E91E63';
+    
+    // 高亮可放置区域
+    const drops = document.querySelectorAll(`[data-qid="${qid}"] .drop-area`);
+    drops.forEach(d => {
+        d.style.cursor = 'pointer';
+        d.onclick = function() {
+            if(!selectedItem) return;
+            const cat = this.dataset.cat;
+            const itemIndex = selectedItem.dataset.item;
+            
+            // 克隆到目标区域
+            const clone = selectedItem.cloneNode(true);
+            clone.onclick = null;
+            clone.style.border = '';
+            this.querySelector('.drop-content').appendChild(clone);
+            
+            // 标记原始为已使用
+            selectedItem.classList.add('used');
+            selectedItem.style.border = '';
+            selectedItem = null;
+            
+            // 保存答案
+            saveAnswer(qid);
+            
+            // 取消点击
+            drops.forEach(d => d.onclick = null);
+        };
+    });
+}
+
+function saveAnswer(qid) {
+    const answer = [];
+    const areas = document.querySelectorAll(`[data-qid="${qid}"] .drop-area`);
+    areas.forEach((area, catIdx) => {
+        const items = area.querySelectorAll('.item');
+        items.forEach(item => {
+            answer.push(`${item.dataset.item}:${catIdx}`);
+        });
+    });
+    document.getElementById(`ans${qid}`).value = answer.join(',');
+}
+
+// 即时反馈函数
+function checkChoiceAnswer(qid,selectedAnswer,labelElement,event){
+event.preventDefault();
+const qData=questions.find(q=>q.id===qid);
+if(!qData)return;
+const radio=labelElement.querySelector('input[type="radio"]');
+radio.checked=true;
+const allLabels=labelElement.parentElement.querySelectorAll('label');
+allLabels.forEach(l=>l.classList.remove('correct-feedback','wrong-feedback'));
+const isCorrect=selectedAnswer===qData.ans;
+setTimeout(()=>{
+if(isCorrect){
+InstantFeedback.onCorrect(labelElement);
+}else{
+InstantFeedback.onWrong(labelElement,qData.exp);
+}
+},200);
+}
+
+function checkFillAnswer(qid,inputElement){
+const qData=questions.find(q=>q.id===qid);
+if(!qData)return;
+const userAnswer=inputElement.value.trim();
+if(!userAnswer)return;
+const isCorrect=qData.ans.some?qData.ans.some(a=>userAnswer.includes(a)):userAnswer.includes(qData.ans);
+inputElement.classList.remove('correct-feedback','wrong-feedback');
+setTimeout(()=>{
+if(isCorrect){
+InstantFeedback.onCorrect(inputElement);
+}else{
+InstantFeedback.onWrong(inputElement,qData.exp);
+}
+},200);
+}
+
+// ==================== 判卷（100%可靠版本） ====================
+function checkAnswer() {
+    console.log('开始判卷...');
+    let score = 0;
+    let wrongList = [];
+
+    questions.forEach(q => {
+        let isCorrect = false;
+        
+        if(q.type === 'choice') {
+            const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+            if(selected && selected.value === q.ans) {
+                isCorrect = true;
+                score += 2;
+            }
+        }
+        else if(q.type === 'fill') {
+            const input = document.querySelector(`input[name="q${q.id}"]`);
+            const value = input ? input.value.trim() : '';
+            if(q.ans.some(a => value.includes(a))) {
+                isCorrect = true;
+                score += 2;
+            }
+        }
+        else if(q.type === 'drag') {
+            const answer = document.getElementById(`ans${q.id}`).value;
+            if(answer) {
+                const pairs = answer.split(',');
+                let allCorrect = true;
+                pairs.forEach(pair => {
+                    const [itemIdx, catIdx] = pair.split(':');
+                    if(q.correct[parseInt(itemIdx)] !== parseInt(catIdx)) allCorrect = false;
+                });
+                if(allCorrect && pairs.length === q.items.length) {
+                    isCorrect = true;
+                    score += 5;
+                }
+            }
+        }
+        else if(q.type === 'exp') {
+            let subCorrect = 0;
+            q.subs.forEach((sub, idx) => {
+                const el = document.querySelector(`[name="exp${q.id}_${idx}"]`);
+                const value = el ? el.value.trim() : '';
+                if(sub.ans.some(a => value.includes(a))) subCorrect++;
+            });
+            const subScore = (subCorrect / q.subs.length) * 12.5;
+            score += subScore;
+            if(subScore >= 12) isCorrect = true;
+        }
+        
+        if(!isCorrect) {
+            wrongList.push({id: q.id, q: q.q, exp: q.exp || '见题目解析'});
+        }
+    });
+
+    // 显示结果
+    const finalScore = Math.round(score);
+    console.log('最终得分:', finalScore);
+    
+    document.getElementById('score').textContent = finalScore;
+    
+    const wrongDiv = document.getElementById('wrong');
+    if(wrongList.length === 0) {
+        wrongDiv.innerHTML = '<div class="correct-msg">🎉 太棒了！全对！满分100分！🎉</div>';
+    } else {
+        let wrongHtml = '';
+        wrongList.forEach(w => {
+            wrongHtml += `<div class="wrong"><strong>第${w.id}题</strong><br>${w.q}<br><span style="color:#4CAF50;">解析：${w.exp}</span></div>`;
+        });
+        wrongDiv.innerHTML = wrongHtml;
+    }
+    
+    document.getElementById('result').style.display = 'block';
+    console.log('弹窗已显示');
+}
+
+function closeResult() {
+    document.getElementById('result').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

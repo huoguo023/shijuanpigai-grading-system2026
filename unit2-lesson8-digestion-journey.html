@@ -1,0 +1,593 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第八课：食物在身体里的旅行 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #FFEBEE; /* 脏器粉背景 */
+            --card-bg: #FFFFFF;
+            --primary: #EF5350; /* 消化红 */
+            --secondary: #AB47BC; /* 肠道紫 */
+            --accent: #FFA726; /* 胃酸橙 */
+            --text: #455A64;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#FFCDD2 10%, transparent 11%);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 3px solid #EF9A9A;
+            overflow: hidden;
+        }
+
+        h1 { color: #C62828; margin-top: 0; font-size: 1.5em; }
+        .subtitle { color: #880E4F; font-size: 0.9em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #FFEBEE;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid var(--primary);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #B71C1C; border-bottom: 1px dashed #E57373; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { background: #FFF9C4; padding: 0 4px; border-radius: 3px; font-weight: bold; color: #E65100; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFF;
+            border: 2px dashed #EF9A9A;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+            height: auto;
+            overflow: hidden;
+        }
+        .svg-caption { font-size: 0.85em; color: #880E4F; margin-top: 5px; font-style: italic; }
+
+        /* 动画关键帧 */
+        @keyframes digestionPath {
+            0% { offset-distance: 0%; fill: #8D6E63; transform: scale(1); } /* 口 */
+            10% { offset-distance: 10%; fill: #8D6E63; } /* 食道 */
+            25% { offset-distance: 25%; fill: #A1887F; transform: scale(0.8); } /* 胃 */
+            35% { offset-distance: 25%; fill: #D7CCC8; transform: scale(0.5); } /* 胃消化 */
+            50% { offset-distance: 50%; fill: #FFF59D; transform: scale(0.3); } /* 小肠 */
+            75% { offset-distance: 75%; fill: #795548; transform: scale(0.4); } /* 大肠 */
+            100% { offset-distance: 100%; fill: #5D4037; transform: scale(0.4); } /* 排出 */
+        }
+        @keyframes squeeze { 0% {transform: scaleX(1);} 50% {transform: scaleX(0.6);} 100% {transform: scaleX(1);} }
+        @keyframes knead { 0% {transform: rotate(0deg) scale(1);} 25% {transform: rotate(5deg) scale(0.95);} 75% {transform: rotate(-5deg) scale(0.95);} 100% {transform: rotate(0deg) scale(1);} }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #C62828;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #C62828; }
+        .btn-next { background: var(--secondary); box-shadow: 0 4px 0 #7B1FA2; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #F3E5F5; border-radius: 5px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #fff; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #BA68C8; margin-top: 10px; }
+        .q-tag { display:inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; color:white;}
+        .tag-choice { background: #42A5F5; }
+        .tag-fill { background: #AB47BC; }
+        .tag-sort { background: #FF7043; }
+        .tag-exp { background: #66BB6A; }
+        
+        .q-content { font-size: 1.15em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项样式 */
+        .option-item {
+            background: #FAFAFA; border: 2px solid #E0E0E0; padding: 12px; border-radius: 8px;
+            margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #F3E5F5; border-color: #AB47BC; font-weight: bold; color: #6A1B9A; }
+
+        .fill-input { border: none; border-bottom: 2px solid #AB47BC; background: transparent; width: 100px; text-align: center; font-size: 1.1em; color: #6A1B9A; border-radius: 0; outline: none; }
+
+        /* 排序题容器 */
+        .sort-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sort-item { 
+            background: #E1BEE7; border: 1px solid #8E24AA; color: #4A148C;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.9em; cursor: pointer;
+        }
+        .sort-box { 
+            min-height: 50px; border: 2px dashed #90A4AE; border-radius: 8px; 
+            margin-top: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            background: #ECEFF1; align-items: center; justify-content: center;
+        }
+        .sort-placeholder { color: #999; font-size: 0.8em; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; font-size: 0.95em; }
+        .score-display { font-size: 3.5em; color: var(--primary); font-weight: bold; margin: 10px 0; }
+
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 第一块：复习巩固 -->
+    <div id="section-review" class="container section active">
+        <h1>🚶‍♂️ 食物在身体里的旅行</h1>
+        <p class="subtitle">复习巩固 & 100分闯关塔</p>
+
+        <!-- 知识点 1, 2, 7: 消化系统全图与路线 -->
+        <div class="knowledge-box">
+            <h3>1. 消化器官全景图</h3>
+            <div class="k-point">🗺️ <strong>旅行路线</strong>：<span class="highlight">口腔 → 咽 → 食道 → 胃 → 小肠 → 大肠 → 体外</span>。</div>
+            <div class="k-point">👄 <strong>口腔</strong>：搅拌、咀嚼、磨碎。初步消化。</div>
+            <div class="k-point">🎢 <strong>食道</strong>：光滑且直，蠕动运输食物到胃。</div>
+            <div class="k-point">👜 <strong>胃</strong>：肌肉发达，有胃酸；蠕动把食物变成<span class="highlight">糊状（食糜）</span>。</div>
+            <div class="k-point">🌀 <strong>小肠</strong>：消化、<span class="highlight">吸收的主要场所</span>（大部分营养）。</div>
+            <div class="k-point">💩 <strong>大肠</strong>：吸收水分，形成粪便。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="250" viewBox="0 0 200 300">
+                    <!-- 人体轮廓 -->
+                    <path d="M60,20 Q100,-10 140,20 Q160,50 160,100 Q160,200 150,280 Q50,280 40,200 Q40,50 60,20" fill="#FFEBEE" stroke="#EF9A9A"/>
+                    
+                    <!-- 消化道路径 -->
+                    <path id="digestivePath" d="M100,40 L100,80 L115,110 Q130,115 110,130 Q90,120 115,110 M110,130 L100,140 L80,140 L80,160 L120,160 L120,180 L80,180 M120,180 Q150,200 100,220 Q50,200 80,180 M100,220 L100,260" fill="none" stroke="none"/>
+                    
+                    <!-- 器官绘制 -->
+                    <text x="110" y="40" font-size="10" fill="#555">口腔</text>
+                    <path d="M95,50 L105,50 L105,90 L95,90 Z" fill="#F8BBD0"/> <!-- 食道 -->
+                    <text x="60" y="70" font-size="10" fill="#555">食道</text>
+                    
+                    <path d="M90,90 Q130,90 130,110 Q130,140 100,130 Q80,120 90,90" fill="#EF5350"/> <!-- 胃 -->
+                    <text x="140" y="110" font-size="10" fill="#555">胃</text>
+                    
+                    <path d="M80,140 L120,140 L120,180 L80,180 Z" fill="#FFF59D" stroke="#FBC02D"/> <!-- 小肠 -->
+                    <text x="50" y="160" font-size="10" fill="#555">小肠</text>
+                    
+                    <path d="M70,130 L130,130 L130,190 L70,190 Z" fill="none" stroke="#8D6E63" stroke-width="4"/> <!-- 大肠框 -->
+                    <text x="140" y="170" font-size="10" fill="#555">大肠</text>
+
+                    <!-- 食物球动画 -->
+                    <circle r="4" fill="#8D6E63">
+                        <animateMotion dur="6s" repeatCount="indefinite" path="M100,40 L100,90 L110,110 L110,130 L90,150 L110,160 L100,170 L125,150 L75,160 L130,180 L70,180 L100,260" />
+                        <animate attributeName="r" values="4;4;3;2;1.5;2;2" dur="6s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <div class="svg-caption">食物在体内的旅行：变小、变糊、被吸收</div>
+            </div>
+        </div>
+
+        <!-- 知识点 3: 模拟食道 -->
+        <div class="knowledge-box">
+            <h3>2. 模拟食道的工作</h3>
+            <div class="k-point">🧪 <strong>材料</strong>：透明塑料管（模拟食道）、小块馒头（模拟食物）。</div>
+            <div class="k-point">👆 <strong>操作</strong>：手指挤压馒头上的管子。</div>
+            <div class="k-point">👀 <strong>现象</strong>：馒头顺着管子向下移动。说明食道通过<span class="highlight">蠕动</span>运输食物。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 管子 -->
+                    <rect x="100" y="10" width="100" height="80" rx="5" fill="none" stroke="#CCC" stroke-width="2"/>
+                    <path d="M100,10 L200,10 M100,90 L200,90" stroke="#333"/>
+                    
+                    <!-- 馒头 -->
+                    <circle cx="150" cy="50" r="15" fill="#FFECB3" stroke="#FFCA28"/>
+                    
+                    <!-- 手挤压动画 -->
+                    <path d="M130,5 L130,25" stroke="#E91E63" stroke-width="5" marker-end="url(#arrow)">
+                        <animate attributeName="d" values="M130,5 L130,25; M140,5 L140,25; M150,5 L150,25; M160,5 L160,25" dur="2s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M130,95 L130,75" stroke="#E91E63" stroke-width="5" marker-end="url(#arrow)">
+                         <animate attributeName="d" values="M130,95 L130,75; M140,95 L140,75; M150,95 L150,75; M160,95 L160,75" dur="2s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#E91E63" />
+                        </marker>
+                    </defs>
+                    <text x="220" y="55" font-size="12">挤压蠕动</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 4: 模拟胃 -->
+        <div class="knowledge-box">
+            <h3>3. 模拟胃的工作</h3>
+            <div class="k-point">🧪 <strong>材料</strong>：塑料袋（模拟胃）、水+食物。</div>
+            <div class="k-point">✊ <strong>操作</strong>：反复揉挤袋子（模拟胃的蠕动）。</div>
+            <div class="k-point">👀 <strong>现象</strong>：食物变成<span class="highlight">糊状（食糜）</span>。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="120" viewBox="0 0 300 120">
+                    <!-- 塑料袋 -->
+                    <path d="M100,20 Q80,60 100,100 L200,100 Q220,60 200,20 L100,20" fill="#E1F5FE" stroke="#039BE5" opacity="0.8" style="animation: knead 2s infinite ease-in-out; transform-origin: center;"/>
+                    
+                    <!-- 内部食物 -->
+                    <g style="animation: knead 2s infinite ease-in-out; transform-origin: center;">
+                        <circle cx="130" cy="60" r="8" fill="#D7CCC8"/>
+                        <circle cx="150" cy="70" r="6" fill="#FFCC80"/>
+                        <circle cx="170" cy="50" r="8" fill="#A5D6A7"/>
+                        <!-- 变成糊 -->
+                        <rect x="110" y="80" width="80" height="15" fill="#FFE082" opacity="0.5"/>
+                    </g>
+                    
+                    <!-- 手 -->
+                    <text x="240" y="60" font-size="12" fill="#E91E63">揉挤 → 变糊</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 5, 6: 健康与爱护 -->
+        <div class="knowledge-box">
+            <h3>4. 爱护消化器官</h3>
+            <div class="k-point">⚠️ <strong>伤害行为</strong>：过冷、过热、不洁净、不充分咀嚼（狼吞虎咽）。</div>
+            <div class="k-point">❤️ <strong>保护</strong>：细嚼慢咽，有利于营养吸收，为生长提供养料。</div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入100分闯关塔！🚀</button>
+    </div>
+
+    <!-- 第二块：闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.9em; color:#880E4F;">
+            <span>总分：100分</span>
+            <span>题目：<span id="q-index">1</span> / 20</span>
+        </div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">提交 / 下一题</button>
+    </div>
+
+    <!-- 第三块：结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 题库 (20题，精选覆盖35题知识点，每题5分) ---
+        const quizData = [
+            // 1. 路线排序 (4题)
+            { type: 'sort', q: '请按食物旅行的顺序排列器官：', items: ['口腔', '胃', '食道', '小肠', '大肠'], answerOrder: ['口腔', '食道', '胃', '小肠', '大肠'], exp: '从上到下的消化顺序。' },
+            { type: 'mcq', q: '食物从食道出来后，直接进入的器官是？', opts: ['小肠', '胃', '大肠'], a: 1, exp: '食道连接胃。' },
+            { type: 'mcq', q: '食物旅行的终点（排出体外前）是？', opts: ['小肠', '胃', '大肠'], a: 2, exp: '大肠形成粪便排出。' },
+            { type: 'mcq', q: '食物进入体内后，经过的第一个消化器官是？', opts: ['胃', '口腔', '食道'], a: 1, exp: '入口即口腔。' },
+
+            // 2. 器官功能 (6题)
+            { type: 'mcq', q: '人体主要的消化和吸收场所是？', opts: ['胃', '小肠', '大肠'], a: 1, exp: '小肠很长，吸收大部分营养。' },
+            { type: 'mcq', q: '主要负责吸收食物残渣中水分的器官是？', opts: ['食道', '小肠', '大肠'], a: 2, exp: '大肠回收水分。' },
+            { type: 'fill', q: '胃通过____把食物变成食糜（糊状）。', a: ['蠕动'], exp: '胃壁肌肉发达，进行物理蠕动。' },
+            { type: 'mcq', q: '食道的主要作用是？', opts: ['磨碎食物', '运输食物', '吸收营养'], a: 1, exp: '连接口腔和胃的通道。' },
+            { type: 'mcq', q: '胃里有____，可以帮助消化分解食物。', opts: ['唾液', '胃酸', '胆汁'], a: 1, exp: '胃液中含有胃酸。' },
+            { type: 'mcq', q: '不能被消化吸收的食物残渣最终会形成____排出体外。', opts: ['尿液', '粪便', '汗液'], a: 1, exp: '消化系统的排泄物。' },
+
+            // 3. 模拟实验 (5题)
+            { type: 'mcq', q: '在模拟实验中，透明塑料管模拟的是？', opts: ['食道', '胃', '肠'], a: 0, exp: '管状结构模拟食道。' },
+            { type: 'mcq', q: '挤压塑料管中的馒头，模拟的是食道的？', opts: ['吸收', '蠕动', '磨碎'], a: 1, exp: '推动食物向下的动作。' },
+            { type: 'mcq', q: '在模拟实验中，大塑料袋模拟的是？', opts: ['口腔', '胃', '小肠'], a: 1, exp: '袋状结构模拟胃。' },
+            { type: 'mcq', q: '我们在塑料袋里加水并反复揉挤，最后食物变成了？', opts: ['块状', '糊状', '粉末'], a: 1, exp: '模拟胃消化成食糜。' },
+            { type: 'exp', q: '【实验分析】如果塑料管是弯曲的，馒头通过会变难，这说明食道的特征是？', opts: ['弯曲且长', '直且光滑', '充满褶皱'], a: 1, exp: '直且光滑利于运输。' },
+
+            // 4. 健康观念 (5题)
+            { type: 'mcq', q: '下列哪种习惯有利于保护消化器官？', opts: ['细嚼慢咽', '吃极烫的火锅', '边吃饭边看书'], a: 0, exp: '减轻胃肠负担。' },
+            { type: 'mcq', q: '吃得太快（狼吞虎咽）主要会加重哪个器官的负担？', opts: ['食道', '胃', '大肠'], a: 1, exp: '未经充分磨碎直接入胃。' },
+            { type: 'mcq', q: '下列食物中，容易伤害消化器官的是？', opts: ['温热的粥', '不干净的苹果', '牛奶'], a: 1, exp: '不洁净食物带细菌。' },
+            { type: 'fill', q: '食物消化良好，更有利于对____的吸收，为生长提供养料。', a: ['营养'], exp: '消化的目的是吸收营养。' },
+            { type: 'mcq', q: '人体各消化器官的功能是____的。', opts: ['一样', '各自不同'], a: 1, exp: '分工合作。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScore = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let sortOrder = []; 
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.6; nextBtn.innerText = "提交答案";
+            selectedOption = null;
+            sortOrder = [];
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let typeLabel = '';
+            let typeClass = '';
+            if(qData.type==='mcq') { typeLabel='选择题'; typeClass='tag-choice'; }
+            else if(qData.type==='fill') { typeLabel='填空题'; typeClass='tag-fill'; }
+            else if(qData.type==='sort') { typeLabel='排列题'; typeClass='tag-sort'; }
+            else { typeLabel='实验分析'; typeClass='tag-exp'; }
+
+            card.innerHTML = `<div class="q-content"><span class="q-tag ${typeClass}">${typeLabel}</span>${qData.q}</div>`;
+
+            // 渲染选项
+            if (qData.type === 'mcq' || qData.type === 'exp') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.6;
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'sort') {
+                renderSort(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected', 'correct-feedback', 'wrong-feedback'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            const isCorrect = (idx === qData.a);
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderSort(card, qData) {
+            const container = document.createElement('div');
+            const sourceDiv = document.createElement('div'); sourceDiv.className = 'sort-container';
+            const targetDiv = document.createElement('div'); targetDiv.className = 'sort-box';
+            targetDiv.innerHTML = '<div class="sort-placeholder">👆 点击上方选项按顺序排入此处</div>';
+
+            let items = [...qData.items].sort(()=>Math.random()-0.5);
+            
+            items.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'sort-item';
+                btn.innerText = item;
+                btn.onclick = () => {
+                    if(targetDiv.contains(btn)) {
+                        sourceDiv.appendChild(btn);
+                        sortOrder = sortOrder.filter(i => i !== item);
+                    } else {
+                        if(targetDiv.querySelector('.sort-placeholder')) targetDiv.innerHTML = '';
+                        targetDiv.appendChild(btn);
+                        sortOrder.push(item);
+                    }
+                    
+                    const btnNext = document.getElementById('nextBtn');
+                    if(sortOrder.length === qData.items.length) {
+                         btnNext.disabled = false; btnNext.style.opacity = 1;
+                    } else {
+                         btnNext.disabled = true; btnNext.style.opacity = 0.6;
+                    }
+                };
+                sourceDiv.appendChild(btn);
+            });
+
+            container.appendChild(sourceDiv); container.appendChild(targetDiv);
+            card.appendChild(container);
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq' || qData.type === 'exp') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'sort') {
+                if (JSON.stringify(sortOrder) === JSON.stringify(qData.answerOrder)) isCorrect = true;
+                myAns = sortOrder.join(' -> ');
+            }
+
+            if (isCorrect) {
+                userScore += 5; // 20题 * 5分 = 100分
+            } else {
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= userScore) { clearInterval(timer); scoreEl.innerText = userScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 30);
+
+            const reward = document.getElementById('reward-text');
+            if(userScore === 100) reward.innerText = "🎉 完美！你已经完全掌握了消化系统的秘密！";
+            else if(userScore >= 80) reward.innerText = "🌟 优秀！记得爱护你的消化器官哦！";
+            else reward.innerText = "💪 加油！再复习一下食物的旅行路线吧！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="color:#D32F2F">你的回答：${m.my || '未作答'}</span><br><span style="color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

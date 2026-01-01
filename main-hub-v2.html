@@ -1,0 +1,1372 @@
+﻿<!DOCTYPE html>
+<!-- saved from url=(0399)file:///C:/Users/96123/OneDrive/Desktop/%E5%9B%9B%E5%B9%B4%E7%BA%A7%E4%B8%8A%E5%86%8C%E7%A7%91%E5%AD%A6%E7%9F%A5%E8%AF%86%E6%A2%B3%E7%90%86%E3%80%90%E8%83%8C%E8%AF%B5%E7%89%88%E3%80%91/%E5%9B%9B%E4%B8%8A%E7%A7%91%E5%AD%A6%E8%AF%95%E9%A2%98%E5%BA%93/%E5%90%88%E5%B9%B6/%E5%B0%8F%E5%AD%A6%E7%A7%91%E5%AD%A6%E5%9B%9B%E4%B8%8A%EF%BC%9A%E7%A7%91%E5%AD%A6%E5%A4%A7%E9%97%AF%E5%85%B3%E6%80%BB%E7%AB%99.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小学科学四上：科学大闯关总站</title>
+    <style>
+        /* === 基础样式 === */
+        :root {
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --primary: #4CAF50;
+            --u1-color: #2196F3; /* 声音单元 */
+            --u2-color: #FF9800; /* 呼吸消化单元 */
+            --u3-color: #9C27B0; /* 运动力单元 */
+        }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* === 顶部导航 === */
+        header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        header h1 { font-size: 1.2rem; color: #333; display: flex; align-items: center; gap: 10px; }
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; margin-right: 15px; padding: 5px; }
+
+        /* === 主体布局 === */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* === 左侧菜单栏 === */
+        aside {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 20;
+        }
+        .unit-title {
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            user-select: none;
+        }
+        .unit-1 { background: var(--u1-color); }
+        .unit-2 { background: var(--u2-color); }
+        .unit-3 { background: var(--u3-color); }
+
+        .lesson-list { display: block; }
+        .lesson-list.collapsed { display: none; }
+
+        .lesson-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            color: #555;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        .lesson-btn:hover { background-color: #f0f9ff; color: var(--primary); }
+        .lesson-btn.active { 
+            background-color: #e8f5e9; 
+            color: var(--primary); 
+            font-weight: bold;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* === 右侧内容区 === */
+        main {
+            flex: 1;
+            background: #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: white;
+        }
+        .welcome-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #555;
+            z-index: 1;
+        }
+        .welcome-icon { font-size: 4rem; margin-bottom: 20px; animation: bounce 2s infinite; }
+
+        /* === 手机适配遮罩层 === */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 15;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .overlay.show { display: block; opacity: 1; }
+
+        /* 手机适配样式 */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            aside {
+                position: fixed;
+                left: 0; top: 0; bottom: 0;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            }
+            aside.open { transform: translateX(0); }
+            .lesson-btn { padding: 15px 20px; } /* 增大点击区域 */
+        }
+
+        @keyframes bounce { 
+            0%, 100% {transform: translateY(0);}
+            50% {transform: translateY(-10px);}
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+    <h1>🔬 小学科学四上 · 大闯关</h1>
+</header>
+
+<div class="main-container">
+    <!-- 手机端遮罩层 -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- 左侧菜单栏 -->
+    <aside id="sidebar">
+        
+        <!-- === 第一单元：声音 === -->
+        <div class="unit-title unit-1" onclick="toggleUnit(&#39;u1-list&#39;)">
+            第一单元：声音 🔊 <span>▼</span>
+        </div>
+        <div id="u1-list" class="lesson-list">
+            <button class="lesson-btn active" onclick="loadLesson(&#39;u1-1&#39;, event)">1. 听听声音</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u1-2&#39;, event)">2. 声音是怎样产生的</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u1-3&#39;, event)">3. 声音是怎样传播的</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u1-4&#39;, event)">4. 我们是怎样听到声音的</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u1-5&#39;, event)">5. 声音的强与弱</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u1-6&#39;, event)">6. 声音的高与低</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u1-78&#39;, event)">7&amp;8. 弦与小乐器</button>
+        </div>
+
+        <!-- === 第二单元：呼吸与消化 === -->
+        <div class="unit-title unit-2" onclick="toggleUnit(&#39;u2-list&#39;)">
+            第二单元：呼吸与消化 🫁 <span>▶</span>
+        </div>
+        <div id="u2-list" class="lesson-list collapsed">
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-1&#39;, event)">1. 感受我们的呼吸</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-2&#39;, event)">2. 呼吸与健康生活</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-3&#39;, event)">3. 测量肺活量</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-4&#39;, event)">4. 一天的食物</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-5&#39;, event)">5. 食物中的营养</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-6&#39;, event)">6. 营养要均衡</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-7&#39;, event)">7. 食物在口腔里的变化</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u2-8&#39;, event)">8. 食物在身体里的旅行</button>
+        </div>
+
+        <!-- === 第三单元：运动和力 === -->
+        <div class="unit-title unit-3" onclick="toggleUnit(&#39;u3-list&#39;)">
+            第三单元：运动和力 🚗 <span>▼</span>
+        </div>
+        <div id="u3-list" class="lesson-list">
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-1&#39;, event)">1. 运动和力(基础)</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-2&#39;, event)">2. 用气球驱动小车</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-3&#39;, event)">3. 用橡皮筋驱动小车</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-4&#39;, event)">4. 弹簧测力计</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-5&#39;, event)">5. 运动与摩擦力</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-6&#39;, event)">6. 运动的小车</button>
+            <button class="lesson-btn" onclick="loadLesson(&#39;u3-78&#39;, event)">7&amp;8. 设计制作小车</button>
+        </div>
+    </aside>
+
+    <!-- 右侧显示区 -->
+    <main>
+        <div id="welcome" class="welcome-screen" style="display: none;">
+            <div class="welcome-icon">🚀</div>
+            <h2>欢迎来到科学大闯关！</h2>
+            <p>👈 请点击左侧菜单选择课程</p>
+            <p style="font-size:0.8rem; color:#999; margin-top:30px;">
+                提示：请确保各课的代码已粘贴在下方的 textarea 区域中。
+            </p>
+        </div>
+        <iframe id="content-frame" title="Lesson Content" src="./小学科学四上：科学大闯关总站_files/saved_resource.html"></iframe>
+    </main>
+</div>
+
+<!-- ============================================================ -->
+<!-- === 核心区域：课程代码粘贴区 (请将生成的HTML粘贴在对应标签内) === -->
+<!-- ============================================================ -->
+
+<!-- 第一单元 -->
+<textarea id="u1-1" style="display:none;">    &lt;!DOCTYPE html&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;第一单元第一课：复习与35题大闯关&lt;/title&gt;
+    &lt;style&gt;
+        :root {
+            --bg-color: #E0F7FA;
+            --card-bg: #FFFFFF;
+            --primary: #4DD0E1; 
+            --secondary: #FFAB91; 
+            --text: #455A64; /* 加深字体颜色，更清晰 */
+            --font-main: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box; /* 关键修复：防止布局被内边距撑破 */
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px; /* 手机端减少外边距 */
+            min-height: 100vh;
+            background-image: radial-gradient(#B2EBF2 15%, transparent 16%);
+            background-size: 30px 30px;
+            /* 修复核心：移除 display: flex，改用默认布局 */
+            display: block; 
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px; /* 电脑上限制最大宽度 */
+            margin: 0 auto; /* 居中显示 */
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px; /* 内部间距适中 */
+            text-align: center;
+            border: 4px solid #B2EBF2;
+            overflow: hidden; /* 防止内容溢出 */
+        }
+
+        /* 标题适配 */
+        h1 { 
+            color: #00ACC1; 
+            margin-top: 0;
+            margin-bottom: 10px; 
+            font-size: 1.8em; /* 手机上字体稍微调小 */
+        }
+        .subtitle { color: #FF7043; font-size: 1em; margin-bottom: 20px; }
+
+        /* 区域切换动画 */
+        .section { display: none; animation: fadeIn 0.3s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 按钮优化 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0; /* 上下撑开，左右自动 */
+            width: 100%; /* 手机上按钮占满一行，更易点击 */
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #0097A7;
+            transition: 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0097A7; }
+        .btn-next { background: #FFAB91; box-shadow: 0 4px 0 #D84315; }
+        .btn-next:active { box-shadow: 0 1px 0 #D84315; }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #FFFDE7;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid #FBC02D;
+            margin-bottom: 15px;
+        }
+        .knowledge-box h3 { margin-top: 0; color: #F57F17; }
+        .knowledge-box p { margin: 8px 0; line-height: 1.6; }
+
+        /* SVG 容器自适应 */
+        .svg-stage {
+            background: #E1F5FE;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            border: 2px dashed #4FC3F7;
+            width: 100%;
+            overflow-x: auto; /* 如果图片实在太宽，允许横向滑动 */
+        }
+
+        /* 题目卡片 */
+        .question-card {
+            background: #FAFAFA;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border: 2px solid #EEE;
+        }
+        .q-tag {
+            background: #E0F2F1; color: #00695C; padding: 3px 6px; 
+            border-radius: 4px; font-size: 0.8em; font-weight: bold;
+            display: inline-block; margin-bottom: 5px;
+        }
+        .q-text { font-size: 1.2em; margin: 10px 0 20px 0; line-height: 1.5; font-weight: bold; color: #37474F; }
+
+        /* 选项样式 */
+        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .option-item {
+            background: white;
+            border: 2px solid #CFD8DC;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            line-height: 1.4;
+            -webkit-tap-highlight-color: transparent; /* 去除手机点击高亮背景 */
+        }
+        .option-item.selected { background: #B2EBF2; border-color: #00BCD4; font-weight: bold; }
+
+        /* 进度条 */
+        .progress-container {
+            height: 10px; background: #ECEFF1; border-radius: 5px; margin-bottom: 10px; overflow: hidden;
+        }
+        .progress-bar { height: 100%; background: #4DD0E1; width: 0%; transition: width 0.3s; }
+
+        /* 填空题输入框 */
+        .fill-input {
+            font-size: 1.2em; padding: 10px; width: 100%; 
+            border: 3px solid #B2EBF2; border-radius: 8px; text-align: center;
+            outline: none; -webkit-appearance: none;
+        }
+
+        /* 错题本 */
+        .wrong-card {
+            background: #FFEBEE; border-left: 5px solid #EF5350;
+            padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 5px;
+        }
+        .score-big { font-size: 3.5em; color: #FF7043; font-weight: bold; margin: 10px 0; }
+
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;!-- 1. 复习区 --&gt;
+    &lt;div id="section-review" class="container section active"&gt;
+        &lt;h1&gt;📖 知识复习&lt;/h1&gt;
+        &lt;p class="subtitle"&gt;听听声音 · 第一课&lt;/p&gt;
+
+        &lt;div class="knowledge-box"&gt;
+            &lt;h3&gt;🎵 重点1：声音的分类&lt;/h3&gt;
+            &lt;p&gt;🐶 &lt;strong&gt;动物叫声&lt;/strong&gt;：狗叫、猫叫、鸟叫等。&lt;/p&gt;
+            &lt;p&gt;🌧️ &lt;strong&gt;自然声音&lt;/strong&gt;：风声、雨声、雷声、流水。&lt;/p&gt;
+            &lt;p&gt;🚗 &lt;strong&gt;人类活动&lt;/strong&gt;：读书、唱歌、机器声、汽车。&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="knowledge-box"&gt;
+            &lt;h3&gt;🎵 重点2：音符与音叉 (动画演示)&lt;/h3&gt;
+            
+            &lt;!-- 1. 七个音符演示 --&gt;
+            &lt;div class="svg-stage"&gt;
+                &lt;p style="font-weight:bold; color:#0277BD; margin-bottom:5px;"&gt;🎹 音符高低：数字越大，声音越高&lt;/p&gt;
+                &lt;svg width="100%" height="180" viewBox="0 0 380 180" preserveAspectRatio="xMidYMid meet"&gt;
+                    &lt;polyline points="40,140 340,20" fill="none" stroke="#CFD8DC" stroke-width="2" stroke-dasharray="5,5"/&gt;
+                    
+                    &lt;!-- 音符组 --&gt;
+                    &lt;g transform="translate(40,140)"&gt; &lt;circle r="15" fill="#EF5350"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;1&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;Do&lt;/text&gt; &lt;/g&gt;
+                    &lt;g transform="translate(90,120)"&gt; &lt;circle r="15" fill="#FF7043"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;2&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;Re&lt;/text&gt; &lt;/g&gt;
+                    &lt;g transform="translate(140,100)"&gt; &lt;circle r="15" fill="#FFCA28"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;3&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;Mi&lt;/text&gt; &lt;/g&gt;
+                    &lt;g transform="translate(190,80)"&gt; &lt;circle r="15" fill="#66BB6A"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;4&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;Fa&lt;/text&gt; &lt;/g&gt;
+                    &lt;g transform="translate(240,60)"&gt; &lt;circle r="15" fill="#42A5F5"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;5&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;Sol&lt;/text&gt; &lt;/g&gt;
+                    &lt;g transform="translate(290,40)"&gt; &lt;circle r="15" fill="#5C6BC0"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;6&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;La&lt;/text&gt; &lt;/g&gt;
+                    &lt;g transform="translate(340,20)"&gt; &lt;circle r="15" fill="#AB47BC"/&gt;&lt;text y="5" text-anchor="middle" fill="white" font-weight="bold" font-size="14"&gt;7&lt;/text&gt;&lt;text y="25" text-anchor="middle" font-size="10" fill="#555"&gt;Si&lt;/text&gt; &lt;/g&gt;
+
+                    &lt;text x="10" y="145" font-size="12" fill="#888"&gt;低&lt;/text&gt;
+                    &lt;text x="360" y="25" font-size="12" fill="#888"&gt;高&lt;/text&gt;
+                &lt;/svg&gt;
+            &lt;/div&gt;
+
+            &lt;!-- 2. 音叉振动演示 --&gt;
+            &lt;div class="svg-stage"&gt;
+                &lt;p style="font-weight:bold; color:#E65100; margin-bottom:5px;"&gt;🔨 音叉的秘密：正在振动&lt;/p&gt;
+                &lt;svg width="100%" height="160" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid meet"&gt;
+                    &lt;rect x="142" y="90" width="16" height="60" rx="5" fill="#78909C"/&gt;
+                    &lt;path d="M120,20 L120,90 Q120,110 150,110 Q180,110 180,90 L180,20" fill="none" stroke="#90A4AE" stroke-width="14" stroke-linecap="round"/&gt;
+                    
+                    &lt;!-- 振动虚影 --&gt;
+                    &lt;path d="M115,20 L115,90" fill="none" stroke="#FFAB91" stroke-width="4" opacity="0.6"&gt;&lt;animate attributeName="d" values="M115,20 L115,90; M125,20 L125,90; M115,20 L115,90" dur="0.05s" repeatCount="indefinite"/&gt;&lt;/path&gt;
+                    &lt;path d="M185,20 L185,90" fill="none" stroke="#FFAB91" stroke-width="4" opacity="0.6"&gt;&lt;animate attributeName="d" values="M185,20 L185,90; M175,20 L175,90; M185,20 L185,90" dur="0.05s" repeatCount="indefinite"/&gt;&lt;/path&gt;
+                    
+                    &lt;!-- 声波 --&gt;
+                    &lt;path d="M100,30 Q90,55 100,80" fill="none" stroke="#4DD0E1" stroke-width="3" opacity="0"&gt;&lt;animate attributeName="d" values="M100,30 Q90,55 100,80; M80,20 Q60,55 80,90" dur="1s" repeatCount="indefinite"/&gt;&lt;animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite"/&gt;&lt;/path&gt;
+                    &lt;path d="M200,30 Q210,55 200,80" fill="none" stroke="#4DD0E1" stroke-width="3" opacity="0"&gt;&lt;animate attributeName="d" values="M200,30 Q210,55 200,80; M220,20 Q240,55 220,90" dur="1s" repeatCount="indefinite"/&gt;&lt;animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite"/&gt;&lt;/path&gt;
+
+                    &lt;text x="10" y="45" font-size="12" fill="#333"&gt;字母=音调&lt;/text&gt;
+                    &lt;line x1="120" y1="40" x2="80" y2="40" stroke="#333" stroke-width="1" stroke-dasharray="2"/&gt;
+                    &lt;text x="225" y="65" font-size="12" fill="#333"&gt;数字=次数&lt;/text&gt;
+                    &lt;line x1="180" y1="60" x2="220" y2="60" stroke="#333" stroke-width="1" stroke-dasharray="2"/&gt;
+                &lt;/svg&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="knowledge-box"&gt;
+            &lt;h3&gt;🎵 重点3：描述声音&lt;/h3&gt;
+            &lt;p&gt;🔊 &lt;strong&gt;高/低&lt;/strong&gt;：小孩(高)、成人(低)。&lt;/p&gt;
+            &lt;p&gt;📢 &lt;strong&gt;强/弱&lt;/strong&gt;：雷声(强)、雨声(弱)。&lt;/p&gt;
+            &lt;p&gt;🎶 &lt;strong&gt;悦耳/刺耳&lt;/strong&gt;：乐曲(悦耳)、噪音(刺耳)。&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;button class="btn" onclick="startQuiz()"&gt;开始35题挑战！🚀&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 2. 闯关区 --&gt;
+    &lt;div id="section-quiz" class="container section"&gt;
+        &lt;div class="progress-container"&gt;
+            &lt;div class="progress-bar" id="progressBar"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div style="text-align:right; font-size:0.9em; color:#888; margin-bottom:5px;"&gt;题目：&lt;span id="q-index"&gt;1&lt;/span&gt; / 35&lt;/div&gt;
+        
+        &lt;div id="question-area"&gt;&lt;/div&gt;
+        &lt;button class="btn btn-next" id="nextBtn" onclick="nextQuestion()"&gt;下一题 ▶&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 3. 结算区 --&gt;
+    &lt;div id="section-result" class="container section"&gt;
+        &lt;h1&gt;🏆 闯关成绩&lt;/h1&gt;
+        &lt;div class="score-big"&gt;&lt;span id="final-score"&gt;0&lt;/span&gt;&lt;span style="font-size:0.4em"&gt;分&lt;/span&gt;&lt;/div&gt;
+        &lt;p id="reward-text"&gt;正在计算...&lt;/p&gt;
+        
+        &lt;div id="wrong-list" style="display:none;"&gt;
+            &lt;h3 style="color:#E57373; border-bottom:2px solid #FFEBEE; padding-bottom:10px;"&gt;❌ 错题本&lt;/h3&gt;
+            &lt;!-- 错题插入区 --&gt;
+        &lt;/div&gt;
+
+        &lt;button class="btn" onclick="location.reload()"&gt;🔄 重新挑战&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        // --- 题库配置 (35道题) ---
+        const quizData = [
+            { type: 'mcq', q: '下列属于自然界的声音的是？', opts: ['读书声', '雷声', '汽车喇叭'], a: 1, exp: '读书声是人类活动，雷声是自然的。' },
+            { type: 'mcq', q: '下列属于动物叫声的是？', opts: ['风声', '马的嘶鸣声', '二胡声'], a: 1, exp: '马嘶鸣是动物的声音。' },
+            { type: 'mcq', q: '属于人类生产生活的声音是？', opts: ['鸟叫', '机器轰鸣声', '雨声'], a: 1, exp: '机器轰鸣是人类生产活动。' },
+            { type: 'tf', q: '判断：风声、雨声、雷声都属于自然界的声音。', a: 1, exp: '正确。' }, 
+            { type: 'tf', q: '判断：演奏乐器发出的声音属于自然界的声音。', a: 0, exp: '错误。乐器声属于人类生活声音。' },
+            { type: 'mcq', q: '“哗啦啦”的流水声属于？', opts: ['动物声音', '自然界声音', '人类声音'], a: 1, exp: '流水声属于自然界。' },
+            { type: 'mcq', q: '清晨的读书声属于？', opts: ['人类生活声音', '动物声音', '自然界声音'], a: 0, exp: '读书声是人类声音。' },
+            { type: 'tf', q: '判断：狗叫声、猫叫声都属于动物的叫声。', a: 1, exp: '正确。' },
+            { type: 'mcq', q: '下列不属于自然界声音的是？', opts: ['海浪声', '飞机起飞声', '暴风雨声'], a: 1, exp: '飞机声是机器声。' },
+            { type: 'tf', q: '判断：我们生活在一个充满声音的世界里。', a: 1, exp: '正确。' },
+
+            { type: 'mcq', q: '通常我们用什么词来描述雷声？', opts: ['弱', '强', '低'], a: 1, exp: '雷声很响，描述为“强”。' },
+            { type: 'mcq', q: '通常我们用什么词来描述轻轻的雨声？', opts: ['强', '刺耳', '弱'], a: 2, exp: '小雨声很轻，描述为“弱”。' },
+            { type: 'mcq', q: '小孩的声音通常比成年人更___？', opts: ['低', '粗', '高'], a: 2, exp: '小孩声音尖细，即“高”。' },
+            { type: 'mcq', q: '成年人的声音通常比小孩更___？', opts: ['高', '低', '尖'], a: 1, exp: '成人声音粗犷，即“低”。' },
+            { type: 'mcq', q: '鸟叫声听起来通常比较___？', opts: ['刺耳', '悦耳', '嘈杂'], a: 1, exp: '鸟叫声好听，即“悦耳”。' },
+            { type: 'mcq', q: '机器的轰鸣声听起来通常比较___？', opts: ['悦耳', '刺耳', '优美'], a: 1, exp: '噪音通常描述为“刺耳”。' },
+            { type: 'tf', q: '判断：声音只有高低之分，没有强弱之分。', a: 0, exp: '错误。声音既有高低也有强弱。' },
+            { type: 'fill', q: '描述声音可以用高、低、强、___、悦耳等。', a: ['弱'], exp: '强与弱是相对的。' },
+            { type: 'mcq', q: '用力敲击鼓面，声音会？', opts: ['弱', '强', '低'], a: 1, exp: '用力大，振动大，声音“强”。' },
+            { type: 'mcq', q: '轻轻拨动琴弦，声音会？', opts: ['弱', '强', '尖'], a: 0, exp: '用力小，声音“弱”。' },
+
+            { type: 'mcq', q: '乐谱中，音符“1”代表？', opts: ['Do', 'Re', 'Mi'], a: 0, exp: '1是Do。' },
+            { type: 'mcq', q: '乐谱中，音符“3”代表？', opts: ['Do', 'Re', 'Mi'], a: 2, exp: '3是Mi。' },
+            { type: 'sort', q: '按声音**从高到低**排列“1、2、3”：', opts: ['1, 2, 3', '3, 2, 1', '2, 3, 1'], a: 1, exp: '3(Mi)最高，1(Do)最低。' },
+            { type: 'tf', q: '判断：乐谱中的数字越大，声音越低。', a: 0, exp: '错误。数字越大，声音越高。' },
+            { type: 'fill', q: '音符“1、2、3”中，声音最低的是数字___。', a: ['1'], exp: '1(Do)是最低的。' },
+
+            { type: 'fill', q: '音叉是用来调试乐器和测试___的仪器。', a: ['音高', '音调'], exp: '音叉测试音高。' },
+            { type: 'mcq', q: '音叉上的字母代表什么？', opts: ['音调', '厂家', '价格'], a: 0, exp: '字母代表音调(如C、D)。' },
+            { type: 'mcq', q: '音叉上的数字代表什么？', opts: ['重量', '长度', '每秒振动次数'], a: 2, exp: '数字代表频率(振动次数)。' },
+            { type: 'mcq', q: '音叉“256”和“512”，哪个声音高？', opts: ['256', '512', '一样'], a: 1, exp: '数字越大声音越高。' },
+            { type: 'tf', q: '判断：轻敲和重敲音叉，声音高低不同。', a: 0, exp: '错误。同一音叉音高不变，改变的是强弱。' },
+
+            { type: 'mcq', q: '声音分类不包括哪项？', opts: ['动物叫声', '外星人声音', '人类活动声音'], a: 1, exp: '课本分三类：自然、动物、人类。' },
+            { type: 'fill', q: '风声、___声、雷声是自然界的声音。', a: ['雨', '水', '浪'], exp: '雨声是自然的。' },
+            { type: 'fill', q: '歌声、___声是人类活动的声音。', a: ['读书', '说话', '笑'], exp: '读书声是人类的。' },
+            { type: 'mcq', q: '要使音叉声音变强，应该？', opts: ['换大音叉', '用力敲', '捂住它'], a: 1, exp: '用力敲，振动幅度大，声音强。' },
+            { type: 'mcq', q: '听到刺耳噪音时应该？', opts: ['大叫', '捂耳朵离开', '听着玩'], a: 1, exp: '保护听力，远离噪音。' }
+        ];
+
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            currentQIndex = 0; userScoreRaw = 0; userMistakes = [];
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            let pct = ((currentQIndex) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = pct + "%";
+
+            area.innerHTML = '';
+            selectedOption = null;
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let typeText = qData.type === 'fill' ? "填空题" : (qData.type === 'tf' ? "判断题" : "选择题");
+            
+            const qTitle = document.createElement('div');
+            qTitle.className = 'q-text';
+            qTitle.innerHTML = `&lt;span class="q-tag"&gt;${typeText}&lt;/span&gt; ` + qData.q;
+            card.appendChild(qTitle);
+
+            if (qData.type === 'mcq' || qData.type === 'sort') {
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+                qData.opts.forEach((opt, idx) =&gt; {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item';
+                    btn.innerText = opt;
+                    btn.onclick = () =&gt; selectOption(btn, idx);
+                    grid.appendChild(btn);
+                });
+                card.appendChild(grid);
+            } else if (qData.type === 'tf') {
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+                ['正确 (√)', '错误 (×)'].forEach((txt, idx) =&gt; {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item';
+                    btn.innerText = txt;
+                    let val = idx === 0 ? 1 : 0;
+                    btn.onclick = () =&gt; selectOption(btn, val);
+                    grid.appendChild(btn);
+                });
+                card.appendChild(grid);
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.type = 'text'; input.className = 'fill-input';
+                input.placeholder = '在此输入答案';
+                input.oninput = (e) =&gt; {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                card.appendChild(input);
+            }
+            area.appendChild(card);
+        }
+
+        function selectOption(el, val) {
+            playSound('click');
+            document.querySelectorAll('.option-item').forEach(d =&gt; d.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedOption = val;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+
+            if (qData.type === 'fill') {
+                if (qData.a.some(ans =&gt; selectedOption.includes(ans))) isCorrect = true;
+            } else {
+                if (selectedOption === qData.a) isCorrect = true;
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                let myAnsStr = selectedOption;
+                if(qData.type === 'tf') myAnsStr = selectedOption === 1 ? "正确" : "错误";
+                if(qData.type === 'mcq' &amp;&amp; typeof selectedOption === 'number') myAnsStr = qData.opts[selectedOption];
+                
+                userMistakes.push({
+                    q: qData.q,
+                    my: myAnsStr,
+                    right: (qData.type === 'tf' ? (qData.a===1?'正确':'错误') : (qData.type === 'mcq' ? qData.opts[qData.a] : qData.a.join('/'))),
+                    exp: qData.exp
+                });
+            }
+
+            currentQIndex++;
+            if (currentQIndex &lt; quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() =&gt; {
+                if(temp &gt;= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const rewardText = document.getElementById('reward-text');
+            if(finalScore === 100) rewardText.innerText = "🎉 满分！你是科学小博士！";
+            else if(finalScore &gt;= 80) rewardText.innerText = "🌟 很棒！继续保持！";
+            else rewardText.innerText = "💪 加油！看看错题解析！";
+
+            const list = document.getElementById('wrong-list');
+            if(userMistakes.length &gt; 0) {
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) =&gt; {
+                    html += `&lt;div class="wrong-card"&gt;&lt;div style="font-weight:bold;"&gt;${i+1}. ${m.q}&lt;/div&gt;&lt;div style="margin:5px 0; font-size:0.9em;"&gt;&lt;span style="color:#D32F2F"&gt;你的答案：${m.my || '未填'}&lt;/span&gt;&lt;br&gt;&lt;span style="color:#388E3C; font-weight:bold;"&gt;正确答案：${m.right}&lt;/span&gt;&lt;/div&gt;&lt;div style="font-size:0.8em; color:#555;"&gt;💡 ${m.exp}&lt;/div&gt;&lt;/div&gt;`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</textarea>
+<textarea id="u1-2" style="display:none;"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第二课：声音是怎样产生的 - 实验与闯关</title>
+    <style>
+        :root {
+            --bg-color: #E0F2F1; /* 浅青色背景 */
+            --card-bg: #FFFFFF;
+            --primary: #009688; /* 蓝绿色主调 */
+            --secondary: #FF7043; /* 活力橙 */
+            --text: #37474F;
+            --font-main: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            display: block;
+            background-image: radial-gradient(#80CBC4 10%, transparent 11%);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 4px solid #B2DFDB;
+            overflow: hidden;
+        }
+
+        h1 { color: #00796B; margin-top: 0; font-size: 1.6em; margin-bottom: 5px; }
+        .subtitle { color: #FF7043; font-size: 1em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.3s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #E0F2F1;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid #009688;
+            margin-bottom: 20px;
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #00695C; border-bottom: 1px dashed #B2DFDB; padding-bottom: 5px; }
+        .k-point { margin-bottom: 10px; font-size: 1em; line-height: 1.5; }
+        .highlight { color: #D84315; font-weight: bold; }
+
+        /* SVG 实验台 */
+        .experiment-stage {
+            background: #FFF;
+            border: 2px dashed #FFB74D;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .exp-caption { font-size: 0.9em; color: #777; margin-top: 5px; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #00695C;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #00695C; }
+        .btn-next { background: #FF7043; box-shadow: 0 4px 0 #D84315; }
+
+        /* 题目区域 */
+        .progress-bar-container { width: 100%; height: 10px; background: #ECEFF1; border-radius: 5px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #26A69A; width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #FAFAFA; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #EEE; margin-top: 10px; }
+        .q-tag { background: #E0F2F1; color: #00796B; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; }
+        .q-content { font-size: 1.2em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项 & 连线 */
+        .option-item {
+            background: white; border: 2px solid #CFD8DC; padding: 12px; border-radius: 8px;
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #B2DFDB; border-color: #009688; font-weight: bold; }
+
+        .fill-input { border: none; border-bottom: 3px solid #009688; background: transparent; width: 100px; text-align: center; font-size: 1.2em; color: #D84315; border-radius: 0; }
+        
+        /* 连线题样式 */
+        .match-container { display: flex; justify-content: space-between; gap: 10px; }
+        .match-col { width: 48%; display: flex; flex-direction: column; gap: 8px; }
+        .match-btn { 
+            padding: 10px; background: #FFF; border: 2px solid #90A4AE; 
+            border-radius: 8px; font-size: 0.9em; text-align: center; cursor: pointer; 
+        }
+        .match-btn.selected { background: #FFF9C4; border-color: #FBC02D; transform: scale(1.02); }
+        .match-btn.matched { background: #C8E6C9; border-color: #43A047; opacity: 0.6; pointer-events: none; }
+
+        /* 错题本 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; }
+        .score-display { font-size: 3.5em; color: #FF7043; font-weight: bold; margin: 10px 0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. 复习区 -->
+    <div id="section-review" class="container section active">
+        <h1>🔬 知识复习</h1>
+        <p class="subtitle">第二课：声音是怎样产生的</p>
+
+        <!-- 实验1：皮筋实验 -->
+        <div class="knowledge-box">
+            <h3>🧪 实验1：皮筋发声的秘密</h3>
+            <div class="k-point">❌ <strong>不发声</strong>：拉伸、按压、揉搓皮筋（皮筋没有振动）。</div>
+            <div class="k-point">✅ <strong>发声</strong>：轻轻弹拨、横向拉动（皮筋在<span class="highlight">振动</span>）。</div>
+            
+            <div class="experiment-stage">
+                <svg width="100%" height="120" viewBox="0 0 300 120">
+                    <!-- 左：静止皮筋 -->
+                    <text x="75" y="20" text-anchor="middle" font-size="12" fill="#555">用力拉伸(不发声)</text>
+                    <rect x="20" y="30" width="10" height="60" fill="#8D6E63"/> <!-- 手 -->
+                    <rect x="120" y="30" width="10" height="60" fill="#8D6E63"/> <!-- 手 -->
+                    <line x1="30" y1="60" x2="120" y2="60" stroke="#EF5350" stroke-width="4" />
+
+                    <!-- 右：振动皮筋 -->
+                    <text x="225" y="20" text-anchor="middle" font-size="12" fill="#555">弹拨(振动发声)</text>
+                    <rect x="170" y="30" width="10" height="60" fill="#8D6E63"/>
+                    <rect x="270" y="30" width="10" height="60" fill="#8D6E63"/>
+                    <!-- 振动动画 -->
+                    <path d="M180,60 Q225,60 270,60" stroke="#EF5350" stroke-width="4" fill="none">
+                        <animate attributeName="d" 
+                            values="M180,60 Q225,30 270,60; M180,60 Q225,90 270,60; M180,60 Q225,30 270,60" 
+                            dur="0.1s" repeatCount="indefinite"/>
+                    </path>
+                    <!-- 声音符号 -->
+                    <text x="285" y="50" font-size="16">🎵</text>
+                </svg>
+                <div class="exp-caption">对比：静止的皮筋 vs 振动的皮筋</div>
+            </div>
+        </div>
+
+        <!-- 实验2：感受振动 -->
+        <div class="knowledge-box">
+            <h3>🧪 实验2：声音是由振动产生的</h3>
+            <div class="k-point">👉 用手触摸正在发声的钢尺、鼓面、音叉，会感觉到<span class="highlight">麻麻的振动</span>。</div>
+            <div class="k-point">🛑 如果物体停止振动，声音也会<span class="highlight">立即停止</span>。</div>
+
+            <div class="experiment-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 鼓面 -->
+                    <ellipse cx="150" cy="60" rx="60" ry="20" fill="#FFCC80" stroke="#EF6C00" stroke-width="2"/>
+                    <path d="M90,60 L90,90 Q150,110 210,90 L210,60" fill="#FFE0B2" stroke="#EF6C00" stroke-width="2"/>
+                    
+                    <!-- 鼓槌 -->
+                    <g>
+                        <line x1="120" y1="10" x2="140" y2="50" stroke="#8D6E63" stroke-width="3">
+                             <animateTransform attributeName="transform" type="rotate" values="0 140 50; -10 140 50; 0 140 50" dur="0.5s" repeatCount="indefinite"/>
+                        </line>
+                        <circle cx="140" cy="50" r="5" fill="#5D4037">
+                            <animate attributeName="cy" values="50; 55; 50" dur="0.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+
+                    <!-- 振动波纹 -->
+                    <ellipse cx="150" cy="60" rx="50" ry="15" fill="none" stroke="#FF5722" stroke-width="2" opacity="0">
+                        <animate attributeName="rx" values="50; 70" dur="0.5s" repeatCount="indefinite"/>
+                        <animate attributeName="ry" values="15; 25" dur="0.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="1; 0" dur="0.5s" repeatCount="indefinite"/>
+                    </ellipse>
+                    
+                    <!-- 手触摸 -->
+                    <text x="230" y="50" font-size="30">🖐️</text>
+                    <text x="230" y="80" font-size="10" fill="#555">手感觉麻</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 实验3：竖笛与声带 -->
+        <div class="knowledge-box">
+            <h3>🧪 实验3：看不见的振动</h3>
+            <div class="k-point">💨 <strong>吹竖笛</strong>：是竖笛里的<span class="highlight">空气柱</span>在振动。</div>
+            <div class="k-point">🗣️ <strong>说话</strong>：依赖喉咙里的<span class="highlight">声带</span>振动。声带越紧，声音越高。</div>
+
+            <div class="experiment-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 竖笛 -->
+                    <rect x="20" y="30" width="100" height="20" fill="#B2DFDB" stroke="#00796B"/>
+                    <circle cx="30" cy="40" r="3" fill="black"/>
+                    <circle cx="50" cy="40" r="3" fill="black"/>
+                    <circle cx="70" cy="40" r="3" fill="black"/>
+                    
+                    <!-- 空气粒子振动 -->
+                    <circle cx="110" cy="40" r="2" fill="#009688"><animate attributeName="cx" values="110;115;110" dur="0.1s" repeatCount="indefinite"/></circle>
+                    <circle cx="100" cy="35" r="2" fill="#009688"><animate attributeName="cx" values="100;105;100" dur="0.1s" repeatCount="indefinite"/></circle>
+                    <text x="70" y="80" font-size="10" fill="#555">竖笛：空气振动</text>
+
+                    <!-- 声带 -->
+                    <g transform="translate(180, 20)">
+                         <path d="M10,10 Q30,30 10,50" fill="none" stroke="#F48FB1" stroke-width="5"/>
+                         <path d="M50,10 Q30,30 50,50" fill="none" stroke="#F48FB1" stroke-width="5"/>
+                         <!-- 振动 -->
+                         <path d="M20,20 L40,20" stroke="#E91E63" stroke-width="2">
+                             <animate attributeName="d" values="M25,30 L35,30; M20,30 L40,30; M25,30 L35,30" dur="0.1s" repeatCount="indefinite"/>
+                         </path>
+                         <text x="60" y="35" font-size="12" fill="#333">声带变紧</text>
+                         <text x="60" y="50" font-size="12" fill="#333">快速振动</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">挑战35题闯关塔！🚀</button>
+    </div>
+
+    <!-- 2. 闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="text-align:right; font-size:0.9em; color:#888;">题目：<span id="q-index">1</span> / 35</div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题 ▶</button>
+    </div>
+
+    <!-- 3. 结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#E57373;">❌ 错题解析</h3>
+            <!-- 错题插入 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 题库 (35题：选择、连线、填空、实验) ---
+        const quizData = [
+            // 基础概念 (选择)
+            { type: 'mcq', q: '声音是由物体的____产生的。', opts: ['弯曲', '振动', '断裂'], a: 1, exp: '声音是由物体振动产生的。' },
+            { type: 'mcq', q: '如果物体停止振动，声音会？', opts: ['继续发声', '立即停止', '变小'], a: 1, exp: '振动停止，发声也就停止了。' },
+            { type: 'mcq', q: '用力拉伸皮筋（保持静止），皮筋会发声吗？', opts: ['会', '不会', '声音很小'], a: 1, exp: '皮筋没有振动，所以不会发声。' },
+            { type: 'mcq', q: '用力揉搓皮筋，皮筋会发出乐音吗？', opts: ['会', '不会', '看情况'], a: 1, exp: '揉搓不能让皮筋进行规律的振动发声。' },
+            { type: 'mcq', q: '弹拨皮筋时，皮筋的运动方式是？', opts: ['往返运动(振动)', '圆周运动', '直线运动'], a: 0, exp: '振动是一种往返运动。' },
+            
+            // 乐器与发声 (连线 - 简化为选择形式以适配手机)
+            { type: 'matching', q: '请将下列乐器与其振动的部位连线：', 
+              pairs: [ {l:'竖笛', r:'空气柱'}, {l:'鼓', r:'鼓面'}, {l:'吉他', r:'琴弦'} ],
+              exp: '竖笛吹气震动空气；鼓敲击震动鼓面；吉他弹拨震动琴弦。' 
+            },
+
+            // 实验分析 (判断/选择)
+            { type: 'mcq', q: '用手触摸正在发声的音叉，感觉手麻麻的，这说明？', opts: ['音叉在漏电', '音叉在振动', '音叉很热'], a: 1, exp: '麻麻的感觉是音叉高频振动引起的。' },
+            { type: 'mcq', q: '击鼓时，鼓面上放几粒豆子，豆子会跳起来，说明？', opts: ['豆子怕声音', '鼓面在振动', '风吹的'], a: 1, exp: '鼓面的振动把豆子弹起来了。' },
+            { type: 'mcq', q: '吹竖笛时，用手指按住不同的孔，是为了改变？', opts: ['空气柱的长短', '竖笛的颜色', '吹气的力度'], a: 0, exp: '改变空气柱长短可以改变音高。' },
+            { type: 'fill', q: '我们说话主要依赖喉咙里的____振动。', a: ['声带'], exp: '声带振动产生人声。' },
+            
+            // 声带专题
+            { type: 'mcq', q: '发声时，我们的声带是怎样的？', opts: ['放松的', '拉紧的', '断开的'], a: 1, exp: '发声时声带变紧并快速振动。' },
+            { type: 'mcq', q: '声带越紧，发出的声音越____？', opts: ['高', '低', '强'], a: 0, exp: '声带越紧，振动越快，声音越高。' },
+            { type: 'mcq', q: '把手放在喉结处说话，手会感觉到振动吗？', opts: ['会', '不会'], a: 0, exp: '可以感觉到声带的振动。' },
+
+            // 综合挑战
+            { type: 'mcq', q: '水龙头的滴水声是____振动产生的。', opts: ['水', '水管', '空气'], a: 0, exp: '水滴撞击引起水的振动。' },
+            { type: 'mcq', q: '蚊子发出的“嗡嗡”声是____振动产生的。', opts: ['嘴巴', '翅膀', '腿'], a: 1, exp: '蚊子翅膀快速振动产生声音。' },
+            { type: 'mcq', q: '在真空中（没有空气），物体振动能听到声音吗？', opts: ['能', '不能'], a: 1, exp: '虽然有振动，但没有物质传播，所以听不到（这是第一课知识点的延伸）。' },
+            { type: 'fill', q: '一个物体在力的作用下，不断重复地做____运动，称为振动。', a: ['往返'], exp: '振动的定义：往返运动。' },
+            { type: 'mcq', q: '用力敲锣，停止敲击后锣声还在持续，是因为？', opts: ['锣面还在振动', '声音有回声', '幻觉'], a: 0, exp: '敲击停止但振动不会立刻消失（余音绕梁）。' },
+            { type: 'mcq', q: '怎样让正在发声的锣立刻停止声音？', opts: ['不再敲', '用手按住锣面', '大声喊停'], a: 1, exp: '按住锣面强制停止振动。' },
+
+            // 更多基础巩固 (凑齐35题)
+            { type: 'mcq', q: '皮筋绷得越紧，弹拨时声音？', opts: ['越高', '越低', '越弱'], a: 0, exp: '越紧振动越快，声音越高。' },
+            { type: 'mcq', q: '我们能听到风声，是因为____在振动。', opts: ['树叶', '空气', '耳朵'], a: 1, exp: '风是空气的流动和振动。' },
+            { type: 'matching', q: '将动作与结果连线：', 
+              pairs: [{l:'按压皮筋', r:'不发声'}, {l:'弹拨皮筋', r:'发声'}, {l:'拉伸皮筋', r:'不发声'}], 
+              exp: '只有弹拨能引起持续振动。' 
+            },
+            { type: 'mcq', q: '下列哪个动作能让皮筋发出声音？', opts: ['横向拉动', '用力拉长', '轻轻揉搓'], a: 0, exp: '横向拉动（弹拨）引起振动。' },
+            { type: 'mcq', q: '声带就像一根____，变紧时能发声。', opts: ['木棍', '皮筋', '铁丝'], a: 1, exp: '声带的性质像皮筋。' },
+            { type: 'fill', q: '声音是由物体____产生的。', a: ['振动'], exp: '核心概念：振动。' },
+            { type: 'mcq', q: '不管是什么物体，只要发出声音，就一定在？', opts: ['运动', '振动', '发热'], a: 1, exp: '发声必振动。' },
+            { type: 'mcq', q: '下列关于声音的说法错误的是？', opts: ['声音是振动产生的', '物体不振动也能发声', '振动停止声音停止'], a: 1, exp: '物体不振动是不可能发声的。' },
+            { type: 'mcq', q: '吹气球时发出的声音是____振动产生的。', opts: ['气球皮', '空气', '嘴巴'], a: 0, exp: '气流冲出使气球皮振动（也包含空气振动）。' },
+            { type: 'mcq', q: '敲击装水的玻璃杯，主要振动的是？', opts: ['杯子和水', '空气', '桌子'], a: 0, exp: '杯子和水共同振动。' },
+            { type: 'fill', q: '吹口哨是____在振动。', a: ['空气', '气流'], exp: '口哨是气流振动。' },
+            { type: 'mcq', q: '用手拍桌子听到声音，是因为？', opts: ['手振动', '桌子振动', '手和桌子都振动'], a: 2, exp: '相互作用，都有振动。' },
+            { type: 'mcq', q: '为什么拉伸的皮筋不发声？', opts: ['因为拉得不够长', '因为没有振动', '因为皮筋太细'], a: 1, exp: '没有做往返运动（振动）。' },
+            { type: 'mcq', q: '要想让橡皮筋发出的声音更高，应该？', opts: ['拉得松一点', '拉得紧一点', '用力弹'], a: 1, exp: '拉紧频率高，音高高。' },
+            { type: 'mcq', q: '人的声带位于？', opts: ['口腔', '喉咙', '肺部'], a: 1, exp: '声带在喉咙里。' }
+        ];
+
+        // 状态变量
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let matchState = { left: null, right: null, matchedCount: 0 };
+        
+        // 音频上下文
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(500, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'wrong') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(400, now); gain.gain.setValueAtTime(0.02, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            currentQIndex = 0; userScoreRaw = 0; userMistakes = [];
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // 更新进度
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+            selectedOption = null;
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let tagText = qData.type === 'mcq' ? '选择题' : (qData.type === 'fill' ? '填空题' : '连线题');
+            card.innerHTML = `<div class="q-content"><span class="q-tag">${tagText}</span>${qData.q}</div>`;
+
+            // 渲染题目
+            if (qData.type === 'mcq') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'matching') {
+                renderMatching(card, qData);
+            }
+
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            playSound('click');
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderMatching(card, qData) {
+            const container = document.createElement('div');
+            container.className = 'match-container';
+            const leftCol = document.createElement('div'); leftCol.className = 'match-col';
+            const rightCol = document.createElement('div'); rightCol.className = 'match-col';
+            
+            // 打乱右侧
+            let rItems = [...qData.pairs].sort(()=>Math.random()-0.5);
+            matchState = { left: null, right: null, matchedCount: 0, userPairs: [] };
+
+            qData.pairs.forEach(p => {
+                const btn = document.createElement('div');
+                btn.className = 'match-btn'; btn.innerText = p.l; btn.dataset.val = p.l; btn.dataset.side = 'left';
+                btn.onclick = (e) => handleMatchClick(e.target, qData.pairs.length);
+                leftCol.appendChild(btn);
+            });
+            rItems.forEach(p => {
+                const btn = document.createElement('div');
+                btn.className = 'match-btn'; btn.innerText = p.r; btn.dataset.val = p.r; btn.dataset.side = 'right';
+                btn.onclick = (e) => handleMatchClick(e.target, qData.pairs.length);
+                rightCol.appendChild(btn);
+            });
+
+            container.appendChild(leftCol); container.appendChild(rightCol);
+            card.appendChild(container);
+        }
+
+        function handleMatchClick(el, totalPairs) {
+            playSound('click');
+            const side = el.dataset.side;
+            // 清除同侧高亮
+            el.parentElement.querySelectorAll('.match-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            if (side === 'left') matchState.left = el;
+            else matchState.right = el;
+
+            if (matchState.left && matchState.right) {
+                // 记录配对
+                matchState.userPairs.push({l: matchState.left.dataset.val, r: matchState.right.dataset.val});
+                
+                // 视觉锁定
+                matchState.left.classList.remove('selected'); matchState.left.classList.add('matched');
+                matchState.right.classList.remove('selected'); matchState.right.classList.add('matched');
+                
+                matchState.left = null; matchState.right = null;
+                matchState.matchedCount++;
+
+                if (matchState.matchedCount === totalPairs) {
+                    document.getElementById('nextBtn').disabled = false;
+                    document.getElementById('nextBtn').style.opacity = 1;
+                }
+            }
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+
+            if (qData.type === 'mcq') {
+                if (selectedOption === qData.a) isCorrect = true;
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+            } else if (qData.type === 'matching') {
+                // 检查配对是否全部正确
+                let correctCount = 0;
+                matchState.userPairs.forEach(up => {
+                    if (qData.pairs.some(p => p.l === up.l && p.r === up.r)) correctCount++;
+                });
+                if (correctCount === qData.pairs.length) isCorrect = true;
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                let myAns = '回答错误';
+                if(qData.type === 'mcq') myAns = qData.opts[selectedOption];
+                if(qData.type === 'fill') myAns = selectedOption;
+                
+                userMistakes.push({
+                    q: qData.q,
+                    my: myAns,
+                    exp: qData.exp
+                });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            // 35题，每题约2.85分，四舍五入
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 完美！你是声音大师！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！掌握得很棒！";
+            else reward.innerText = "💪 加油！弄懂错题再来一次！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="font-size:0.9em; color:#D32F2F">你的回答：${m.my}</span><br><span style="font-size:0.9em; color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html></textarea>
+
+<script>
+    // 兼容性获取元素辅助函数
+    function getQuerySelector(selector) {
+        if (document.querySelector) {
+            return document.querySelector(selector);
+        }
+        if (selector.indexOf('#') === 0) {
+            return document.getElementById(selector.substring(1));
+        }
+        return document.body; // Fallback
+    }
+
+    // 核心功能：加载课程内容
+    function loadLesson(id, event) {
+        // 1. UI更新
+        document.getElementById('welcome').style.display = 'none';
+        
+        // 移除所有按钮激活态
+        var btns = document.querySelectorAll('.lesson-btn');
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.remove('active');
+        }
+        // 添加当前按钮激活态
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+
+        var iframe = document.getElementById('content-frame');
+        
+        // 2. 特殊处理：u3-3到u3-6使用外部文件
+        var externalFiles = {
+            // 第一单元
+            'u1-3': '第一单元 第三课：声音是怎样传播的.html',
+            'u1-4': '第一单元第四课：我们是怎样听到声音的.html',
+            'u1-5': '第一单元  第五课.声音的强与弱.html',
+            'u1-6': '第一单元6.声音的高与低.html',
+            'u1-78': '第一单元第七、八课：让弦发出高低不同的声音 & 制作小乐器.html',
+            // 第二单元
+            'u2-1': '小学科学四上 第二单元1.感受我们的呼吸 复习.html',
+            'u2-2': '小学科学四上第二单元2.呼吸与健康生活.html',
+            'u2-3': '小学科学四上第二单元3.测量肺活量.html',
+            'u2-4': '小学科学四上第二单元4.一天的食物.html',
+            'u2-5': '小学科学四上第二单元5.食物中的营养.html',
+            'u2-6': '小学科学四上第二单元6.营养要均衡.html',
+            'u2-7': '小学科学四上第二单元7：食物在口腔里的变化.html',
+            'u2-8': '小学科学四上第二单元8.食物在身体里的旅行.html',
+            // 第三单元
+            'u3-1': '第三单元 第1课 运动和力 .html',
+            'u3-2': '第三单元 新第2课 用气球驱动小车.html',
+            'u3-3': '第三单元 第三课 用橡皮筋驱动小车.html',
+            'u3-4': '第三单元 第四课、弹簧测力计.html',
+            'u3-5': '第三单元 第5课.html',
+            'u3-6': '第三单元 第6课.html',
+            'u3-78': '第三单元 7、 8课.html'
+        };
+        
+        if (externalFiles[id]) {
+            // 直接加载外部HTML文件
+            iframe.src = externalFiles[id];
+        } else {
+            // 3. 从textarea读取内容
+            var storage = document.getElementById(id);
+            
+            if (storage && storage.value.trim() !== '') {
+                // 注入内容到 iframe
+                // 优先使用 srcdoc，不兼容则回退到 Blob URL
+                if ('srcdoc' in iframe) {
+                    iframe.srcdoc = storage.value;
+                } else {
+                    var blob = new Blob([storage.value], {type: 'text/html'});
+                    var blobURL = URL.createObjectURL(blob);
+                    iframe.src = blobURL;
+                    
+                    // 释放内存
+                    iframe.onload = function() {
+                        URL.revokeObjectURL(blobURL);
+                    };
+                }
+            } else {
+                // 4. 空内容处理
+                var emptyContent = '<body style="font-family:\'Microsoft YaHei\', sans-serif; text-align:center; padding:50px; color:#666;">' +
+                                    '<h2 style="color:#FF5722;">🚧 内容加载中或为空</h2>' +
+                                    '<p>请确认代码已粘贴到对应ID的 textarea 中。<br>ID: ' + id + '</p></body>';
+                iframe.srcdoc = emptyContent;
+            }
+        }
+
+        // 5. 移动端：点击后自动收起侧边栏
+        if (window.innerWidth <= 768) {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = getQuerySelector('.overlay');
+            if (sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        }
+    }
+
+    // 侧边栏切换（移动端）
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = getQuerySelector('.overlay');
+        
+        if (sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('show');
+        } else {
+            sidebar.classList.add('open');
+            if (overlay) overlay.classList.add('show');
+        }
+    }
+
+    // 单元折叠/展开
+    function toggleUnit(listId) {
+        var list = document.getElementById(listId);
+        var unitTitle = list.previousElementSibling;
+        var arrow = unitTitle.querySelector('span');
+        
+        if (list.classList.contains('collapsed')) {
+            list.classList.remove('collapsed');
+            if (arrow) arrow.textContent = '▼';
+        } else {
+            list.classList.add('collapsed');
+            if (arrow) arrow.textContent = '▶';
+        }
+    }
+</script>
+
+
+</body></html>

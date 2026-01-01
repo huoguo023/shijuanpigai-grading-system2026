@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小学科学四上：科学大闯关总站</title>
+    <style>
+        /* === 基础样式 === */
+        :root {
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --primary: #4CAF50;
+            --u1-color: #2196F3; /* 声音单元 */
+            --u2-color: #FF9800; /* 呼吸消化单元 */
+            --u3-color: #9C27B0; /* 运动力单元 */
+        }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        /* 简化的样式，保留基本结构 */
+        header {
+            height: var(--header-height);
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .unit-title {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .unit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .unit-list.collapsed {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>小学科学四上：科学大闯关总站</h1>
+    </header>
+    
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="unit-title" onclick="toggleUnit(this.nextElementSibling)">
+                第一单元：声音 <span>▼</span>
+            </div>
+            <ul class="unit-list">
+                <li onclick="loadLesson('lesson1')">1. 听听声音</li>
+                <li onclick="loadLesson('lesson2')">2. 声音是怎样产生的</li>
+            </ul>
+            
+            <div class="unit-title" onclick="toggleUnit(this.nextElementSibling)">
+                第二单元：呼吸与消化 <span>▼</span>
+            </div>
+            <ul class="unit-list">
+                <li onclick="loadLesson('lesson3')">1. 感受我们的呼吸</li>
+                <li onclick="loadLesson('lesson4')">2. 呼吸与健康生活</li>
+            </ul>
+            
+            <div class="unit-title" onclick="toggleUnit(this.nextElementSibling)">
+                第三单元：运动与力 <span>▼</span>
+            </div>
+            <ul class="unit-list">
+                <li onclick="loadLesson('lesson5')">1. 运动和力</li>
+                <li onclick="loadLesson('lesson6')">2. 用气球驱动小车</li>
+            </ul>
+        </div>
+        
+        <div class="content">
+            <h2>欢迎来到科学大闯关！</h2>
+            <p>请从左侧选择要学习的单元和课程。</p>
+        </div>
+    </div>
+
+    <script>
+        // 题库数据定义 - 扩展版
+        const quizData = {
+            // 第一单元：声音
+            unit1: [
+                {
+                    id: 1,
+                    question: "声音是怎样产生的？",
+                    options: [
+                        "物体振动",
+                        "空气流动",
+                        "光线反射",
+                        "磁场变化"
+                    ],
+                    answer: 0,
+                    explanation: "声音是由物体振动产生的，当物体振动时，会引起周围空气分子的振动，从而形成声波。"
+                },
+                {
+                    id: 2,
+                    question: "下列哪个不是声音传播的介质？",
+                    options: [
+                        "固体",
+                        "液体",
+                        "气体",
+                        "真空"
+                    ],
+                    answer: 3,
+                    explanation: "声音的传播需要介质，固体、液体和气体都可以传播声音，但真空中没有物质，无法传播声音。"
+                },
+                {
+                    id: 3,
+                    question: "我们是通过什么器官听到声音的？",
+                    options: [
+                        "眼睛",
+                        "耳朵",
+                        "鼻子",
+                        "嘴巴"
+                    ],
+                    answer: 1,
+                    explanation: "耳朵是我们的听觉器官，它接收声波并将其转化为神经信号，传送到大脑。"
+                },
+                {
+                    id: 4,
+                    question: "声音的高低与什么有关？",
+                    options: [
+                        "物体振动的幅度",
+                        "物体振动的快慢",
+                        "物体的大小",
+                        "物体的颜色"
+                    ],
+                    answer: 1,
+                    explanation: "声音的高低（音调）与物体振动的快慢有关，振动越快，音调越高；振动越慢，音调越低。"
+                },
+                {
+                    id: 5,
+                    question: "声音的强弱与什么有关？",
+                    options: [
+                        "物体振动的幅度",
+                        "物体振动的快慢",
+                        "物体的温度",
+                        "物体的重量"
+                    ],
+                    answer: 0,
+                    explanation: "声音的强弱（响度）与物体振动的幅度有关，振动幅度越大，声音越强；振动幅度越小，声音越弱。"
+                }
+            ],
+            
+            // 第二单元：呼吸与消化
+            unit2: [
+                {
+                    id: 6,
+                    question: "我们呼吸时，主要吸入的气体是什么？",
+                    options: [
+                        "二氧化碳",
+                        "氧气",
+                        "氮气",
+                        "氢气"
+                    ],
+                    answer: 1,
+                    explanation: "我们呼吸时主要吸入氧气，氧气对人体的生命活动非常重要。"
+                },
+                {
+                    id: 7,
+                    question: "下列哪个器官是呼吸系统的主要器官？",
+                    options: [
+                        "心脏",
+                        "肝脏",
+                        "肺",
+                        "胃"
+                    ],
+                    answer: 2,
+                    explanation: "肺是呼吸系统的主要器官，负责气体交换。"
+                },
+                {
+                    id: 8,
+                    question: "食物在人体内的消化过程开始于哪里？",
+                    options: [
+                        "口腔",
+                        "胃",
+                        "小肠",
+                        "大肠"
+                    ],
+                    answer: 0,
+                    explanation: "食物的消化过程从口腔开始，牙齿咀嚼食物，唾液帮助初步消化淀粉。"
+                },
+                {
+                    id: 9,
+                    question: "下列哪种食物富含蛋白质？",
+                    options: [
+                        "米饭",
+                        "苹果",
+                        "鸡蛋",
+                        "黄瓜"
+                    ],
+                    answer: 2,
+                    explanation: "鸡蛋富含蛋白质，蛋白质是人体生长发育所必需的营养物质。"
+                },
+                {
+                    id: 10,
+                    question: "为了保持健康，我们的饮食应该怎样？",
+                    options: [
+                        "只吃肉类",
+                        "只吃蔬菜",
+                        "营养均衡，多样化",
+                        "只吃自己喜欢的食物"
+                    ],
+                    answer: 2,
+                    explanation: "为了保持健康，我们应该摄入多样化的食物，保证营养均衡。"
+                }
+            ],
+            
+            // 第三单元：运动与力
+            unit3: [
+                {
+                    id: 11,
+                    question: "推和拉都会产生什么？",
+                    options: [
+                        "声音",
+                        "力",
+                        "光",
+                        "热"
+                    ],
+                    answer: 1,
+                    explanation: "推和拉都会产生力，力可以改变物体的运动状态。"
+                },
+                {
+                    id: 12,
+                    question: "下列哪个是弹性力的例子？",
+                    options: [
+                        "磁力",
+                        "重力",
+                        "橡皮筋的弹力",
+                        "摩擦力"
+                    ],
+                    answer: 2,
+                    explanation: "橡皮筋的弹力是弹性力的典型例子，当物体发生弹性形变时会产生弹性力。"
+                },
+                {
+                    id: 13,
+                    question: "小车在地面上行驶时，会受到什么力的阻碍？",
+                    options: [
+                        "重力",
+                        "摩擦力",
+                        "磁力",
+                        "浮力"
+                    ],
+                    answer: 1,
+                    explanation: "小车在地面上行驶时会受到摩擦力的阻碍，摩擦力是两个接触面之间的阻力。"
+                },
+                {
+                    id: 14,
+                    question: "要使静止的物体运动起来，需要什么？",
+                    options: [
+                        "施加力",
+                        "减小重量",
+                        "改变形状",
+                        "降低温度"
+                    ],
+                    answer: 0,
+                    explanation: "要使静止的物体运动起来，需要对物体施加力。"
+                },
+                {
+                    id: 15,
+                    question: "下列哪种情况需要更大的力？",
+                    options: [
+                        "推空车",
+                        "推装满货物的车",
+                        "推小车",
+                        "推玩具车"
+                    ],
+                    answer: 1,
+                    explanation: "物体越重，需要施加的力就越大，所以推装满货物的车需要更大的力。"
+                }
+            ]
+        };
+        
+        // 导航逻辑
+        function switchTab(tabId) {
+            if (typeof document !== 'undefined' && document.getElementById) {
+                document.querySelectorAll('header button').forEach(b => {
+                    if (b && b.classList) b.classList.remove('active');
+                });
+                const btn = document.getElementById('btn-' + tabId);
+                if (btn && btn.classList) btn.classList.add('active');
+                if (window && window.scrollTo) window.scrollTo(0, 0);
+            }
+        }
+        
+        // 拖放排序逻辑 - 修复版
+        function moveUp(btn) {
+            if (btn && btn.closest) {
+                let item = btn.closest('li');
+                if (item && item.previousElementSibling) {
+                    item.parentNode.insertBefore(item, item.previousElementSibling);
+                }
+            }
+        }
+        
+        function moveDown(btn) {
+            if (btn && btn.closest) {
+                let item = btn.closest('li');
+                if (item && item.nextElementSibling) {
+                    item.parentNode.insertBefore(item.nextElementSibling, item);
+                }
+            }
+        }
+        
+        // 空函数，避免TypeError错误
+        function updateSortInput() {
+            // 禁用此函数，防止访问不存在的DOM元素
+        }
+        
+        // 评分逻辑
+        function checkAnswers() {
+            try {
+                let score = 0;
+                let feedback = "";
+                // 简化的评分逻辑
+                console.log('检查答案');
+            } catch (error) {
+                console.error('评分过程中出错:', error);
+            }
+        }
+        
+        // 安全挂载到window对象
+        if (typeof window !== 'undefined') {
+            window.switchTab = switchTab;
+            window.moveUp = moveUp;
+            window.moveDown = moveDown;
+            window.updateSortInput = updateSortInput;
+            window.checkAnswers = checkAnswers;
+        }
+    </script>
+
+    <script>
+        // 主页面控制脚本
+        (function() {
+            // 兼容性获取元素辅助函数
+            function getQuerySelector(selector) {
+                if (typeof document !== 'undefined' && document.querySelector) {
+                    return document.querySelector(selector);
+                }
+                if (selector && selector.indexOf('#') === 0) {
+                    return document.getElementById(selector.slice(1));
+                }
+                return null;
+            }
+            
+            // 课程内容数据
+            const lessonContent = {
+                unit1: {
+                    title: "第一单元：声音",
+                    chapters: [
+                        {
+                            title: "声音的产生",
+                            content: "声音是由物体振动产生的。当物体振动时，会引起周围空气分子的振动，形成声波向四周传播。例如，敲鼓时，鼓面振动产生声音；说话时，声带振动产生声音。"
+                        },
+                        {
+                            title: "声音的传播",
+                            content: "声音的传播需要介质，可以在固体、液体和气体中传播，但不能在真空中传播。声音在不同介质中的传播速度不同，在固体中传播最快，液体次之，气体最慢。"
+                        },
+                        {
+                            title: "声音的特性",
+                            content: "声音有三个基本特性：音调、响度和音色。音调与物体振动的频率有关，振动越快，音调越高；响度与物体振动的幅度有关，振动幅度越大，响度越大；音色与发声体的材料和结构有关。"
+                        },
+                        {
+                            title: "我们的耳朵",
+                            content: "耳朵是我们的听觉器官，由外耳、中耳和内耳三部分组成。外耳收集声音，中耳传递振动，内耳将振动转化为神经信号，传送到大脑，我们就能听到声音了。"
+                        },
+                        {
+                            title: "噪声与保护",
+                            content: "噪声是指妨碍人们正常休息、学习和工作的声音。长期处于噪声环境中会影响我们的听力。我们可以通过植树造林、安装隔音设备、佩戴耳塞等方式减少噪声的影响。"
+                        }
+                    ]
+                },
+                unit2: {
+                    title: "第二单元：呼吸与消化",
+                    chapters: [
+                        {
+                            title: "我们的呼吸",
+                            content: "呼吸是人体重要的生理活动。我们通过呼吸吸入氧气，呼出二氧化碳。呼吸过程是由呼吸系统完成的，包括鼻、咽、喉、气管、支气管和肺等器官。"
+                        },
+                        {
+                            title: "肺的作用",
+                            content: "肺是呼吸系统的主要器官，位于胸腔内。肺的主要功能是进行气体交换：吸入空气中的氧气进入血液，血液中的二氧化碳排出体外。"
+                        },
+                        {
+                            title: "食物的消化",
+                            content: "食物的消化从口腔开始，经过咽、食道、胃、小肠和大肠等消化器官。在消化过程中，食物被分解成小分子物质，以便身体吸收利用。"
+                        },
+                        {
+                            title: "营养物质",
+                            content: "人体需要的主要营养物质包括糖类、蛋白质、脂肪、维生素、矿物质和水。这些营养物质来自各种食物，我们应该保持饮食多样化，确保营养均衡。"
+                        },
+                        {
+                            title: "健康生活",
+                            content: "为了保持健康，我们应该：1) 合理膳食，不挑食、不偏食；2) 适量运动，增强体质；3) 养成良好的作息习惯；4) 保持愉快的心情。"
+                        }
+                    ]
+                },
+                unit3: {
+                    title: "第三单元：运动与力",
+                    chapters: [
+                        {
+                            title: "力的认识",
+                            content: "力是物体对物体的作用。推、拉、提、压等都会产生力。力可以改变物体的运动状态，也可以改变物体的形状。力的单位是牛顿，简称牛。"
+                        },
+                        {
+                            title: "弹力",
+                            content: "当物体发生弹性形变时，会产生一种恢复原来形状的力，这就是弹力。弹簧、橡皮筋、弓箭等都利用了弹力的原理。"
+                        },
+                        {
+                            title: "摩擦力",
+                            content: "两个相互接触的物体，当它们要发生或已经发生相对运动时，在接触面上会产生一种阻碍相对运动的力，这就是摩擦力。摩擦力有时是有益的，有时是有害的。"
+                        },
+                        {
+                            title: "重力",
+                            content: "地球对物体有吸引作用，这种力叫做重力。重力的方向是竖直向下的。物体所受重力的大小与其质量有关，质量越大，重力越大。"
+                        },
+                        {
+                            title: "简单机械",
+                            content: "杠杆、轮轴、滑轮等都是简单机械。使用简单机械可以省力或改变力的方向，使我们的工作更轻松。例如，跷跷板是一种杠杆，门把手是一种轮轴。"
+                        }
+                    ]
+                }
+            };
+            
+            // 加载课程内容
+            function loadLesson(lessonId) {
+                console.log('加载课程:', lessonId);
+                
+                // 从lessonId中提取单元号，例如'lesson1'对应'unit1'
+                const unitId = 'unit' + Math.ceil(parseInt(lessonId.replace('lesson', '')) / 2);
+                showLessonContent(unitId);
+            }
+            
+            // 显示课程内容
+            function showLessonContent(unitId) {
+                const unitContent = lessonContent[unitId];
+                const contentArea = getQuerySelector('.content');
+                if (!unitContent || !contentArea) return;
+                
+                let html = `
+                    <div class="lesson-container">
+                        <h2 class="lesson-title">${unitContent.title}</h2>
+                        <div class="chapter-list">
+                `;
+                
+                unitContent.chapters.forEach((chapter, index) => {
+                    html += `
+                        <div class="chapter-item">
+                            <h3 class="chapter-title">${index + 1}. ${chapter.title}</h3>
+                            <p class="chapter-content">${chapter.content}</p>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                        <div class="lesson-actions">
+                            <button class="btn btn-primary" onclick="startQuiz('${unitId}')">开始测验</button>
+                        </div>
+                    </div>
+                `;
+                
+                contentArea.innerHTML = html;
+            }
+            
+            // 测验相关变量
+            let currentUnit = null;
+            let currentQuestionIndex = 0;
+            let userAnswers = [];
+            let questions = [];
+            
+            // 测验功能
+            function startQuiz(unitId) {
+                const contentArea = getQuerySelector('.content');
+                if (!contentArea) return;
+                
+                currentUnit = unitId;
+                currentQuestionIndex = 0;
+                userAnswers = [];
+                questions = quizData[unitId] || [];
+                
+                if (questions.length > 0) {
+                    renderQuestion();
+                } else {
+                    contentArea.innerHTML = `<h3>单元 ${unitId.replace('unit', '')} 测验</h3><p>该单元暂无题目</p><button class="btn btn-secondary" onclick="backToLesson('${unitId}')">返回课程</button>`;
+                }
+            }
+            
+            // 返回课程
+            function backToLesson(unitId) {
+                showLessonContent(unitId);
+            }
+            
+            // 选择答案
+            function selectAnswer(questionIndex, optionIndex) {
+                userAnswers[questionIndex] = optionIndex;
+                updateAnswerStyles(questionIndex);
+            }
+            
+            // 上一题
+            function prevQuestion() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    renderQuestion();
+                }
+            }
+            
+            // 下一题
+            function nextQuestion() {
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }
+            }
+            
+            // 提交测验
+            function submitQuiz() {
+                // 检查是否所有题目都已回答
+                let allAnswered = true;
+                for (let i = 0; i < questions.length; i++) {
+                    if (userAnswers[i] === undefined) {
+                        allAnswered = false;
+                        break;
+                    }
+                }
+                
+                if (!allAnswered) {
+                    if (confirm('您还有题目未回答，确定要提交吗？')) {
+                        showResults();
+                    }
+                } else {
+                    showResults();
+                }
+            }
+            
+            // 重新测验
+            function retakeQuiz() {
+                startQuiz(currentUnit);
+            }
+            
+            // 渲染题目
+            function renderQuestion() {
+                const contentArea = getQuerySelector('.content');
+                if (!contentArea || questions.length === 0 || currentQuestionIndex >= questions.length) return;
+                
+                const question = questions[currentQuestionIndex];
+                const userAnswer = userAnswers[currentQuestionIndex];
+                
+                let html = `
+                    <div class="quiz-container">
+                        <h2 class="quiz-title">单元 ${currentUnit.replace('unit', '')} 测验</h2>
+                        <div class="question-progress">问题 ${currentQuestionIndex + 1}/${questions.length}</div>
+                        
+                        <div class="question-item">
+                            <h3 class="question-text">${question.question}</h3>
+                            <div class="options-list">
+                `;
+                
+                question.options.forEach((option, index) => {
+                    const isSelected = userAnswer === index;
+                    html += `
+                        <div class="option-item" onclick="selectAnswer(${currentQuestionIndex}, ${index})">
+                            <div class="option-radio ${isSelected ? 'selected' : ''}"></div>
+                            <div class="option-text">${option}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                            </div>
+                        </div>
+                        
+                        <div class="quiz-navigation">
+                            <button class="btn btn-secondary" onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>上一题</button>
+                            <div class="question-indicators">
+                `;
+                
+                // 添加题目指示器
+                questions.forEach((q, index) => {
+                    const isActive = index === currentQuestionIndex;
+                    const isAnswered = userAnswers[index] !== undefined;
+                    html += `
+                        <span class="question-indicator ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" onclick="gotoQuestion(${index})"></span>
+                    `;
+                });
+                
+                html += `
+                            </div>
+                            ${currentQuestionIndex === questions.length - 1 ? 
+                                `<button class="btn btn-primary" onclick="submitQuiz()">提交测验</button>` : 
+                                `<button class="btn btn-primary" onclick="nextQuestion()">下一题</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+                
+                contentArea.innerHTML = html;
+            }
+            
+            // 更新答案样式
+            function updateAnswerStyles(questionIndex) {
+                if (questionIndex !== currentQuestionIndex) return;
+                
+                const options = document.querySelectorAll('.option-item');
+                const userAnswer = userAnswers[questionIndex];
+                
+                options.forEach((option, index) => {
+                    const radio = option.querySelector('.option-radio');
+                    if (index === userAnswer) {
+                        radio.classList.add('selected');
+                    } else {
+                        radio.classList.remove('selected');
+                    }
+                });
+                
+                // 更新题目指示器
+                const indicator = document.querySelector(`.question-indicators span:nth-child(${currentQuestionIndex + 1})`);
+                if (indicator) {
+                    indicator.classList.add('answered');
+                }
+            }
+            
+            // 跳转到指定题目
+            function gotoQuestion(index) {
+                if (index >= 0 && index < questions.length) {
+                    currentQuestionIndex = index;
+                    renderQuestion();
+                }
+            }
+            
+            // 显示测验结果
+            function showResults() {
+                const contentArea = getQuerySelector('.content');
+                if (!contentArea) return;
+                
+                let correctCount = 0;
+                const results = [];
+                
+                questions.forEach((question, index) => {
+                    const userAnswer = userAnswers[index];
+                    const isCorrect = userAnswer === question.answer;
+                    if (isCorrect) correctCount++;
+                    
+                    results.push({
+                        question: question,
+                        userAnswer: userAnswer,
+                        isCorrect: isCorrect
+                    });
+                });
+                
+                const scorePercentage = Math.round((correctCount / questions.length) * 100);
+                
+                let html = `
+                    <div class="results-container">
+                        <h2 class="results-title">测验结果</h2>
+                        <div class="score-summary">
+                            <div class="score-circle">
+                                <div class="score-number">${scorePercentage}%</div>
+                            </div>
+                            <div class="score-details">
+                                <p>正确: ${correctCount}/${questions.length}</p>
+                                <p>得分: ${scorePercentage}%</p>
+                            </div>
+                        </div>
+                        
+                        <div class="question-results">
+                `;
+                
+                results.forEach((result, index) => {
+                    const question = result.question;
+                    html += `
+                        <div class="result-item ${result.isCorrect ? 'correct' : 'incorrect'}">
+                            <div class="result-header">
+                                <h4>问题 ${index + 1}</h4>
+                                <span class="result-status">${result.isCorrect ? '正确' : '错误'}</span>
+                            </div>
+                            <div class="question-text">${question.question}</div>
+                            <div class="answer-info">
+                                <div class="user-answer">
+                                    <strong>你的答案:</strong> ${result.userAnswer !== undefined ? question.options[result.userAnswer] : '未作答'}
+                                </div>
+                                <div class="correct-answer">
+                                    <strong>正确答案:</strong> ${question.options[question.answer]}
+                                </div>
+                            </div>
+                            <div class="explanation">
+                                <strong>解释:</strong> ${question.explanation}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                        
+                        <div class="results-actions">
+                            <button class="btn btn-secondary" onclick="backToLesson('${currentUnit}')">返回课程</button>
+                            <button class="btn btn-primary" onclick="retakeQuiz()">重新测验</button>
+                        </div>
+                    </div>
+                `;
+                
+                contentArea.innerHTML = html;
+            }
+            
+            // 侧边栏切换
+            function toggleSidebar() {
+                const sidebar = getQuerySelector('.sidebar');
+                if (sidebar && sidebar.style) {
+                    sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+                }
+            }
+            
+            // 单元折叠/展开
+            function toggleUnit(list) {
+                if (!list) return;
+                
+                const unitTitle = list.previousElementSibling;
+                const arrow = unitTitle ? unitTitle.querySelector('span') : null;
+                
+                if (list.classList && list.classList.contains('collapsed')) {
+                    list.classList.remove('collapsed');
+                    if (arrow) arrow.textContent = '▼';
+                } else {
+                    if (list.classList) list.classList.add('collapsed');
+                    if (arrow) arrow.textContent = '▶';
+                }
+            }
+            
+            // 安全暴露公共函数
+            if (typeof window !== 'undefined') {
+                window.toggleSidebar = toggleSidebar;
+                window.toggleUnit = toggleUnit;
+                window.loadLesson = loadLesson;
+            }
+        })();
+    </script>
+</body>
+</html>

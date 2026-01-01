@@ -1,0 +1,287 @@
+<!-- ==================== 即时反馈增强系统 ==================== -->
+<!-- 将此代码段插入到 <head> 标签末尾或 <body> 开始处 -->
+
+<style>
+/* 即时反馈样式 */
+.feedback-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.feedback-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.feedback-success {
+    border: 3px solid #4CAF50;
+    color: #2E7D32;
+}
+
+.feedback-error {
+    border: 3px solid #FF9800;
+    color: #E65100;
+}
+
+.toast-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.feedback-success .toast-icon {
+    background: #4CAF50;
+    color: white;
+}
+
+.feedback-error .toast-icon {
+    background: #FF9800;
+    color: white;
+}
+
+.toast-message {
+    max-width: 300px;
+}
+
+/* 撒花动画 */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* 选项反馈动画 */
+@keyframes correct-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+    20%, 40%, 60%, 80% { transform: translateX(8px); }
+}
+
+.option-item.correct-feedback {
+    animation: correct-pulse 0.6s;
+    background: #E8F5E9 !important;
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important;
+}
+
+.option-item.wrong-feedback {
+    animation: shake 0.5s;
+    background: #FFF3E0 !important;
+    border-color: #FF9800 !important;
+}
+
+.fill-input.correct-feedback {
+    animation: correct-pulse 0.6s;
+    background: #E8F5E9 !important;
+    border-color: #4CAF50 !important;
+}
+
+.fill-input.wrong-feedback {
+    animation: shake 0.5s;
+    background: #FFF3E0 !important;
+    border-color: #FF9800 !important;
+}
+
+@media (max-width: 768px) {
+    .feedback-toast {
+        font-size: 1rem;
+        padding: 12px 20px;
+        max-width: 90%;
+    }
+    .toast-message {
+        max-width: 200px;
+    }
+}
+</style>
+
+<script>
+// ==================== 即时反馈系统 ====================
+const InstantFeedback = {
+    audioCtx: null,
+    
+    encouragements: [
+        '太棒了！继续加油！🌟',
+        '你真聪明！👍',
+        '完全正确！真厉害！🎯',
+        '答对了！你是最棒的！⭐',
+        '太优秀了！继续保持！🏆',
+        '真是个小天才！💡',
+        '回答得非常好！👏',
+        '你掌握得很好！📚'
+    ],
+    
+    hints: [
+        '再想想哦！你可以的！💪',
+        '别灰心，再试一次！🌈',
+        '加油！仔细看看题目！👀',
+        '没关系，继续努力！💫',
+        '再看看知识点吧！📖',
+        '不要放弃，你能行！🚀',
+        '思考一下，你一定能想到！🤔',
+        '加油！相信自己！✨'
+    ],
+    
+    init() {
+        if (!this.audioCtx) {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    },
+    
+    // 播放答对音效
+    playCorrectSound() {
+        this.init();
+        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        
+        const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+        notes.forEach((freq, i) => {
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(this.audioCtx.destination);
+            
+            const now = this.audioCtx.currentTime;
+            const start = now + i * 0.1;
+            
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.15, start);
+            gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+            
+            osc.start(start);
+            osc.stop(start + 0.3);
+        });
+    },
+    
+    // 播放答错音效
+    playWrongSound() {
+        this.init();
+        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+        
+        const now = this.audioCtx.currentTime;
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+        osc.type = 'triangle';
+        
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        
+        osc.start(now);
+        osc.stop(now + 0.2);
+    },
+    
+    // 撒花动画
+    showConfetti() {
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+        const confettiCount = 30;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.cssText = `
+                    width: ${Math.random() * 10 + 5}px;
+                    height: ${Math.random() * 10 + 5}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    left: ${Math.random() * 100}%;
+                    top: -20px;
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 4000);
+            }, i * 30);
+        }
+    },
+    
+    // 显示提示框
+    showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `feedback-toast feedback-${type}`;
+        toast.innerHTML = `
+            <div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div>
+            <div class="toast-message">${message}</div>
+        `;
+        
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    },
+    
+    // 答对反馈
+    onCorrect(element) {
+        this.playCorrectSound();
+        this.showConfetti();
+        const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+        this.showToast(msg, 'success');
+        if (element) {
+            element.classList.add('correct-feedback');
+            setTimeout(() => element.classList.remove('correct-feedback'), 600);
+        }
+    },
+    
+    // 答错反馈
+    onWrong(element, hint = '') {
+        this.playWrongSound();
+        const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + 
+                   (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+        this.showToast(msg, 'error');
+        if (element) {
+            element.classList.add('wrong-feedback');
+            setTimeout(() => element.classList.remove('wrong-feedback'), 500);
+        }
+    }
+};
+
+// 初始化
+if (typeof window !== 'undefined') {
+    InstantFeedback.init();
+}
+</script>

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2 用气球驱动小车 - 全单元闯关测试</title>
+    <style>
+        :root {
+            --primary: #3F51B5; /* 保持第一课主色调 */
+            --accent: #FF4081;  /* 保持第一课强调色 */
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #333;
+            --success: #4CAF50;
+            --error: #F44336;
+        }
+
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
+        
+        /* Header & Layout */
+        header { background: linear-gradient(135deg, var(--primary), #1A237E); color: white; padding: 2rem 1rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .container { max-width: 900px; margin: -30px auto 0; padding: 0 15px; position: relative; z-index: 2; }
+        
+        .section-title { border-left: 5px solid var(--accent); padding-left: 15px; margin: 40px 0 20px; font-size: 1.5rem; color: #444; }
+
+        /* Cards */
+        .card { background: var(--card); border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        /* --- Review Section (SVG Animations) --- */
+        .demo-box { background: #e8eaf6; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: center; border: 1px solid #c5cae9; }
+        .demo-controls button { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 5px; transition: 0.2s; }
+        .demo-controls button:hover { background: #303F9F; transform: scale(1.05); }
+        
+        /* Specific Animation Styles for Lesson 2 */
+        .air-stream { stroke-dasharray: 5; animation: dash 0.5s linear infinite; opacity: 0; }
+        @keyframes dash { to { stroke-dashoffset: -10; } }
+
+        /* --- Quiz Section --- */
+        .quiz-status { background: #333; color: white; padding: 15px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; }
+        
+        .question-item { padding: 20px 0; border-bottom: 1px solid #eee; }
+        .q-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; color: white; font-size: 0.75rem; margin-right: 8px; vertical-align: middle; }
+        .badge-choice { background: #2196F3; }
+        .badge-fill { background: #9C27B0; }
+        .badge-drag { background: #FF9800; }
+        .badge-exp { background: #E91E63; }
+        
+        .q-content { font-weight: 600; font-size: 1.05rem; display: inline; vertical-align: middle; }
+        
+        /* Form Inputs */
+        .options label { display: block; padding: 8px 12px; margin: 5px 0; background: #f9f9f9; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .options label:hover { background: #e3f2fd; }
+        .options input { margin-right: 10px; }
+        
+        input[type="text"] { border: 1px solid #ccc; padding: 8px; border-radius: 4px; width: 200px; }
+        
+        /* Drag & Drop Styles */
+        .drag-container { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .drop-zone { flex: 1; min-width: 120px; border: 2px dashed #bbb; background: #fafafa; padding: 10px; border-radius: 6px; }
+        .drop-zone h4 { margin: 0 0 8px 0; text-align: center; color: #666; font-size: 0.9rem; }
+        .drag-pool { margin-top: 10px; padding: 10px; background: #eee; border-radius: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .drag-item { background: white; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; user-select: none; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .drag-item.selected { border-color: var(--primary); background: #e8eaf6; box-shadow: 0 0 0 2px var(--primary); }
+
+        /* Experiment Question Specifics */
+        .exp-box { border: 2px solid #E91E63; border-radius: 8px; padding: 15px; margin-top: 15px; background: #fce4ec; }
+        .exp-img-container { background: white; border: 1px solid #ddd; padding: 10px; text-align: center; margin-bottom: 15px; border-radius: 4px; }
+        .exp-part { margin-bottom: 12px; }
+        .exp-label { display: block; font-weight: bold; color: #880E4F; font-size: 0.9rem; margin-bottom: 4px; }
+        textarea { width: 100%; height: 60px; border: 1px solid #ccc; border-radius: 4px; padding: 8px; font-family: inherit; resize: vertical; }
+
+        /* Submit Button */
+        .btn-submit { display: block; width: 100%; max-width: 300px; margin: 40px auto; padding: 15px; background: var(--success); color: white; border: none; border-radius: 50px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); transition: transform 0.2s; }
+        .btn-submit:hover { transform: scale(1.03); }
+
+        /* Results Overlay */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; }
+        .modal-content { background: white; margin: 5vh auto; width: 90%; max-width: 800px; padding: 30px; border-radius: 12px; position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: #999; }
+        .score-display { text-align: center; font-size: 3rem; color: var(--primary); font-weight: bold; margin: 20px 0; }
+        .analysis-card { background: #ffebee; border-left: 4px solid var(--error); padding: 15px; margin-bottom: 15px; }
+        .analysis-card strong { display: block; margin-bottom: 5px; }
+        .correct-answer { color: var(--success); font-weight: bold; margin-top: 5px; display: block; }
+        
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    input[type="text"].correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    input[type="text"].wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>第三单元 第二课《用气球驱动小车》</h1>
+    <p>复习演示 & 100分闯关测试</p>
+</header>
+
+<div class="container">
+
+    <!-- PART 1: REVIEW SECTION -->
+    <div class="section-title">一、 知识复习与演示</div>
+    
+    <div class="card">
+        <h3>1. 反冲力原理 (Action & Reaction)</h3>
+        <p>把气球吹足气后松开口部，气体向<strong>后</strong>喷出，气球向<strong>前</strong>运动。</p>
+        <p><strong>定义：</strong>气球里的气体喷出时，会产生一个和喷出方向相反的推力，这个力叫<strong>反冲力</strong>。</p>
+        <div class="demo-box">
+            <svg id="svg-recoil" viewBox="0 0 350 140" width="100%" height="140" style="background:linear-gradient(to bottom, #E8EAF6 0%, #F5F5F5 100%); border-radius:10px;">
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#F44336" /></marker>
+                    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#2196F3" /></marker>
+                    <radialGradient id="balloonGrad">
+                        <stop offset="0%" style="stop-color:#FF80AB"/>
+                        <stop offset="50%" style="stop-color:#FF4081"/>
+                        <stop offset="100%" style="stop-color:#C51162"/>
+                    </radialGradient>
+                    <linearGradient id="carGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#5C6BC0"/>
+                        <stop offset="100%" style="stop-color:#3F51B5"/>
+                    </linearGradient>
+                    <radialGradient id="wheelGrad2">
+                        <stop offset="0%" style="stop-color:#616161"/>
+                        <stop offset="60%" style="stop-color:#424242"/>
+                        <stop offset="100%" style="stop-color:#212121"/>
+                    </radialGradient>
+                </defs>
+                
+                <!-- 地面参考线 -->
+                <line x1="20" y1="100" x2="330" y2="100" stroke="#BDBDBD" stroke-dasharray="5,3" stroke-width="2"/>
+                <text x="25" y="115" font-size="10" fill="#757575">地面</text>
+                
+                <!-- 气球小车组 -->
+                <g id="demo-car-group" transform="translate(175, 50)">
+                    <!-- 气球 -->
+                    <ellipse id="anim-balloon" cx="0" cy="0" rx="45" ry="32" fill="url(#balloonGrad)" stroke="#C51162" stroke-width="1.5"/>
+                    <ellipse cx="-10" cy="-8" rx="12" ry="15" fill="#FFE0F0" opacity="0.4"/>
+                    
+                    <!-- 气球口 -->
+                    <rect x="-48" y="-6" width="12" height="12" fill="#FF4081" rx="2"/>
+                    <rect x="-50" y="-4" width="4" height="8" fill="#C51162"/>
+                    
+                    <!-- 气流线（初始隐藏） -->
+                    <g id="air-stream" opacity="0">
+                        <path d="M-52,-2 Q-65,-2 -75,-2" stroke="#64B5F6" stroke-width="3" fill="none" opacity="0.7">
+                            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.3s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M-52,0 Q-65,0 -75,0" stroke="#42A5F5" stroke-width="4" fill="none" opacity="0.8" stroke-dasharray="5,3">
+                            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.25s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M-52,2 Q-65,2 -75,2" stroke="#2196F3" stroke-width="3" fill="none" opacity="0.7">
+                            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.35s" repeatCount="indefinite"/>
+                        </path>
+                    </g>
+                    
+                    <!-- 小车车身 -->
+                    <rect x="-25" y="25" width="50" height="20" fill="url(#carGrad2)" rx="4" stroke="#1A237E" stroke-width="1.5"/>
+                    <rect x="-20" y="28" width="40" height="10" fill="#C5CAE9" opacity="0.5" rx="2"/>
+                    
+                    <!-- 车轮 -->
+                    <circle cx="-18" cy="45" r="6" fill="url(#wheelGrad2)" stroke="#212121" stroke-width="1"/>
+                    <circle cx="-18" cy="45" r="3" fill="#757575"/>
+                    <line x1="-18" y1="42" x2="-18" y2="48" stroke="#424242" stroke-width="0.5"/>
+                    <line x1="-21" y1="45" x2="-15" y2="45" stroke="#424242" stroke-width="0.5"/>
+                    
+                    <circle cx="18" cy="45" r="6" fill="url(#wheelGrad2)" stroke="#212121" stroke-width="1"/>
+                    <circle cx="18" cy="45" r="3" fill="#757575"/>
+                    <line x1="18" y1="42" x2="18" y2="48" stroke="#424242" stroke-width="0.5"/>
+                    <line x1="15" y1="45" x2="21" y2="45" stroke="#424242" stroke-width="0.5"/>
+                </g>
+
+                <!-- 力的箭头（初始隐藏） -->
+                <g id="demo-arrows" opacity="0">
+                    <!-- 气体向后箭头 -->
+                    <line x1="120" y1="50" x2="75" y2="50" stroke="#2196F3" stroke-width="4" marker-end="url(#arrow-blue)"/>
+                    <text x="50" y="42" fill="#1976D2" font-size="13" font-weight="bold">气体向后</text>
+                    <text x="55" y="55" fill="#1976D2" font-size="10">喷气方向</text>
+
+                    <!-- 小车向前箭头 -->
+                    <line x1="230" y1="50" x2="275" y2="50" stroke="#F44336" stroke-width="4" marker-end="url(#arrow)"/>
+                    <text x="255" y="42" fill="#D32F2F" font-size="13" font-weight="bold">小车向前</text>
+                    <text x="255" y="55" fill="#D32F2F" font-size="10">反冲力</text>
+                </g>
+                
+                <!-- 说明文字 -->
+                <text x="175" y="130" text-anchor="middle" font-size="12" fill="#5E35B1" font-weight="bold">作用力与反作用力方向相反</text>
+            </svg>
+            <div class="demo-controls">
+                <button onclick="playRecoil()">▶️ 演示反冲力</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>2. 影响行驶距离的因素</h3>
+        <ul>
+            <li><strong>气球大小：</strong> 气球越大 -> 能量越多 -> 距离越远。</li>
+            <li><strong>喷管粗细：</strong> 粗管动力大但时间短；细管动力小但时间长。</li>
+        </ul>
+        <div class="demo-box">
+            <svg viewBox="0 0 380 160" width="100%" height="160" style="background:linear-gradient(to bottom, #FFF3E0 0%, #F5F5F5 100%); border-radius:10px;">
+                <defs>
+                    <linearGradient id="nozzleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#BDBDBD"/>
+                        <stop offset="50%" style="stop-color:#E0E0E0"/>
+                        <stop offset="100%" style="stop-color:#BDBDBD"/>
+                    </linearGradient>
+                    <radialGradient id="balloonGrad2">
+                        <stop offset="0%" style="stop-color:#FF80AB"/>
+                        <stop offset="70%" style="stop-color:#FF4081"/>
+                        <stop offset="100%" style="stop-color:#C51162"/>
+                    </radialGradient>
+                </defs>
+                
+                <!-- 标题 -->
+                <text x="190" y="20" text-anchor="middle" font-size="14" fill="#E65100" font-weight="bold">喷管粗细对比实验</text>
+                
+                <!-- 粗喷管场景 -->
+                <g transform="translate(0, 35)">
+                    <text x="30" y="15" font-size="13" font-weight="bold" fill="#D32F2F">粗喷管:</text>
+                    
+                    <!-- 气球 -->
+                    <ellipse cx="100" cy="15" rx="25" ry="18" fill="url(#balloonGrad2)" stroke="#C51162" stroke-width="1"/>
+                    <ellipse cx="92" cy="10" rx="8" ry="10" fill="#FFE0F0" opacity="0.4"/>
+                    
+                    <!-- 粗喷管 -->
+                    <rect x="125" y="8" width="45" height="14" fill="url(#nozzleGrad)" stroke="#757575" stroke-width="1.5" rx="2"/>
+                    <rect x="168" y="10" width="8" height="10" fill="#9E9E9E"/>
+                    
+                    <!-- 粗气流 -->
+                    <g class="air-stream" style="opacity:1; animation: dash 0.2s linear infinite;">
+                        <line x1="176" y1="12" x2="200" y2="12" stroke="#42A5F5" stroke-width="5" stroke-dasharray="5"/>
+                        <line x1="176" y1="15" x2="205" y2="15" stroke="#2196F3" stroke-width="6" stroke-dasharray="5"/>
+                        <line x1="176" y1="18" x2="200" y2="18" stroke="#1976D2" stroke-width="5" stroke-dasharray="5"/>
+                    </g>
+                    
+                    <!-- 特性标注 -->
+                    <text x="220" y="10" font-size="11" fill="#1976D2">✓ 喷气快</text>
+                    <text x="220" y="23" font-size="11" fill="#1976D2">✓ 动力大</text>
+                    <text x="220" y="36" font-size="11" fill="#F57C00">✗ 时间短</text>
+                    
+                    <!-- 能量条 -->
+                    <rect x="30" y="45" width="150" height="12" fill="#ECEFF1" stroke="#90A4AE" stroke-width="1" rx="6"/>
+                    <rect x="32" y="47" width="90" height="8" fill="#FF9800" rx="4">
+                        <animate attributeName="width" values="90;0;90" dur="2.5s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="190" y="55" font-size="10" fill="#666">能量消耗快</text>
+                </g>
+                
+                <!-- 细喷管场景 -->
+                <g transform="translate(0, 100)">
+                    <text x="30" y="15" font-size="13" font-weight="bold" fill="#2E7D32">细喷管:</text>
+                    
+                    <!-- 气球 -->
+                    <ellipse cx="100" cy="15" rx="25" ry="18" fill="url(#balloonGrad2)" stroke="#C51162" stroke-width="1"/>
+                    <ellipse cx="92" cy="10" rx="8" ry="10" fill="#FFE0F0" opacity="0.4"/>
+                    
+                    <!-- 细喷管 -->
+                    <rect x="125" y="12" width="45" height="6" fill="url(#nozzleGrad)" stroke="#757575" stroke-width="1.5" rx="1"/>
+                    <rect x="168" y="13" width="8" height="4" fill="#9E9E9E"/>
+                    
+                    <!-- 细气流 -->
+                    <g class="air-stream" style="opacity:1; animation: dash 0.8s linear infinite;">
+                        <line x1="176" y1="14" x2="200" y2="14" stroke="#64B5F6" stroke-width="2" stroke-dasharray="3"/>
+                        <line x1="176" y1="15" x2="205" y2="15" stroke="#42A5F5" stroke-width="2.5" stroke-dasharray="3"/>
+                        <line x1="176" y1="16" x2="200" y2="16" stroke="#2196F3" stroke-width="2" stroke-dasharray="3"/>
+                    </g>
+                    
+                    <!-- 特性标注 -->
+                    <text x="220" y="10" font-size="11" fill="#F57C00">✗ 喷气慢</text>
+                    <text x="220" y="23" font-size="11" fill="#F57C00">✗ 动力小</text>
+                    <text x="220" y="36" font-size="11" fill="#2E7D32">✓ 时间长</text>
+                    
+                    <!-- 能量条 -->
+                    <rect x="30" y="45" width="150" height="12" fill="#ECEFF1" stroke="#90A4AE" stroke-width="1" rx="6"/>
+                    <rect x="32" y="47" width="90" height="8" fill="#4CAF50" rx="4">
+                        <animate attributeName="width" values="90;0;90" dur="6.5s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="190" y="55" font-size="10" fill="#666">能量消耗慢</text>
+                </g>
+                
+                <!-- 底部应用说明 -->
+                <rect x="10" y="145" width="360" height="1" fill="#E0E0E0"/>
+                <text x="20" y="157" font-size="11" fill="#5E35B1" font-weight="bold">💡 应用：</text>
+                <text x="70" y="157" font-size="10" fill="#666">火箭、喷气式飞机、乌贼喷水、烟花升空</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- PART 2: QUIZ SECTION -->
+    <div class="section-title">二、 单元闯关塔 (35题 / 100分)</div>
+    
+    <div class="card">
+        <div class="quiz-status">
+            <span>共 35 题</span>
+            <span>满分 100 分</span>
+        </div>
+        <form id="quiz-form">
+            <!-- JS will inject questions here -->
+        </form>
+        <button type="button" class="btn-submit" onclick="submitQuiz()">提交试卷</button>
+    </div>
+
+</div>
+
+<!-- Results Modal -->
+<div id="result-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeResult()">&times;</span>
+        <h2 style="text-align:center">测试结果</h2>
+        <div class="score-display" id="final-score">0</div>
+        <div id="analysis-content">
+            <!-- Wrong answers injected here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// --- 即时反馈系统 ---
+const InstantFeedback = {
+    audioCtx: null,
+    encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+    hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+    
+    init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+    
+    playCorrectSound() {
+        this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        const notes = [523.25, 659.25, 783.99];
+        notes.forEach((freq, i) => {
+            const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+            osc.connect(gain); gain.connect(this.audioCtx.destination);
+            const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+            osc.frequency.value = freq; osc.type = 'sine';
+            gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+            osc.start(start); osc.stop(start + 0.3);
+        });
+    },
+    
+    playWrongSound() {
+        this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+        osc.connect(gain); gain.connect(this.audioCtx.destination);
+        const now = this.audioCtx.currentTime;
+        osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+    },
+    
+    showConfetti() {
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => {
+                const c = document.createElement('div'); c.className = 'confetti';
+                c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 4000);
+            }, i * 30);
+        }
+    },
+    
+    showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `feedback-toast feedback-${type}`;
+        toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+    },
+    
+    onCorrect(element) {
+        this.playCorrectSound(); this.showConfetti();
+        const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+        this.showToast(msg, 'success');
+        if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+    },
+    
+    onWrong(element, hint = '') {
+        this.playWrongSound();
+        const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+        this.showToast(msg, 'error');
+        if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+    }
+};
+InstantFeedback.init();
+
+// 即时反馈函数
+function checkChoiceAnswer(qid,selectedAnswer,labelElement,event){
+event.preventDefault();
+const qData=questions.find(q=>q.id===qid);
+if(!qData)return;
+const radio=labelElement.querySelector('input[type="radio"]');
+radio.checked=true;
+const allLabels=labelElement.parentElement.querySelectorAll('label');
+allLabels.forEach(l=>l.classList.remove('correct-feedback','wrong-feedback'));
+const isCorrect=selectedAnswer===qData.ans;
+setTimeout(()=>{
+if(isCorrect){
+InstantFeedback.onCorrect(labelElement);
+}else{
+InstantFeedback.onWrong(labelElement,qData.exp);
+}
+},200);
+}
+
+function checkFillAnswer(qid,inputElement){
+const qData=questions.find(q=>q.id===qid);
+if(!qData)return;
+const userAnswer=inputElement.value.trim();
+if(!userAnswer)return;
+const isCorrect=qData.ans.some?qData.ans.some(a=>userAnswer.includes(a)):userAnswer.includes(qData.ans);
+inputElement.classList.remove('correct-feedback','wrong-feedback');
+setTimeout(()=>{
+if(isCorrect){
+InstantFeedback.onCorrect(inputElement);
+}else{
+InstantFeedback.onWrong(inputElement,qData.exp);
+}
+},200);
+}
+
+// --- 1. Simulation Logic ---
+function playRecoil() {
+    const group = document.getElementById('demo-car-group');
+    const arrows = document.getElementById('demo-arrows');
+    const balloon = document.getElementById('anim-balloon');
+    const airStream = document.getElementById('air-stream');
+    
+    // Reset
+    group.setAttribute('transform', 'translate(175, 50)');
+    arrows.setAttribute('opacity', '0');
+    balloon.setAttribute('rx', '45');
+    balloon.setAttribute('ry', '32');
+    airStream.setAttribute('opacity', '0');
+    
+    // Animate
+    setTimeout(() => {
+        arrows.setAttribute('opacity', '1');
+        airStream.setAttribute('opacity', '1');
+        
+        let pos = 175;
+        let rx = 45;
+        let ry = 32;
+        const interval = setInterval(() => {
+            pos += 3; // Move right faster
+            rx -= 0.6; // Shrink horizontally
+            ry -= 0.4; // Shrink vertically
+            
+            group.setAttribute('transform', `translate(${pos}, 50)`);
+            if(rx > 15 && ry > 10) {
+                balloon.setAttribute('rx', rx);
+                balloon.setAttribute('ry', ry);
+            }
+            
+            if (pos > 280) {
+                clearInterval(interval);
+                arrows.setAttribute('opacity', '0');
+                airStream.setAttribute('opacity', '0');
+                setTimeout(() => {
+                    // Reset for next demo
+                    group.setAttribute('transform', 'translate(175, 50)');
+                    balloon.setAttribute('rx', '45');
+                    balloon.setAttribute('ry', '32');
+                }, 1000);
+            }
+        }, 20);
+    }, 200);
+}
+
+// --- 2. Question Database (35 Questions) ---
+const questions = [
+    // --- 选择题 (1-20) ---
+    { id: 1, type: 'choice', q: '1. 气球喷气方向向左，气球会向（ ）运动。', opts: ['A. 左', 'B. 右', 'C. 上'], ans: 'B', exp: '气球运动方向与喷气方向相反。' },
+    { id: 2, type: 'choice', q: '2. 气球里的气体喷出时，会产生一个和喷出方向相反的推力，这个力叫（ ）。', opts: ['A. 重力', 'B. 弹力', 'C. 反冲力'], ans: 'C', exp: '这是反冲力的定义。' },
+    { id: 3, type: 'choice', q: '3. 下列物体中，不是利用反冲力运动的是（ ）。', opts: ['A. 喷气式飞机', 'B. 弓箭', 'C. 火箭'], ans: 'B', exp: '弓箭利用的是弹力，飞机和火箭利用反冲力。' },
+    { id: 4, type: 'choice', q: '4. 想要让气球小车行驶得更远，我们可以（ ）。', opts: ['A. 用更小的气球', 'B. 增加车身重量', 'C. 减轻车身重量'], ans: 'C', exp: '车身越轻，起步越快，受到的阻力影响相对较小，行驶更远。' },
+    { id: 5, type: 'choice', q: '5. 气球飞行的方向（ ）。', opts: ['A. 很有规律', 'B. 没有规律', 'C. 总是向下的'], ans: 'B', exp: '喷嘴无规律震动导致方向随机。' },
+    { id: 6, type: 'choice', q: '6. 喷气嘴越粗，喷气速度越快，动力（ ），喷气时间（ ）。', opts: ['A. 大，短', 'B. 小，长', 'C. 大，长'], ans: 'A', exp: '粗管：气流大，力大，气跑得快（时间短）。' },
+    { id: 7, type: 'choice', q: '7. 组装气球小车时，车轴转动不灵活，我们可以（ ）。', opts: ['A. 换大轮子', 'B. 加润滑油', 'C. 增加气球'], ans: 'B', exp: '加润滑油可以减小摩擦力。' },
+    { id: 8, type: 'choice', q: '8. 充气后的气球具有（ ），喷气时可以产生动力。', opts: ['A. 能量', 'B. 磁力', 'C. 摩擦力'], ans: 'A', exp: '压缩空气具有能量。' },
+    { id: 9, type: 'choice', q: '9. 节日燃放的“冲天炮”是利用（ ）升空的。', opts: ['A. 弹力', 'B. 重力', 'C. 反冲力'], ans: 'C', exp: '火药气体向下喷，炮向上冲。' },
+    { id: 10, type: 'choice', q: '10. 同样的细喷管，气球吹得越大，行驶距离（ ）。', opts: ['A. 越近', 'B. 越远', 'C. 不变'], ans: 'B', exp: '气量足，持续时间长，总能量多。' },
+    { id: 11, type: 'choice', q: '11. 气球小车动力不足时，可以（ ）。', opts: ['A. 换更大的气球', 'B. 把喷管弄得非常细', 'C. 增加车重'], ans: 'A', exp: '大气球提供更多能量；太细的管子虽然时间长但推力可能不足以克服静摩擦。' },
+    { id: 12, type: 'choice', q: '12. 在光滑的地板上行驶比在毛巾上行驶（ ）。', opts: ['A. 更远', 'B. 更近', 'C. 一样'], ans: 'A', exp: '光滑地面摩擦力小。' },
+    { id: 13, type: 'choice', q: '13. 消防员使用高压水枪灭火时，身体会向（ ）倾斜。', opts: ['A. 前', 'B. 后', 'C. 左'], ans: 'B', exp: '水向前喷，人受向后的反冲力。' },
+    { id: 14, type: 'choice', q: '14. 如果气球喷嘴向下，气球会（ ）。', opts: ['A. 向上飞', 'B. 向下飞', 'C. 不动'], ans: 'A', exp: '反冲力方向向上。' },
+    { id: 15, type: 'choice', q: '15. 下列关于反冲力的说法正确的是（ ）。', opts: ['A. 只有气体能产生', 'B. 只有液体能产生', 'C. 气体和液体喷射都能产生'], ans: 'C', exp: '水枪（液）和气球（气）都有反冲力。' },
+    { id: 16, type: 'choice', q: '16. 要使小车运动，外力必须（ ）摩擦力。', opts: ['A. 大于', 'B. 小于', 'C. 等于'], ans: 'A', exp: '动力大于阻力才能启动。' },
+    { id: 17, type: 'choice', q: '17. 喷气嘴细，小车行驶速度（ ），行驶距离（ ）。', opts: ['A. 慢，远', 'B. 快，近', 'C. 慢，近'], ans: 'A', exp: '细管推力小（起步慢），但持久，往往能利用惯性滑行更远。' },
+    { id: 18, type: 'choice', q: '18. 乌贼（墨鱼）喷水前行，也是利用了（ ）。', opts: ['A. 浮力', 'B. 反冲力', 'C. 重力'], ans: 'B', exp: '生物界的反冲力应用。' },
+    { id: 19, type: 'choice', q: '19. 制作小车时，气球安装在（ ）最合适。', opts: ['A. 车头', 'B. 车尾', 'C. 都可以，只要喷嘴朝后'], ans: 'C', exp: '关键是喷气方向向后，安装位置不限。' },
+    { id: 20, type: 'choice', q: '20. 气球变瘪了，小车最终停下来是因为（ ）。', opts: ['A. 没气了', 'B. 受到阻力', 'C. 没气了且受到阻力'], ans: 'C', exp: '动力消失，且始终存在摩擦阻力。' },
+
+    // --- 填空题 (21-30) ---
+    { id: 21, type: 'fill', q: '21. 气球里的气体喷出时，会产生一个和喷出方向____的推力。', ans: '相反', exp: '方向相反。' },
+    { id: 22, type: 'fill', q: '22. 这种推动气球运动的力叫做____力。', ans: '反冲', exp: '定义：反冲力。' },
+    { id: 23, type: 'fill', q: '23. 喷气式飞机、火箭是靠喷气发动机产生的____运动的。', ans: '反冲力', exp: '应用实例。' },
+    { id: 24, type: 'fill', q: '24. 气球吹得越大，气球具有的____越大。', ans: '能量', exp: '压缩空气储存能量。' },
+    { id: 25, type: 'fill', q: '25. 喷管越粗，喷气速度越____，动力越____。', ans: '快', exp: '粗管喷气快，动力大（此处只需填快/大）。' },
+    { id: 26, type: 'fill', q: '26. 喷管越细，喷气时间越____。', ans: '长', exp: '细管流量小，时间长。' },
+    { id: 27, type: 'fill', q: '27. 气球小车的动力来源于气球喷出气体产生的____。', ans: '反冲力', exp: '动力来源。' },
+    { id: 28, type: 'fill', q: '28. 减轻车身____可以使小车行驶得更远。', ans: '重量', exp: '轻量化减小摩擦。' },
+    { id: 29, type: 'fill', q: '29. 气球在飞行中，喷气嘴会无规律____，导致方向变化。', ans: '振动', exp: '振动导致方向失控。' },
+    { id: 30, type: 'fill', q: '30. 车轴处加____可以减小摩擦力。', ans: '润滑油', exp: '润滑减少摩擦。' },
+
+    // --- 拖拽题 (31-33) ---
+    { 
+        id: 31, type: 'drag', q: '31. 请将下列现象分类（受力类型）：', 
+        cats: ['利用反冲力', '不是反冲力'], 
+        items: [{t:'火箭升空', c:0}, {t:'拉弓射箭', c:1}, {t:'放飞气球', c:0}, {t:'苹果落地', c:1}],
+        exp: '火箭和气球是反冲力；弓箭是弹力，苹果是重力。'
+    },
+    { 
+        id: 32, type: 'drag', q: '32. 请根据喷管粗细分类特性：', 
+        cats: ['粗喷管', '细喷管'], 
+        items: [{t:'喷气快', c:0}, {t:'动力大', c:0}, {t:'时间长', c:1}, {t:'动力小', c:1}],
+        exp: '粗管：快、大、短；细管：慢、小、长。'
+    },
+    { 
+        id: 33, type: 'drag', q: '33. 影响小车距离的因素：', 
+        cats: ['距离变远', '距离变近'], 
+        items: [{t:'气球吹大', c:0}, {t:'路面粗糙', c:1}, {t:'车身变轻', c:0}, {t:'增加载重', c:1}],
+        exp: '气大、车轻、路滑 -> 远。'
+    },
+
+    // --- 实验探究题 (34-35) ---
+    {
+        id: 34, type: 'experiment', 
+        q: '34. 某小组探究“气球喷管粗细对小车行驶距离的影响”，记录如下表。',
+        // 修复：SVG 使用线条和独立文本，不使用 \n
+        svg: `<svg viewBox="0 0 320 160" style="background:white; border:1px solid #ddd">
+                <!-- Header -->
+                <rect x="0" y="0" width="320" height="40" fill="#eee"/>
+                <text x="50" y="25" text-anchor="middle" font-weight="bold" font-size="14">喷管类型</text>
+                <text x="160" y="25" text-anchor="middle" font-weight="bold" font-size="14">喷气时间(秒)</text>
+                <text x="270" y="25" text-anchor="middle" font-weight="bold" font-size="14">距离(厘米)</text>
+                
+                <!-- Lines -->
+                <line x1="0" y1="40" x2="320" y2="40" stroke="#ccc"/>
+                <line x1="0" y1="80" x2="320" y2="80" stroke="#ccc"/>
+                <line x1="0" y1="120" x2="320" y2="120" stroke="#ccc"/>
+                <line x1="100" y1="0" x2="100" y2="160" stroke="#ccc"/>
+                <line x1="220" y1="0" x2="220" y2="160" stroke="#ccc"/>
+
+                <!-- Row 1: 粗喷管 -->
+                <text x="50" y="65" text-anchor="middle" font-size="14">粗喷管</text>
+                <text x="160" y="65" text-anchor="middle" font-size="14">2.5</text>
+                <text x="270" y="65" text-anchor="middle" font-size="14">150</text>
+                
+                <!-- Row 2: 中喷管 -->
+                <text x="50" y="105" text-anchor="middle" font-size="14">中喷管</text>
+                <text x="160" y="105" text-anchor="middle" font-size="14">4.0</text>
+                <text x="270" y="105" text-anchor="middle" font-size="14">210</text>
+
+                <!-- Row 3: 细喷管 -->
+                <text x="50" y="145" text-anchor="middle" font-size="14">细喷管</text>
+                <text x="160" y="145" text-anchor="middle" font-size="14">6.5</text>
+                <text x="270" y="145" text-anchor="middle" font-size="14">280</text>
+              </svg>`,
+        sub: [
+            { label: '1.【填空】根据数据，喷管越细，喷气时间越____。', ans: '长' },
+            { label: '2.【分析】哪种喷管让小车行驶得最远？为什么？', ans: '细喷管', key: ['细', '长'] },
+            { label: '3.【原理】说明喷管粗细选择的科学原理。', ans: '综合考虑动力与时间', key: ['动力', '时间', '综合'] }
+        ],
+        exp: '1.长；2.细喷管，因为它提供了持续更久的动力；3.粗管动力大但时间短，细管动力小但时间长，需综合考虑摩擦力大小来选择。'
+    },
+    {
+        id: 35, type: 'experiment', 
+        q: '35. 探究“气球大小对小车行驶距离的影响”。',
+        svg: `<svg viewBox="0 0 300 120" style="background:white; border:1px solid #ddd">
+                <circle cx="50" cy="50" r="15" fill="#FF4081" opacity="0.6"/><text x="50" y="85" text-anchor="middle" font-size="12" fill="#333">小气球</text>
+                <circle cx="150" cy="50" r="25" fill="#FF4081" opacity="0.8"/><text x="150" y="95" text-anchor="middle" font-size="12" fill="#333">中气球</text>
+                <circle cx="250" cy="50" r="35" fill="#FF4081"/><text x="250" y="105" text-anchor="middle" font-size="12" fill="#333">大气球</text>
+                <line x1="20" y1="110" x2="280" y2="110" stroke="#ddd" stroke-dasharray="4" />
+              </svg>`,
+        sub: [
+            { label: '1.【填空】实验中唯一改变的条件是____。', ans: '气球大小' },
+            { label: '2.【分析】预测：____气球驱动的小车行驶得最远。', ans: '大' },
+            { label: '3.【原理】气球大小与行驶距离的关系原理是什么？', ans: '能量', key: ['能量', '多', '远'] }
+        ],
+        exp: '1.气球大小；2.大；3.气球越大，储存的空气越多（能量越大），产生的反冲力做功越多，行驶越远。'
+    }
+];
+
+// --- 3. Quiz Rendering Logic (From Lesson 1) ---
+const form = document.getElementById('quiz-form');
+
+function renderQuiz() {
+    questions.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'question-item';
+        div.id = `q-${q.id}`;
+        
+        // Badge
+        let badgeClass = '';
+        let badgeText = '';
+        if(q.type === 'choice') { badgeClass = 'badge-choice'; badgeText = '选择题 (2分)'; }
+        if(q.type === 'fill') { badgeClass = 'badge-fill'; badgeText = '填空题 (2分)'; }
+        if(q.type === 'drag') { badgeClass = 'badge-drag'; badgeText = '拖拽题 (5分)'; }
+        if(q.type === 'experiment') { badgeClass = 'badge-exp'; badgeText = '实验探究 (12.5分)'; }
+        
+        let html = `<div><span class="q-badge ${badgeClass}">${badgeText}</span><div class="q-content">${q.q}</div></div>`;
+
+        // Input Generation
+        if (q.type === 'choice') {
+            html += `<div class="options">`;
+            q.opts.forEach(opt => {
+                html += `<label onclick="checkChoiceAnswer(${q.id},'${opt[0]}',this,event)"><input type="radio" name="q${q.id}" value="${opt[0]}"> ${opt}</label>`;
+            });
+            html += `</div>`;
+        } else if (q.type === 'fill') {
+            html += `<div style="margin-top:10px"><input type="text" name="q${q.id}" placeholder="请输入答案" onblur="checkFillAnswer(${q.id},this)"></div>`;
+        } else if (q.type === 'drag') {
+            html += `<div class="drag-container">`;
+            q.cats.forEach((cat, idx) => {
+                html += `<div class="drop-zone" ondrop="drop(event, ${q.id}, ${idx})" ondragover="allowDrop(event)"><h4>${cat}</h4><div class="zone-items" id="zone-${q.id}-${idx}"></div></div>`;
+            });
+            html += `</div><div class="drag-pool">`;
+            q.items.forEach((item, idx) => {
+                html += `<div class="drag-item" id="d-${q.id}-${idx}" draggable="true" ondragstart="drag(event, ${q.id}, ${idx})" onclick="clickDrag(this, ${q.id}, ${idx})">${item.t}</div>`;
+            });
+            html += `</div><input type="hidden" id="inp-q${q.id}">`;
+        } else if (q.type === 'experiment') {
+            html += `<div class="exp-box">`;
+            html += `<div class="exp-img-container">${q.svg}</div>`;
+            q.sub.forEach((sub, idx) => {
+                html += `<div class="exp-part"><span class="exp-label">${sub.label}</span>`;
+                if(sub.label.includes('填空')) {
+                    html += `<input type="text" name="q${q.id}_s${idx}" placeholder="简短回答">`;
+                } else {
+                    html += `<textarea name="q${q.id}_s${idx}" placeholder="请详细说明..."></textarea>`;
+                }
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+
+        div.innerHTML = html;
+        form.appendChild(div);
+    });
+}
+
+// --- 4. Drag & Drop Helpers (Mobile Friendly Click + Desktop Drag) ---
+let selectedDrag = null;
+
+function allowDrop(ev) { ev.preventDefault(); }
+function drag(ev, qid, iidx) { ev.dataTransfer.setData("qid", qid); ev.dataTransfer.setData("iidx", iidx); }
+function drop(ev, qid, zidx) {
+    ev.preventDefault();
+    const iidx = ev.dataTransfer.getData("iidx");
+    const item = document.getElementById(`d-${qid}-${iidx}`);
+    if(item) appendItem(item, qid, zidx);
+}
+
+// Mobile Click Logic
+function clickDrag(el, qid, iidx) {
+    if(selectedDrag && selectedDrag === el) {
+        el.classList.remove('selected'); selectedDrag = null; return;
+    }
+    if(selectedDrag) selectedDrag.classList.remove('selected');
+    selectedDrag = el;
+    el.classList.add('selected');
+    
+    // Bind click events to zones
+    const zones = document.querySelectorAll(`#q-${qid} .drop-zone`);
+    zones.forEach((z, idx) => {
+        z.onclick = () => { if(selectedDrag) { appendItem(selectedDrag, qid, idx); selectedDrag=null; } };
+    });
+}
+
+function appendItem(item, qid, zidx) {
+    document.getElementById(`zone-${qid}-${zidx}`).appendChild(item);
+    item.classList.remove('selected');
+    updateDragInput(qid);
+}
+
+function updateDragInput(qid) {
+    let res = [];
+    const zones = document.querySelectorAll(`#q-${qid} .drop-zone`);
+    zones.forEach((z, zidx) => {
+        const items = z.querySelectorAll('.drag-item');
+        items.forEach(i => {
+            // format: itemIndex:zoneIndex
+            const iidx = i.id.split('-')[2];
+            res.push(`${iidx}:${zidx}`);
+        });
+    });
+    document.getElementById(`inp-q${qid}`).value = res.join(',');
+}
+
+// --- 5. Scoring Logic ---
+function submitQuiz() {
+    let score = 0;
+    let html = '';
+    
+    questions.forEach(q => {
+        let correct = false;
+        let userAns = '';
+        let points = 0;
+        
+        if(q.type === 'choice') {
+            const el = document.querySelector(`input[name="q${q.id}"]:checked`);
+            if(el) userAns = el.value;
+            if(userAns === q.ans) { correct = true; score += 2; }
+        } 
+        else if (q.type === 'fill') {
+            const el = document.querySelector(`input[name="q${q.id}"]`);
+            userAns = el.value.trim();
+            if(userAns.includes(q.ans)) { correct = true; score += 2; }
+        }
+        else if (q.type === 'drag') {
+            const raw = document.getElementById(`inp-q${q.id}`).value;
+            if(raw) {
+                const pairs = raw.split(',');
+                let allRight = true;
+                let count = 0;
+                pairs.forEach(p => {
+                    const [i, z] = p.split(':');
+                    if(q.items[i].c != z) allRight = false;
+                    count++;
+                });
+                if(count === q.items.length && allRight) { correct = true; score += 5; }
+            }
+        }
+        else if (q.type === 'experiment') {
+            // Partial scoring for experiment questions
+            let subPoints = 0;
+            let subCorrectCount = 0;
+            q.sub.forEach((sub, idx) => {
+                const el = document.querySelector(`[name="q${q.id}_s${idx}"]`);
+                const val = el ? el.value.trim() : '';
+                let isPartRight = false;
+                
+                if(sub.label.includes('填空')) {
+                    if(val.includes(sub.ans)) isPartRight = true;
+                } else {
+                    // Check keywords
+                    if(sub.key && sub.key.some(k => val.includes(k))) isPartRight = true;
+                }
+                
+                if(isPartRight) { 
+                    subPoints += (12.5 / q.sub.length); 
+                    subCorrectCount++; 
+                }
+            });
+            
+            // Allow small float tolerance
+            if(subCorrectCount === q.sub.length) { correct = true; }
+            score += subPoints;
+        }
+
+        if(!correct) {
+            html += `<div class="analysis-card">
+                <strong>第 ${q.id} 题 (${q.type === 'experiment' ? '实验探究' : '基础知识'})</strong>
+                <div>${q.q}</div>
+                <span class="correct-answer">解析：${q.exp}</span>
+            </div>`;
+        }
+    });
+
+    // Final Score Cap
+    score = Math.min(100, Math.round(score));
+    
+    document.getElementById('final-score').innerText = score;
+    document.getElementById('analysis-content').innerHTML = html || '<div style="text-align:center; color:green; font-size:1.2rem; padding:20px;">太棒了！全部正确！你是科学小达人！</div>';
+    document.getElementById('result-modal').style.display = 'block';
+}
+
+function closeResult() {
+    document.getElementById('result-modal').style.display = 'none';
+}
+
+// Init
+renderQuiz();
+
+</script>
+</body>
+</html>

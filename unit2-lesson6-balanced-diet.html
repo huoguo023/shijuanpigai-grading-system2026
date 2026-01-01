@@ -1,0 +1,627 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第六课：营养要均衡 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #FFF8E1; /* 温暖的米色背景 */
+            --card-bg: #FFFFFF;
+            --primary: #FF6F00; /* 活力橙 */
+            --secondary: #8BC34A; /* 健康绿 */
+            --accent: #29B6F6; /* 水蓝 */
+            --danger: #E53935;
+            --text: #37474F;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#FFECB3 10%, transparent 11%);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 3px solid #FFB74D;
+            overflow: hidden;
+        }
+
+        h1 { color: #EF6C00; margin-top: 0; font-size: 1.5em; }
+        .subtitle { color: #78909C; font-size: 0.9em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #FAFAFA;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid var(--secondary);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #558B2F; border-bottom: 1px dashed #CED7DB; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { background: #FFF9C4; padding: 0 4px; border-radius: 3px; font-weight: bold; color: #E65100; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFFFFF;
+            border: 2px dashed #BDBDBD;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+            height: auto;
+            overflow: hidden;
+        }
+        .svg-caption { font-size: 0.85em; color: #90A4AE; margin-top: 5px; font-style: italic; }
+
+        /* 动画关键帧 */
+        @keyframes balance { 0% {transform: rotate(0deg);} 25% {transform: rotate(-5deg);} 75% {transform: rotate(5deg);} 100% {transform: rotate(0deg);} }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+        @keyframes flow { 0% {stroke-dashoffset: 20;} 100% {stroke-dashoffset: 0;} }
+        @keyframes grow { 0% {height: 10px;} 100% {height: 40px;} }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #E65100;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #E65100; }
+        .btn-next { background: var(--secondary); box-shadow: 0 4px 0 #558B2F; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #ECEFF1; border-radius: 5px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #fff; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #FFCC80; margin-top: 10px; }
+        .q-tag { display:inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; color:white;}
+        .tag-choice { background: #42A5F5; }
+        .tag-fill { background: #AB47BC; }
+        .tag-sort { background: #FF7043; }
+        .tag-exp { background: #26A69A; }
+        
+        .q-content { font-size: 1.15em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项样式 */
+        .option-item {
+            background: #FAFAFA; border: 2px solid #E0E0E0; padding: 12px; border-radius: 8px;
+            margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #FFF3E0; border-color: #FF9800; font-weight: bold; color: #E65100; }
+
+        .fill-input { border: none; border-bottom: 2px solid #FF9800; background: transparent; width: 100px; text-align: center; font-size: 1.1em; color: #E65100; border-radius: 0; outline: none; }
+
+        /* 排序题容器 */
+        .sort-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sort-item { 
+            background: #E8F5E9; border: 1px solid #4CAF50; color: #2E7D32;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.9em; cursor: pointer;
+        }
+        .sort-box { 
+            min-height: 50px; border: 2px dashed #90A4AE; border-radius: 8px; 
+            margin-top: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            background: #ECEFF1; align-items: center; justify-content: center;
+        }
+        .sort-placeholder { color: #999; font-size: 0.8em; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; font-size: 0.95em; }
+        .score-display { font-size: 3.5em; color: var(--primary); font-weight: bold; margin: 10px 0; }
+
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 第一块：复习巩固 -->
+    <div id="section-review" class="container section active">
+        <h1>🥗 营养要均衡</h1>
+        <p class="subtitle">复习巩固 & 100分闯关塔</p>
+
+        <!-- 知识点 1 & 3: 均衡饮食习惯 -->
+        <div class="knowledge-box">
+            <h3>1. 均衡饮食的重要性</h3>
+            <div class="k-point">🚫 <span class="highlight">不挑食、不偏食</span>才能获取均衡营养。没有一种食物包含所有营养。</div>
+            <div class="k-point">⚠️ 营养不均衡会影响身体健康。</div>
+            <div class="k-point">🥗 方法：<span class="highlight">荤素搭配、粗细粮搭配</span>，品种多样，数量合理。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 天平底座 -->
+                    <path d="M130,90 L170,90 L150,50 Z" fill="#78909C"/>
+                    <!-- 天平横杆 (动画) -->
+                    <g style="transform-origin: 150px 50px; animation: balance 4s infinite ease-in-out;">
+                        <rect x="50" y="48" width="200" height="4" fill="#546E7A"/>
+                        <!-- 左盘：蔬菜+肉 -->
+                        <path d="M50,50 L20,80 L80,80 Z" fill="#CFD8DC" transform="translate(0,0) scale(1,-1) translate(0,-100)"/>
+                        <circle cx="50" cy="40" r="12" fill="#8BC34A"/> <!-- 菜 -->
+                        <rect x="40" y="20" width="20" height="12" fill="#EF5350"/> <!-- 肉 -->
+                        <!-- 右盘：健康 -->
+                        <path d="M250,50 L220,80 L280,80 Z" fill="#CFD8DC" transform="translate(0,0) scale(1,-1) translate(0,-100)"/>
+                        <path d="M240,25 L250,35 L270,15" stroke="#4CAF50" stroke-width="4" fill="none"/> <!-- 对勾 -->
+                        <circle cx="250" cy="40" r="18" stroke="#4CAF50" stroke-width="2" fill="none"/>
+                    </g>
+                </svg>
+                <div class="svg-caption">演示：荤素搭配，营养天平才平衡</div>
+            </div>
+        </div>
+
+        <!-- 知识点 2: 膳食宝塔 -->
+        <div class="knowledge-box">
+            <h3>2. 平衡膳食宝塔</h3>
+            <div class="k-point">🗼 <strong>分层原则</strong>：下一层食用量 > 上一层。</div>
+            <div class="k-point">💧 <strong>底层</strong>：水和<span class="highlight">谷薯类</span>（吃最多）。</div>
+            <div class="k-point">🧂 <strong>顶层</strong>：<span class="highlight">盐和油</span>（吃最少）。</div>
+            <div class="k-point">📊 各类食物地位和比重不同。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="180" viewBox="0 0 300 180">
+                    <!-- 宝塔形状 -->
+                    <g stroke="#fff" stroke-width="1">
+                        <!-- 顶层 油盐 -->
+                        <path d="M135,30 L165,30 L170,50 L130,50 Z" fill="#EF5350"/> 
+                        <text x="150" y="45" text-anchor="middle" fill="white" font-size="10">油/盐 (少)</text>
+                        
+                        <!-- 奶豆 -->
+                        <path d="M130,50 L170,50 L180,80 L120,80 Z" fill="#FFB74D"/>
+                        <text x="150" y="70" text-anchor="middle" fill="white" font-size="10">奶/豆/蛋</text>
+                        
+                        <!-- 鱼肉 -->
+                        <path d="M120,80 L180,80 L195,110 L105,110 Z" fill="#FFCA28"/>
+                        <text x="150" y="100" text-anchor="middle" fill="#333" font-size="10">鱼/肉</text>
+                        
+                        <!-- 蔬果 -->
+                        <path d="M105,110 L195,110 L215,140 L85,140 Z" fill="#AED581"/>
+                        <text x="150" y="130" text-anchor="middle" fill="#333" font-size="10">蔬菜/水果</text>
+                        
+                        <!-- 谷薯水 -->
+                        <path d="M85,140 L215,140 L240,170 L60,170 Z" fill="#42A5F5"/>
+                        <text x="150" y="160" text-anchor="middle" fill="white" font-size="10">谷物/水 (多)</text>
+                    </g>
+                    <!-- 箭头指示量 -->
+                    <path d="M40,160 L40,40" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+                    <text x="30" y="100" font-size="10" writing-mode="tb">食用量减少</text>
+                    <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#555" /></marker></defs>
+                </svg>
+                <div class="svg-caption">演示：宝塔结构，下多上少</div>
+            </div>
+        </div>
+
+        <!-- 知识点 4, 8: 能量 -->
+        <div class="knowledge-box">
+            <h3>3. 能量供给</h3>
+            <div class="k-point">🏃 <strong>运动量大</strong>：需多吃<span class="highlight">糖类</span>（谷物类）补充能量。</div>
+            <div class="k-point">⚡ <span class="highlight">谷物、油脂</span>含糖类和脂肪，提供能量。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="80" viewBox="0 0 300 80">
+                    <!-- 跑步人 -->
+                    <circle cx="50" cy="20" r="8" fill="#FF9800"/>
+                    <path d="M50,28 L50,50 L40,70 M50,50 L60,70 M35,40 L50,35 L65,40" stroke="#FF9800" stroke-width="3" fill="none"/>
+                    <!-- 电池 -->
+                    <rect x="100" y="30" width="60" height="30" rx="2" stroke="#333" fill="none"/>
+                    <rect x="160" y="38" width="6" height="14" fill="#333"/>
+                    <!-- 能量条动画 -->
+                    <rect x="102" y="32" width="0" height="26" fill="#76FF03">
+                        <animate attributeName="width" from="0" to="56" dur="1.5s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="220" y="50" font-size="12">补充糖类/能量</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 5, 9: 生长发育 -->
+        <div class="knowledge-box">
+            <h3>4. 生长发育</h3>
+            <div class="k-point">👶 <strong>儿童长身体</strong>：需多摄取<span class="highlight">蛋白质</span>。</div>
+            <div class="k-point">🥛 来源：奶制品、豆类、鱼虾、蛋类。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 儿童 -->
+                    <g transform="translate(100, 0)">
+                        <circle cx="20" cy="30" r="10" fill="#FFCC80"/>
+                        <rect x="10" y="40" width="20" height="30" fill="#90CAF9"/>
+                        <rect x="12" y="70" width="6" height="20" fill="#5D4037"/>
+                        <rect x="22" y="70" width="6" height="20" fill="#5D4037"/>
+                    </g>
+                    <!-- 尺子 -->
+                    <rect x="150" y="10" width="10" height="80" fill="#FFF3E0" stroke="#333"/>
+                    <g stroke="#333" stroke-width="1">
+                        <line x1="150" y1="20" x2="160" y2="20"/>
+                        <line x1="150" y1="40" x2="155" y2="40"/>
+                        <line x1="150" y1="60" x2="160" y2="60"/>
+                        <line x1="150" y1="80" x2="155" y2="80"/>
+                    </g>
+                    <!-- 箭头动画 -->
+                    <path d="M130,80 L130,20" stroke="#F44336" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)">
+                        <animate attributeName="stroke-dashoffset" from="20" to="0" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="180" y="55" font-size="12" fill="#D84315">蛋白质 = 建筑材料</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 6, 10: 健康调节 -->
+        <div class="knowledge-box">
+            <h3>5. 保持健康</h3>
+            <div class="k-point">🤒 <strong>手指脱皮、口腔溃疡</strong>：多吃<span class="highlight">维生素</span>（蔬果类）。</div>
+            <div class="k-point">🍎 蔬菜水果含维生素和矿物质，维持健康。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="80" viewBox="0 0 300 80">
+                    <!-- 手指 -->
+                    <path d="M50,60 L50,30 Q50,10 70,10 Q90,10 90,30 L90,60" fill="#FFCC80" stroke="#E65100"/>
+                    <path d="M60,20 L70,25 L65,35" fill="none" stroke="#D32F2F" stroke-width="1"/> <!-- 伤口 -->
+                    <!-- 十字盾牌 -->
+                    <path d="M150,10 L180,10 L190,40 L165,70 L140,40 Z" fill="#81C784" stroke="#2E7D32"/>
+                    <rect x="160" y="25" width="10" height="30" fill="white"/>
+                    <rect x="150" y="35" width="30" height="10" fill="white"/>
+                    <text x="210" y="45" font-size="12" fill="#2E7D32">维生素修复</text>
+                </svg>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入100分闯关塔！🚀</button>
+    </div>
+
+    <!-- 第二块：闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.9em; color:#78909C;">
+            <span>总分：100分</span>
+            <span>题目：<span id="q-index">1</span> / 20</span>
+        </div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">提交 / 下一题</button>
+    </div>
+
+    <!-- 第三块：结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 题库 (20题，总分100分，覆盖35题的知识点范围) ---
+        // 分值分配：每题5分
+        const quizData = [
+            // 1. 膳食宝塔结构 (5题)
+            { type: 'mcq', q: '“平衡膳食宝塔”中，需要吃得最多的食物是？', opts: ['油和盐', '奶制品', '谷薯类和水'], a: 2, exp: '底层是谷物和水，基石最重要。' },
+            { type: 'mcq', q: '“平衡膳食宝塔”顶层的食物是？', opts: ['蔬菜', '肉类', '盐和油'], a: 2, exp: '顶层油盐，需要控制摄入。' },
+            { type: 'sort', q: '请将食物按宝塔从底到顶（多到少）的顺序排列：', items: ['谷物水', '蔬菜水果', '油盐'], answerOrder: ['谷物水', '蔬菜水果', '油盐'], exp: '底层最多，越往上越少。' },
+            { type: 'mcq', q: '根据宝塔原则，下一层食物的食用量应该____上一层。', opts: ['大于', '小于', '等于'], a: 0, exp: '金字塔结构，下大上小。' },
+            { type: 'fill', q: '我们平时需要吃得最少的食物是____和____。', a: ['油', '盐'], exp: '位于塔尖，多吃无益。' },
+
+            // 2. 营养功能与需求 (6题)
+            { type: 'mcq', q: '如果你今天要去参加运动会，运动量很大，午餐应该适当多吃？', opts: ['肥肉', '米饭/面条', '蔬菜'], a: 1, exp: '糖类（谷物）提供能量最快。' },
+            { type: 'mcq', q: '正在长身体的儿童，需要适量多摄取富含____的食物。', opts: ['脂肪', '蛋白质', '维生素'], a: 1, exp: '蛋白质是生长发育的原料。' },
+            { type: 'mcq', q: '小明最近手指脱皮、口腔溃疡，他可能需要多吃？', opts: ['红烧肉', '蔬菜和水果', '白米饭'], a: 1, exp: '缺乏维生素，需补充蔬果。' },
+            { type: 'mcq', q: '下列哪类食物主要给我们提供能量？', opts: ['谷物类/油脂类', '蔬菜类', '水'], a: 0, exp: '糖类和脂肪是供能物质。' },
+            { type: 'mcq', q: '奶制品、豆类、鱼虾类主要含有什么营养？', opts: ['淀粉', '蛋白质', '纤维素'], a: 1, exp: '优质蛋白来源。' },
+            { type: 'fill', q: '蔬菜和水果类含有____和矿物质，能让我们保持健康。', a: ['维生素'], exp: '调节身体机能。' },
+
+            // 3. 饮食习惯与搭配 (5题)
+            { type: 'mcq', q: '关于饮食习惯，下列说法正确的是？', opts: ['只吃爱吃的', '不挑食、不偏食', '不吃肉只吃菜'], a: 1, exp: '均衡营养需要多样化。' },
+            { type: 'exp', q: '【实验分析】小红午餐只吃了一碗白饭和一块红烧肉，为了营养均衡，晚餐她最好？', opts: ['吃牛排', '喝肉汤', '吃青菜和鱼'], a: 2, exp: '午餐缺维生素，晚餐需补蔬果和优质蛋白。' },
+            { type: 'mcq', q: '搭配膳食营养时，我们应该做到？', opts: ['品种单一', '荤素搭配', '只吃精粮'], a: 1, exp: '荤素搭配、粗细搭配。' },
+            { type: 'mcq', q: '如果没有摄取均衡的营养，可能会？', opts: ['身体更强壮', '影响身体健康', '没什么影响'], a: 1, exp: '导致营养不良或肥胖。' },
+            { type: 'mcq', q: '有没有一种食物含有身体所需的所有营养成分？', opts: ['有', '没有'], a: 1, exp: '所以要吃多种食物。' },
+
+            // 4. 综合判断 (4题)
+            { type: 'sort', q: '请将下列食物按推荐食用量从多到少排列：', items: ['米饭', '青菜', '红烧肉'], answerOrder: ['米饭', '青菜', '红烧肉'], exp: '谷物>蔬菜>肉类。' },
+            { type: 'fill', q: '各类食物在均衡营养中的地位和比重是____的。（填一样或不一样）', a: ['不一样'], exp: '宝塔各层面积不同。' },
+            { type: 'mcq', q: '下列哪种搭配属于粗细粮搭配？', opts: ['白米饭+白面条', '白米饭+玉米/红薯', '瘦肉+肥肉'], a: 1, exp: '玉米红薯属粗粮。' },
+            { type: 'mcq', q: '坚持多吃____能让我们保持健康。', opts: ['炸鸡', '蔬果', '糖果'], a: 1, exp: '提供维生素和矿物质。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScore = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let sortOrder = []; 
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.6; nextBtn.innerText = "提交答案";
+            selectedOption = null;
+            sortOrder = [];
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let typeLabel = '';
+            let typeClass = '';
+            if(qData.type==='mcq') { typeLabel='选择题'; typeClass='tag-choice'; }
+            else if(qData.type==='fill') { typeLabel='填空题'; typeClass='tag-fill'; }
+            else if(qData.type==='sort') { typeLabel='排列题'; typeClass='tag-sort'; }
+            else { typeLabel='实验分析'; typeClass='tag-exp'; }
+
+            card.innerHTML = `<div class="q-content"><span class="q-tag ${typeClass}">${typeLabel}</span>${qData.q}</div>`;
+
+            // 渲染选项
+            if (qData.type === 'mcq' || qData.type === 'exp') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.6;
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'sort') {
+                renderSort(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected', 'correct-feedback', 'wrong-feedback'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            const isCorrect = (idx === qData.a);
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderSort(card, qData) {
+            const container = document.createElement('div');
+            const sourceDiv = document.createElement('div'); sourceDiv.className = 'sort-container';
+            const targetDiv = document.createElement('div'); targetDiv.className = 'sort-box';
+            targetDiv.innerHTML = '<div class="sort-placeholder">👆 点击上方选项按顺序排入此处</div>';
+
+            // 随机打乱选项
+            let items = [...qData.items].sort(()=>Math.random()-0.5);
+            
+            items.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'sort-item';
+                btn.innerText = item;
+                btn.onclick = () => {
+                    if(targetDiv.contains(btn)) {
+                        // 移回源
+                        sourceDiv.appendChild(btn);
+                        sortOrder = sortOrder.filter(i => i !== item);
+                    } else {
+                        // 移入目标
+                        if(targetDiv.querySelector('.sort-placeholder')) targetDiv.innerHTML = '';
+                        targetDiv.appendChild(btn);
+                        sortOrder.push(item);
+                    }
+                    
+                    const btnNext = document.getElementById('nextBtn');
+                    if(sortOrder.length === qData.items.length) {
+                         btnNext.disabled = false; btnNext.style.opacity = 1;
+                    } else {
+                         btnNext.disabled = true; btnNext.style.opacity = 0.6;
+                    }
+                };
+                sourceDiv.appendChild(btn);
+            });
+
+            container.appendChild(sourceDiv); container.appendChild(targetDiv);
+            card.appendChild(container);
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            // 判分逻辑
+            if (qData.type === 'mcq' || qData.type === 'exp') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                // 简单模糊匹配
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'sort') {
+                if (JSON.stringify(sortOrder) === JSON.stringify(qData.answerOrder)) isCorrect = true;
+                myAns = sortOrder.join(' -> ');
+            }
+
+            if (isCorrect) {
+                userScore += 5; // 每题5分，共20题=100分
+            } else {
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            // 动态跑分
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= userScore) { clearInterval(timer); scoreEl.innerText = userScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 30);
+
+            const reward = document.getElementById('reward-text');
+            if(userScore === 100) reward.innerText = "🎉 太棒了！你是营养平衡大师！";
+            else if(userScore >= 80) reward.innerText = "🌟 成绩优秀！要注意细节哦！";
+            else reward.innerText = "💪 继续加油！复习一下再来挑战！";
+
+            // 显示错题
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="color:#D32F2F">你的回答：${m.my || '未作答'}</span><br><span style="color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>

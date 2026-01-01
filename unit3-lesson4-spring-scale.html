@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>四、弹簧测力计 - 互动学习与100分闯关</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{--primary:#00BCD4;--accent:#FF5722;--bg:#f5f5f5;--card:#fff;--dark:#00838F;}
+*{box-sizing:border-box;}
+body{font-family:'Microsoft YaHei','Segoe UI',sans-serif;margin:0;background:var(--bg);color:#333;line-height:1.7;padding-bottom:60px;}
+header{background:linear-gradient(135deg,var(--primary),var(--dark));color:#fff;padding:2.5rem 1rem;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.2);}
+h1{font-size:2.2rem;margin:0;text-shadow:2px 2px 4px rgba(0,0,0,.3);}
+.container{max-width:950px;margin:0 auto;padding:0 20px;}
+.card{background:var(--card);border-radius:15px;padding:30px;margin:25px 0;box-shadow:0 6px 20px rgba(0,0,0,.08);}
+.demo{background:linear-gradient(to bottom,#e0f7fa,#b2ebf2);border:3px solid var(--primary);border-radius:12px;padding:25px;margin:20px 0;text-align:center;}
+.demo-btn{background:var(--accent);color:#fff;border:none;padding:12px 25px;border-radius:30px;cursor:pointer;font-size:1rem;margin:8px;box-shadow:0 3px 10px rgba(0,0,0,.2);transition:all .3s;}
+.demo-btn:hover{background:#E64A19;transform:translateY(-2px);}
+.q-tag{display:inline-block;padding:5px 12px;border-radius:5px;color:#fff;font-size:0.85rem;margin-right:10px;font-weight:bold;}
+.tag-choice{background:#2196F3;}
+.tag-fill{background:#9C27B0;}
+.tag-drag{background:#FF9800;}
+.tag-exp{background:#E91E63;}
+.question{margin-bottom:30px;padding:20px;background:#fafafa;border-radius:10px;border-left:5px solid var(--primary);}
+.options label{display:block;margin:10px 0;padding:10px;background:#fff;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .2s;}
+.options label:hover{border-color:var(--primary);background:#e0f7fa;}
+.options input{margin-right:12px;}
+.drag-container{display:flex;flex-wrap:wrap;gap:15px;margin:20px 0;}
+.drop-zone{flex:1;min-width:140px;min-height:110px;border:3px dashed #ccc;background:#fff;border-radius:10px;padding:12px;}
+.drop-zone h4{margin:0 0 10px;text-align:center;color:#666;font-size:0.9rem;pointer-events:none;}
+.drop-items{min-height:70px;}
+.item-pool{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0;padding:15px;background:#f0f0f0;border-radius:10px;}
+.drag-item{background:#fff;padding:10px 18px;border:2px solid #ddd;border-radius:25px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.1);user-select:none;transition:all .2s;}
+.drag-item.selected{border:3px solid var(--accent);background:#ffe0e0;}
+.drag-item.used{opacity:0.4;cursor:not-allowed;}
+.exp-block{background:#fff3e0;border:3px solid var(--accent);border-radius:12px;padding:20px;margin:20px 0;}
+.exp-svg{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px;text-align:center;}
+.exp-sub{margin:15px 0;padding:15px;background:#fff;border-radius:8px;}
+textarea{width:100%;height:75px;padding:12px;border:2px solid #ddd;border-radius:8px;resize:vertical;}
+input[type="text"]{padding:10px;border:2px solid #ddd;border-radius:6px;font-size:1rem;}
+.submit-btn{display:block;width:350px;margin:50px auto;padding:18px;background:linear-gradient(135deg,#4CAF50,#388E3C);color:#fff;border:none;border-radius:50px;font-size:1.4rem;cursor:pointer;box-shadow:0 6px 20px rgba(76,175,80,.4);font-weight:bold;}
+.submit-btn:hover{transform:scale(1.03);}
+#result-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;overflow-y:auto;}
+.result-box{background:#fff;margin:3% auto;padding:40px;width:90%;max-width:800px;border-radius:20px;position:relative;box-shadow:0 10px 50px rgba(0,0,0,.3);}
+.close-btn{position:absolute;right:25px;top:20px;font-size:2.5rem;cursor:pointer;color:#999;}
+.score-display{font-size:5rem;color:var(--primary);text-align:center;margin:30px 0;font-weight:bold;}
+.error-item{background:#ffebee;padding:18px;border-left:6px solid #f44336;margin:15px 0;border-radius:8px;}
+.correct-tip{color:#2e7d32;font-weight:bold;margin-top:10px;display:block;font-size:1.1rem;}
+/* 即时反馈样式 */
+.feedback-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:white;padding:15px 25px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.3);z-index:10000;display:flex;align-items:center;gap:12px;min-width:280px;max-width:90%;opacity:0;transition:all .3s cubic-bezier(.68,-.55,.265,1.55);}
+.feedback-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.feedback-success{border-left:5px solid #4CAF50;}
+.feedback-error{border-left:5px solid #FF9800;}
+.toast-icon{font-size:28px;font-weight:bold;}
+.feedback-success .toast-icon{color:#4CAF50;}
+.feedback-error .toast-icon{color:#FF9800;}
+.toast-message{flex:1;font-size:16px;line-height:1.4;}
+.confetti{position:fixed;width:10px;height:10px;z-index:9999;pointer-events:none;}
+@keyframes confetti-fall{to{transform:translateY(100vh) rotate(360deg);opacity:0;}}
+@keyframes correct-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}
+.options label.correct-feedback{animation:correct-pulse .6s ease;background:#C8E6C9!important;border-color:#4CAF50!important;box-shadow:0 0 20px rgba(76,175,80,.4);}
+.options label.wrong-feedback{animation:shake .5s ease;background:#FFE0B2!important;border-color:#FF9800!important;}
+input[type="text"].correct-feedback{animation:correct-pulse .6s ease;background:#C8E6C9!important;border-color:#4CAF50!important;}
+input[type="text"].wrong-feedback{animation:shake .5s ease;background:#FFE0B2!important;border-color:#FF9800!important;}
+</style>
+</head>
+<body>
+<header><h1>四、弹簧测力计</h1><p style="margin-top:10px;">互动复习 + 100分闯关塔</p></header>
+<div class="container">
+<div class="card">
+<h2 style="color:var(--primary);">📚 第一部分：知识复习与演示</h2>
+<div class="demo">
+<h3>1. 弹簧测力计的组成</h3>
+<svg viewBox="0 0 280 320" width="200" height="230" style="background:linear-gradient(to bottom, #E0F7FA 0%, #F5F5F5 100%); border-radius:10px;">
+<defs>
+<linearGradient id="caseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" style="stop-color:#CFD8DC"/>
+<stop offset="50%" style="stop-color:#ECEFF1"/>
+<stop offset="100%" style="stop-color:#CFD8DC"/>
+</linearGradient>
+<linearGradient id="springGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:#FF7043"/>
+<stop offset="50%" style="stop-color:#FF5722"/>
+<stop offset="100%" style="stop-color:#E64A19"/>
+</linearGradient>
+<radialGradient id="ringGrad">
+<stop offset="0%" style="stop-color:#90A4AE"/>
+<stop offset="70%" style="stop-color:#607D8B"/>
+<stop offset="100%" style="stop-color:#455A64"/>
+</radialGradient>
+</defs>
+
+<!-- 标题 -->
+<text x="140" y="20" text-anchor="middle" font-size="14" fill="#00838F" font-weight="bold">弹簧测力计结构图</text>
+
+<!-- 外壳 -->
+<rect x="95" y="45" width="50" height="220" fill="url(#caseGrad)" stroke="#546E7A" stroke-width="2.5" rx="8"/>
+<rect x="98" y="48" width="44" height="214" fill="#FAFAFA" opacity="0.3" rx="6"/>
+
+<!-- 刻度板 -->
+<rect x="85" y="60" width="25" height="190" fill="#FFFFFF" stroke="#37474F" stroke-width="1.5" rx="2"/>
+
+<!-- 刻度线和数字 -->
+<line x1="85" y1="70" x2="95" y2="70" stroke="#000" stroke-width="2"/>
+<text x="78" y="74" font-size="11" fill="#000" font-weight="bold">0</text>
+
+<line x1="85" y1="100" x2="92" y2="100" stroke="#000" stroke-width="1.5"/>
+<text x="78" y="104" font-size="11" fill="#000" font-weight="bold">1</text>
+
+<line x1="85" y1="130" x2="92" y2="130" stroke="#000" stroke-width="1.5"/>
+<text x="78" y="134" font-size="11" fill="#000" font-weight="bold">2</text>
+
+<line x1="85" y1="160" x2="92" y2="160" stroke="#000" stroke-width="1.5"/>
+<text x="78" y="164" font-size="11" fill="#000" font-weight="bold">3</text>
+
+<line x1="85" y1="190" x2="92" y2="190" stroke="#000" stroke-width="1.5"/>
+<text x="78" y="194" font-size="11" fill="#000" font-weight="bold">4</text>
+
+<line x1="85" y1="220" x2="92" y2="220" stroke="#000" stroke-width="1.5"/>
+<text x="78" y="224" font-size="11" fill="#000" font-weight="bold">5</text>
+
+<!-- 小刻度 -->
+<line x1="87" y1="85" x2="92" y2="85" stroke="#666" stroke-width="0.8"/>
+<line x1="87" y1="115" x2="92" y2="115" stroke="#666" stroke-width="0.8"/>
+<line x1="87" y1="145" x2="92" y2="145" stroke="#666" stroke-width="0.8"/>
+<line x1="87" y1="175" x2="92" y2="175" stroke="#666" stroke-width="0.8"/>
+<line x1="87" y1="205" x2="92" y2="205" stroke="#666" stroke-width="0.8"/>
+
+<!-- 弹簧 -->
+<path d="M120,70 L120,75 L115,80 L125,85 L115,90 L125,95 L115,100 L125,105 L115,110 L125,115 L115,120 L125,125 L115,130 L125,135 L115,140 L125,145 L115,150 L125,155 L115,160 L125,165 L115,170 L125,175 L115,180 L125,185 L115,190 L125,195 L115,200 L125,205 L120,210 L120,220" 
+      stroke="url(#springGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+<path d="M120,70 L120,75 L115,80 L125,85 L115,90 L125,95 L115,100 L125,105 L115,110 L125,115 L115,120 L125,125 L115,130 L125,135 L115,140 L125,145 L115,150 L125,155 L115,160 L125,165 L115,170 L125,175 L115,180 L125,185 L115,190 L125,195 L115,200 L125,205 L120,210 L120,220" 
+      stroke="#FFCCBC" stroke-width="2" fill="none" opacity="0.6"/>
+
+<!-- 指针 -->
+<line x1="105" y1="100" x2="125" y2="100" stroke="#E91E63" stroke-width="3.5"/>
+<polygon points="105,100 110,97 110,103" fill="#E91E63"/>
+<circle cx="125" cy="100" r="3" fill="#E91E63"/>
+
+<!-- 提环 -->
+<circle cx="120" cy="35" r="18" fill="none" stroke="url(#ringGrad)" stroke-width="4"/>
+<circle cx="120" cy="35" r="12" fill="none" stroke="#78909C" stroke-width="2"/>
+<ellipse cx="120" cy="32" rx="6" ry="3" fill="#B0BEC5" opacity="0.5"/>
+
+<!-- 挂钩 -->
+<path d="M120,245 Q125,255 120,265 Q115,275 120,285" fill="none" stroke="#546E7A" stroke-width="4" stroke-linecap="round"/>
+<circle cx="120" cy="285" r="5" fill="none" stroke="#546E7A" stroke-width="3"/>
+<ellipse cx="120" cy="242" rx="4" ry="2" fill="#78909C"/>
+
+<!-- 标注 -->
+<g transform="translate(155, 0)">
+<text x="0" y="38" font-size="12" fill="#37474F" font-weight="bold">① 提环</text>
+<line x1="-10" y1="35" x2="-35" y2="35" stroke="#90A4AE" stroke-width="1" stroke-dasharray="2,2"/>
+
+<text x="0" y="105" font-size="12" fill="#37474F" font-weight="bold">② 刻度板</text>
+<line x1="-10" y1="102" x2="-45" y2="102" stroke="#90A4AE" stroke-width="1" stroke-dasharray="2,2"/>
+
+<text x="0" y="145" font-size="12" fill="#FF5722" font-weight="bold">③ 弹簧</text>
+<line x1="-10" y1="142" x2="-35" y2="142" stroke="#90A4AE" stroke-width="1" stroke-dasharray="2,2"/>
+
+<text x="0" y="100" font-size="12" fill="#E91E63" font-weight="bold">④ 指针</text>
+<line x1="-10" y1="97" x2="-20" y2="97" stroke="#90A4AE" stroke-width="1" stroke-dasharray="2,2"/>
+
+<text x="0" y="270" font-size="12" fill="#37474F" font-weight="bold">⑤ 挂钩</text>
+<line x1="-10" y1="267" x2="-35" y2="267" stroke="#90A4AE" stroke-width="1" stroke-dasharray="2,2"/>
+</g>
+
+<!-- 单位标注 -->
+<text x="140" y="305" text-anchor="middle" font-size="11" fill="#00838F" font-weight="bold">单位：牛顿 (N)</text>
+</svg>
+<p style="margin-top:15px; font-size:0.95rem;"><strong>五大组成部分：</strong>提环、弹簧、指针、刻度板、挂钩</p>
+</div>
+<div class="demo">
+<h3>2. 力的单位</h3>
+<p>牛顿 (N) ≈ 100克物体的重力</p>
+<button class="demo-btn" onclick="alert('1牛顿约等于2个鸡蛋的重力！')">点击了解1牛顿有多大</button>
+</div>
+</div>
+<div class="card">
+<h2 style="color:var(--primary);">🎯 第二部分：闯关塔测试（共35题）</h2>
+<form id="quiz-form"></form>
+<button type="button" class="submit-btn" onclick="submitQuiz()">🚀 提交答案</button>
+</div>
+</div>
+<div id="result-modal">
+<div class="result-box">
+<span class="close-btn" onclick="document.getElementById('result-modal').style.display='none'">&times;</span>
+<h2 style="text-align:center;">测试成绩</h2>
+<div class="score-display" id="final-score">0</div>
+<h3>❌ 错题解析</h3>
+<div id="error-analysis"></div>
+</div>
+</div>
+<script>
+// 即时反馈系统
+const InstantFeedback={audioCtx:null,encouragements:['太棒了！继续加油！🌟','你真聪明！👍','完全正确！真厉害！🎯','答对了！你是最棒的！⭐','太优秀了！继续保持！🏆','真是个小天才！💡','回答得非常好！👏','你掌握得很好！📚'],hints:['再想想哦！你可以的！💪','别灰心，再试一次！🌈','加油！仔细看看题目！👀','没关系，继续努力！💫','再看看知识点吧！📖','不要放弃，你能行！🚀','思考一下，你一定能想到！🤔','加油！相信自己！✨'],init(){if(!this.audioCtx)this.audioCtx=new(window.AudioContext||window.webkitAudioContext)();},playCorrectSound(){this.init();if(this.audioCtx.state==='suspended')this.audioCtx.resume();const notes=[523.25,659.25,783.99];notes.forEach((freq,i)=>{const osc=this.audioCtx.createOscillator();const gain=this.audioCtx.createGain();osc.connect(gain);gain.connect(this.audioCtx.destination);const now=this.audioCtx.currentTime;const startTime=now+i*.1;osc.frequency.value=freq;osc.type='sine';gain.gain.setValueAtTime(.15,startTime);gain.gain.exponentialRampToValueAtTime(.01,startTime+.3);osc.start(startTime);osc.stop(startTime+.3);});},playWrongSound(){this.init();if(this.audioCtx.state==='suspended')this.audioCtx.resume();const osc=this.audioCtx.createOscillator();const gain=this.audioCtx.createGain();osc.connect(gain);gain.connect(this.audioCtx.destination);const now=this.audioCtx.currentTime;osc.frequency.setValueAtTime(300,now);osc.frequency.linearRampToValueAtTime(250,now+.2);osc.type='triangle';gain.gain.setValueAtTime(.1,now);gain.gain.linearRampToValueAtTime(0,now+.2);osc.start(now);osc.stop(now+.2);},showConfetti(){const colors=['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A','#98D8C8','#F7DC6F','#BB8FCE'];for(let i=0;i<30;i++){setTimeout(()=>{const confetti=document.createElement('div');confetti.className='confetti';confetti.style.cssText=`width:${Math.random()*10+5}px;height:${Math.random()*10+5}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${Math.random()*100}%;top:-20px;border-radius:${Math.random()>.5?'50%':'0'};animation:confetti-fall ${Math.random()*2+2}s linear forwards;transform:rotate(${Math.random()*360}deg);`;document.body.appendChild(confetti);setTimeout(()=>confetti.remove(),4000);},i*30);}},showToast(message,type='success'){const toast=document.createElement('div');toast.className=`feedback-toast feedback-${type}`;toast.innerHTML=`<div class="toast-icon">${type==='success'?'✓':'✗'}</div><div class="toast-message">${message}</div>`;document.body.appendChild(toast);setTimeout(()=>toast.classList.add('show'),10);setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),300);},2500);},onCorrect(element){this.playCorrectSound();this.showConfetti();const message=this.encouragements[Math.floor(Math.random()*this.encouragements.length)];this.showToast(message,'success');if(element){element.classList.add('correct-feedback');setTimeout(()=>element.classList.remove('correct-feedback'),600);}},onWrong(element,hint=''){this.playWrongSound();const baseMessage=this.hints[Math.floor(Math.random()*this.hints.length)];const message=hint?`${baseMessage}<br><small style="font-size:0.85em;">💡 ${hint}</small>`:baseMessage;this.showToast(message,'error');if(element){element.classList.add('wrong-feedback');setTimeout(()=>element.classList.remove('wrong-feedback'),500);}}};
+InstantFeedback.init();
+
+// 题目数据
+const quizData=[{id:1,type:'choice',q:'1. 弹簧测力计是用来测量什么的工具？',opts:['A. 质量','B. 力的大小','C. 长度'],ans:'B',exp:'弹簧测力计用于测量力的大小。'},{id:2,type:'choice',q:'2. 力的单位是（ ）',opts:['A. 千克','B. 米','C. 牛顿'],ans:'C',exp:'力的单位是牛顿，简称牛，符号N。'},{id:3,type:'choice',q:'3. 弹簧测力计由哪些部分组成？',opts:['A. 提环、弹簧、指针、刻度板、挂钩','B. 外壳、电池、屏幕','C. 齿轮、电机、传感器'],ans:'A',exp:'五大组成部分：提环、弹簧、指针、刻度板、挂钩。'},{id:4,type:'choice',q:'4. 弹簧受的拉力越大，弹簧（ ）',opts:['A. 伸得越长','B. 伸得越短','C. 长度不变'],ans:'A',exp:'这是弹簧测力计的工作原理。'},{id:5,type:'choice',q:'5. 使用弹簧测力计前，首先要检查（ ）',opts:['A. 颜色是否好看','B. 指针是否指在0位置','C. 重量是否合适'],ans:'B',exp:'归零检查是使用前必须做的。'},{id:6,type:'choice',q:'6. 读数时，视线应该（ ）',opts:['A. 从上往下看','B. 从下往上看','C. 与指针相平'],ans:'C',exp:'视线与指针相平可以避免视差。'},{id:7,type:'choice',q:'7. 测量的力不能超过测力计的（ ）',opts:['A. 最小刻度','B. 最大量程','C. 平均值'],ans:'B',exp:'超载会损坏弹簧测力计。'},{id:8,type:'choice',q:'8. 质量为100克的物体，重力约为（ ）',opts:['A. 10牛','B. 1牛','C. 0.1牛'],ans:'B',exp:'100克物体的重力约为1牛顿。'},{id:9,type:'choice',q:'9. 弹簧测力计的刻度是（ ）',opts:['A. 均匀的','B. 不均匀的','C. 随机的'],ans:'A',exp:'刻度均匀是弹簧测力计的特点。'},{id:10,type:'choice',q:'10. 下列不属于弹力应用的是（ ）',opts:['A. 蹦床','B. 弹簧床垫','C. 铁锤'],ans:'C',exp:'铁锤不是利用弹力工作的。'},{id:11,type:'choice',q:'11. 牛顿（N）是以哪位科学家的名字命名的？',opts:['A. 爱因斯坦','B. 牛顿','C. 伽利略'],ans:'B',exp:'以英国物理学家艾萨克·牛顿命名。'},{id:12,type:'choice',q:'12. 测力时，弹簧伸长方向应该（ ）',opts:['A. 与所测力方向在一条直线上','B. 垂直于所测力','C. 任意方向都可以'],ans:'A',exp:'方向一致才能准确测量。'},{id:13,type:'choice',q:'13. "gf"表示的单位是（ ）',opts:['A. 克力','B. 千克力','C. 牛顿'],ans:'A',exp:'gf是克力的符号。'},{id:14,type:'choice',q:'14. 不同弹簧测力计的一大格代表的力（ ）',opts:['A. 一定相同','B. 可能不同','C. 必须是1N'],ans:'B',exp:'不同测力计的分度值可能不同。'},{id:15,type:'choice',q:'15. 使用前可以先掂一掂物体，这是为了（ ）',opts:['A. 好玩','B. 估测物体重力','C. 增加手感'],ans:'B',exp:'估测可以选择合适量程的测力计。'},{id:16,type:'choice',q:'16. 撑杆跳高运动员利用的是撑杆的（ ）',opts:['A. 重力','B. 弹力','C. 摩擦力'],ans:'B',exp:'撑杆弯曲产生弹力。'},{id:17,type:'choice',q:'17. 弹簧测力计的指针是用来（ ）',opts:['A. 指示力的大小','B. 装饰','C. 固定弹簧'],ans:'A',exp:'指针指示刻度，显示力的大小。'},{id:18,type:'choice',q:'18. 下列关于弹簧测力计的说法错误的是（ ）',opts:['A. 刻度均匀','B. 可以超载使用','C. 使用前要归零'],ans:'B',exp:'绝对不能超载使用！'},{id:19,type:'choice',q:'19. 质量为500克的物体，重力约为（ ）',opts:['A. 0.5牛','B. 5牛','C. 50牛'],ans:'B',exp:'100克=1N，500克=5N。'},{id:20,type:'choice',q:'20. 海绵垫受压后能恢复，利用的是（ ）',opts:['A. 弹力','B. 重力','C. 浮力'],ans:'A',exp:'海绵的弹性形变产生弹力。'},{id:21,type:'fill',q:'21. 弹簧测力计是根据弹簧受的拉力越大，伸得越____的特性制成的。',ans:['长'],exp:'原理：受拉力越大，弹簧伸得越长。'},{id:22,type:'fill',q:'22. 力的单位是____，简称牛，符号是____。',ans:['牛顿','N'],exp:'力的国际单位是牛顿，符号N。'},{id:23,type:'fill',q:'23. 弹簧测力计由提环、弹簧、____、刻度板、挂钩组成。',ans:['指针'],exp:'指针用于指示数值。'},{id:24,type:'fill',q:'24. 使用弹簧测力计前，要检查指针是否指在____位置。',ans:['0','零'],exp:'为了准确测量，必须先调零。'},{id:25,type:'fill',q:'25. 读数时，视线要与____相平。',ans:['指针'],exp:'视线平行可避免视差。'},{id:26,type:'fill',q:'26. 测量的力不能超过测力计刻度标出的____。',ans:['最大数量','最大量程'],exp:'超过量程会损坏弹簧。'},{id:27,type:'fill',q:'27. 质量为100克的物体的重力约为____牛。',ans:['1'],exp:'1N ≈ 100g物体的重力。'},{id:28,type:'fill',q:'28. 弹簧测力计的刻度是____的。',ans:['均匀'],exp:'弹簧伸长量与拉力成正比，所以刻度均匀。'},{id:29,type:'fill',q:'29. 蹦床、撑杆、健身球都是利用了____。',ans:['弹力','弹性'],exp:'这些物体发生形变都会产生弹力。'},{id:30,type:'fill',q:'30. 测力时，弹簧伸长方向要与所测力的方向在____上。',ans:['一条直线','同一直线'],exp:'避免摩擦和分力影响测量结果。'},{id:31,type:'drag',q:'31. 请将下列物品按"是否利用弹力"分类',cats:['利用弹力','不利用弹力'],items:['蹦床','铁锤','弹簧床垫','撑杆','水桶'],correct:[0,1,0,0,1],exp:'蹦床、床垫、撑杆都利用了弹性形变产生的力；铁锤和水桶主要利用重力或惯性。'},{id:32,type:'drag',q:'32. 使用弹簧测力计的正确步骤排序',cats:['第1步','第2步','第3步','第4步'],items:['检查指针归零','挂上物体','读取数值','视线与指针平行'],correct:[0,1,3,2],exp:'正确顺序：归零 -> 挂物 -> 视线平行 -> 读数。'},{id:33,type:'drag',q:'33. 判断以下操作是否正确',cats:['正确操作','错误操作'],items:['读数时视线与指针平行','超过最大量程测量','使用前检查归零','斜着看刻度读数'],correct:[0,1,0,1],exp:'超量程和斜视读数都是错误的；平行读数和归零是正确的。'},{id:34,type:'exp',q:'34. 小明用弹簧测力计测量不同物体的重力，记录如下表。请分析：',svg:`<svg viewBox="0 0 300 120" style="background:#fff;border:1px solid #ddd"><text x="150" y="20" text-anchor="middle">数据记录表</text><line x1="20" y1="30" x2="280" y2="30" stroke="#333"/><text x="60" y="50">物体</text><text x="200" y="50">重力(N)</text><line x1="20" y1="60" x2="280" y2="60" stroke="#ccc"/><text x="60" y="80">100g</text><text x="200" y="80">1.0</text><text x="60" y="100">200g</text><text x="200" y="100">2.0</text></svg>`,subs:[{q:'(1) 从数据看出，质量越大，重力越____。',ans:['大']},{q:'(2) 100克物体的重力是____牛。',ans:['1']},{q:'(3) 请总结质量与重力的关系。',ans:['正比','越大']}],exp:'(1)质量越大重力越大；(2)表格直接显示1.0N；(3)原理：物体的重力与质量成正比。'},{id:35,type:'exp',q:'35. 观察下图弹簧测力计，回答问题：',svg:`<svg viewBox="0 0 100 150"><rect x="30" y="10" width="40" height="130" fill="#eee" stroke="#333"/><line x1="40" y1="30" x2="50" y2="30" stroke="#000"/><text x="20" y="35" font-size="10">0</text><line x1="40" y1="60" x2="50" y2="60" stroke="#000"/><text x="20" y="65" font-size="10">1</text><line x1="40" y1="90" x2="50" y2="90" stroke="#000"/><text x="20" y="95" font-size="10">2</text><line x1="45" y1="60" x2="65" y2="60" stroke="red" stroke-width="2"/></svg>`,subs:[{q:'(1) 此时指针读数是____N。',ans:['1']},{q:'(2) 该测力计最大量程是____N(看图估算)。',ans:['5','4','3']},{q:'(3) 能否测量6N的物体？(能/不能)',ans:['不能']}],exp:'(1)指针指在1的位置；(2)虽然图未画全，但根据刻度间距，通常是5N；(3)不能，因为超过了量程会损坏测力计。'}];
+
+// 生成题目
+const form=document.getElementById('quiz-form');
+quizData.forEach(q=>{
+const div=document.createElement('div');
+div.className='question';
+div.dataset.qid=q.id;
+let html='';
+if(q.type==='choice'){
+html+=`<span class="q-tag tag-choice">选择题</span><strong>${q.q}</strong><div class="options">`;
+q.opts.forEach(opt=>html+=`<label onclick="checkAnswer(${q.id},'${opt[0]}',this,event)"><input type="radio" name="q${q.id}" value="${opt[0]}">${opt}</label>`);
+html+=`</div>`;
+}else if(q.type==='fill'){
+const parts=q.q.split('____');
+html+=`<span class="q-tag tag-fill">填空题</span><strong>`;
+parts.forEach((part,i)=>{
+html+=part;
+if(i<parts.length-1)html+=`<input type="text" name="q${q.id}_${i}" style="width:100px;margin:0 5px;" onblur="checkFillAnswer(${q.id},this)">`;
+});
+html+=`</strong>`;
+}else if(q.type==='drag'){
+html+=`<span class="q-tag tag-drag">拖拽题</span><strong>${q.q}</strong><div class="drag-container">`;
+q.cats.forEach((cat,i)=>html+=`<div class="drop-zone" data-cat="${i}"><h4>${cat}</h4><div class="drop-items"></div></div>`);
+html+=`</div><div class="item-pool">`;
+q.items.forEach((item,i)=>html+=`<div class="drag-item" data-idx="${i}" onclick="selectItem(this,${q.id})">${item}</div>`);
+html+=`</div><input type="hidden" id="drag${q.id}">`;
+}else if(q.type==='exp'){
+html+=`<span class="q-tag tag-exp">实验探究</span><strong>${q.q}</strong><div class="exp-block"><div class="exp-svg">${q.svg}</div>`;
+q.subs.forEach((sub,i)=>{
+html+=`<div class="exp-sub"><label>${sub.q}</label><input type="text" name="exp${q.id}_${i}" style="width:100%;"></div>`;
+});
+html+=`</div>`;
+}
+div.innerHTML=html;
+form.appendChild(div);
+});
+
+// 选择题即时反馈
+function checkAnswer(qid,selectedAnswer,labelElement,event){
+event.preventDefault();
+const qData=quizData.find(q=>q.id===qid);
+if(!qData)return;
+const radio=labelElement.querySelector('input[type="radio"]');
+radio.checked=true;
+const allLabels=labelElement.parentElement.querySelectorAll('label');
+allLabels.forEach(l=>l.classList.remove('correct-feedback','wrong-feedback'));
+const isCorrect=selectedAnswer===qData.ans;
+setTimeout(()=>{
+if(isCorrect){
+InstantFeedback.onCorrect(labelElement);
+}else{
+InstantFeedback.onWrong(labelElement,qData.exp);
+}
+},200);
+}
+
+// 填空题即时反馈
+function checkFillAnswer(qid,inputElement){
+const qData=quizData.find(q=>q.id===qid);
+if(!qData)return;
+const userAnswer=inputElement.value.trim();
+if(!userAnswer)return;
+const isCorrect=qData.ans.some(a=>userAnswer.includes(a));
+inputElement.classList.remove('correct-feedback','wrong-feedback');
+setTimeout(()=>{
+if(isCorrect){
+InstantFeedback.onCorrect(inputElement);
+}else{
+InstantFeedback.onWrong(inputElement,qData.exp);
+}
+},200);
+}
+
+// 拖拽逻辑
+let selectedDragItem=null;
+function selectItem(el,qid){
+if(el.classList.contains('used'))return;
+if(selectedDragItem)selectedDragItem.classList.remove('selected');
+selectedDragItem=el;
+el.classList.add('selected');
+const zones=document.querySelectorAll(`[data-qid="${qid}"] .drop-zone`);
+zones.forEach(zone=>{
+zone.style.background='#e3f2fd';
+zone.style.cursor='pointer';
+zone.onclick=function(){
+if(!selectedDragItem)return;
+const clone=selectedDragItem.cloneNode(true);
+clone.onclick=null;clone.classList.remove('selected');
+this.querySelector('.drop-items').appendChild(clone);
+selectedDragItem.classList.add('used');
+selectedDragItem.classList.remove('selected');
+selectedDragItem=null;
+updateDragAnswer(qid);
+zones.forEach(z=>{z.style.background='';z.onclick=null;});
+};
+});
+}
+
+function updateDragAnswer(qid){
+const ans=[];
+document.querySelectorAll(`[data-qid="${qid}"] .drop-zone`).forEach((z,i)=>{
+z.querySelectorAll('.drag-item').forEach(item=>ans.push(`${item.dataset.idx}:${i}`));
+});
+document.getElementById(`drag${qid}`).value=ans.join(',');
+}
+
+// 提交判卷
+function submitQuiz(){
+let totalScore=0;
+let errors=[];
+quizData.forEach(q=>{
+let correct=false;
+if(q.type==='choice'){
+const radio=document.querySelector(`input[name="q${q.id}"]:checked`);
+if(radio&&radio.value===q.ans){correct=true;totalScore+=2;}
+}else if(q.type==='fill'){
+const inputs=document.querySelectorAll(`input[name^="q${q.id}_"]`);
+let allRight=true;
+inputs.forEach(input=>{
+if(!q.ans.some(a=>input.value.trim().includes(a)))allRight=false;
+});
+if(allRight&&inputs.length>0){correct=true;totalScore+=2;}
+}else if(q.type==='drag'){
+const val=document.getElementById(`drag${q.id}`).value;
+if(val){
+const pairs=val.split(',');
+let right=true;
+pairs.forEach(p=>{
+const[idx,cat]=p.split(':');
+if(q.correct[parseInt(idx)]!==parseInt(cat))right=false;
+});
+if(right&&pairs.length===q.items.length){correct=true;totalScore+=5;}
+}
+}else if(q.type==='exp'){
+let subRight=0;
+q.subs.forEach((sub,i)=>{
+const val=document.querySelector(`[name="exp${q.id}_${i}"]`).value.trim();
+if(sub.ans.some(a=>val.includes(a)))subRight++;
+});
+const s=(subRight/q.subs.length)*12.5;
+totalScore+=s;
+if(s>=12)correct=true;
+}
+if(!correct){
+errors.push({id:q.id,q:q.q,exp:q.exp});
+}
+});
+document.getElementById('final-score').textContent=Math.round(totalScore);
+const errDiv=document.getElementById('error-analysis');
+if(errors.length===0){
+errDiv.innerHTML='<div style="background:#E8F5E9;color:#2E7D32;padding:20px;border-radius:8px;font-size:1.2rem;text-align:center;">🎉 完美！全对！</div>';
+}else{
+let html='';
+errors.forEach(e=>{
+html+=`<div class="error-item"><strong>第 ${e.id} 题</strong><p>${e.q}</p><span class="correct-tip">💡 解析：${e.exp}</span></div>`;
+});
+errDiv.innerHTML=html;
+}
+document.getElementById('result-modal').style.display='block';
+}
+</script>
+</body>
+</html>

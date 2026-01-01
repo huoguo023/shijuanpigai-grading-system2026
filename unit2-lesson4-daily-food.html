@@ -1,0 +1,637 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第四课：一天的食物 - 科学大闯关</title>
+    <style>
+        :root {
+            --bg-color: #FFFDE7; /* 奶油色背景，代表食物 */
+            --card-bg: #FFFFFF;
+            --primary: #FF9800; /* 橙色 */
+            --secondary: #8BC34A; /* 蔬菜绿 */
+            --accent: #F44336; /* 肉类红 */
+            --text: #3E2723;
+            --font-main: "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            background-image: radial-gradient(#FFCC80 15%, transparent 16%);
+            background-size: 25px 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 4px solid #FFCC80;
+            overflow: hidden;
+        }
+
+        h1 { color: #E65100; margin-top: 0; font-size: 1.6em; margin-bottom: 5px; }
+        .subtitle { color: #F57C00; font-size: 1em; margin-bottom: 15px; font-weight: bold; }
+
+        /* 区域切换 */
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 知识点卡片 */
+        .knowledge-box {
+            background: #FFF3E0;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+            border-left: 5px solid #FF9800;
+            margin-bottom: 20px;
+        }
+        .knowledge-box h3 { margin: 0 0 10px 0; color: #E65100; border-bottom: 1px dashed #FFE0B2; padding-bottom: 5px; }
+        .k-point { margin-bottom: 8px; font-size: 1em; line-height: 1.6; }
+        .highlight { color: #C2185B; font-weight: bold; background: #F8BBD0; padding: 0 4px; border-radius: 3px; }
+        .green-text { color: #2E7D32; font-weight: bold; }
+        .red-text { color: #C62828; font-weight: bold; }
+
+        /* SVG 演示区 */
+        .svg-stage {
+            background: #FFF;
+            border: 2px dashed #FFB74D;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+        }
+        .svg-caption { font-size: 0.9em; color: #8D6E63; margin-top: 5px; font-style: italic; }
+
+        .ctrl-btn {
+            background: #FF9800; color: white; border: none; padding: 8px 20px; 
+            border-radius: 20px; margin: 5px; cursor: pointer; font-size: 0.9em;
+            box-shadow: 0 3px 0 #E65100; transition: 0.1s;
+        }
+        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #E65100; }
+        .ctrl-btn.green { background: #8BC34A; box-shadow: 0 3px 0 #558B2F; }
+
+        /* 按钮 */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #E65100;
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #E65100; }
+        .btn-next { background: #8BC34A; box-shadow: 0 4px 0 #558B2F; }
+
+        /* 题目区 */
+        .progress-container { height: 10px; background: #EFEBE9; border-radius: 5px; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #FF9800; width: 0%; transition: width 0.3s; }
+        
+        .question-card { background: #FAFAFA; border-radius: 10px; padding: 15px; text-align: left; border: 2px solid #E0E0E0; margin-top: 10px; }
+        .q-tag { background: #FFE0B2; color: #E65100; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-right: 5px; }
+        .q-content { font-size: 1.2em; font-weight: bold; margin: 10px 0 20px 0; line-height: 1.4; }
+
+        /* 选项 */
+        .option-item {
+            background: white; border: 2px solid #FFCC80; padding: 12px; border-radius: 8px;
+            margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .option-item.selected { background: #FFE0B2; border-color: #F57C00; font-weight: bold; color: #E65100; }
+
+        .fill-input { border: none; border-bottom: 3px solid #FF9800; background: transparent; width: 120px; text-align: center; font-size: 1.2em; color: #E65100; border-radius: 0; }
+
+        /* 排序/拖拽题 */
+        .sort-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .sort-item { 
+            background: #FFF3E0; border: 1px solid #FF9800; color: #E65100;
+            padding: 8px 12px; border-radius: 20px; font-size: 0.9em; cursor: pointer;
+        }
+        .sort-box { 
+            min-height: 50px; border: 2px dashed #BDBDBD; border-radius: 8px; 
+            margin-top: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            background: #FAFAFA; align-items: center;
+        }
+        .sort-placeholder { color: #999; font-size: 0.9em; width: 100%; text-align: center; }
+
+        /* 错题解析 */
+        .wrong-item { background: #FFEBEE; border-left: 4px solid #EF5350; padding: 10px; margin-bottom: 10px; text-align: left; border-radius: 4px; }
+        .score-display { font-size: 4em; color: #FF9800; font-weight: bold; margin: 10px 0; }
+
+    </style>
+
+    <!-- 即时反馈系统 -->
+    <style>
+    .feedback-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 10000; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-size: 1.1rem; font-weight: bold; }
+    .feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .feedback-success { border: 3px solid #4CAF50; color: #2E7D32; }
+    .feedback-error { border: 3px solid #FF9800; color: #E65100; }
+    .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; }
+    .feedback-success .toast-icon { background: #4CAF50; color: white; }
+    .feedback-error .toast-icon { background: #FF9800; color: white; }
+    .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    @keyframes correct-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); } 20%, 40%, 60%, 80% { transform: translateX(8px); } }
+    .option-item.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important; }
+    .option-item.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    .fill-input.correct-feedback { animation: correct-pulse 0.6s; background: #E8F5E9 !important; border-color: #4CAF50 !important; }
+    .fill-input.wrong-feedback { animation: shake 0.5s; background: #FFF3E0 !important; border-color: #FF9800 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 复习区 -->
+    <div id="section-review" class="container section active">
+        <h1>🥪 知识复习</h1>
+        <p class="subtitle">第二单元第四课：一天的食物</p>
+
+        <!-- 知识点 1: 能量来源 -->
+        <div class="knowledge-box">
+            <h3>1. 能量的来源</h3>
+            <div class="k-point">⚡ <strong>饮食与呼吸</strong>：除了呼吸，饮食是我们获取<span class="highlight">能量</span>的另一重要活动。</div>
+            <div class="svg-stage">
+                <svg width="100%" height="80" viewBox="0 0 300 80">
+                    <!-- 呼吸 -->
+                    <text x="50" y="30" text-anchor="middle" font-size="12">呼吸</text>
+                    <circle cx="50" cy="50" r="15" fill="#B3E5FC"/>
+                    <text x="50" y="55" text-anchor="middle" font-size="20">🌬️</text>
+                    
+                    <!-- 饮食 -->
+                    <text x="250" y="30" text-anchor="middle" font-size="12">饮食</text>
+                    <circle cx="250" cy="50" r="15" fill="#FFCCBC"/>
+                    <text x="250" y="55" text-anchor="middle" font-size="20">🍎</text>
+
+                    <!-- 人体能量 -->
+                    <g transform="translate(150, 40)">
+                        <rect x="-30" y="-15" width="60" height="30" rx="5" fill="#FFEB3B"/>
+                        <text x="0" y="5" text-anchor="middle" font-size="12" font-weight="bold">能量</text>
+                        <path d="M-60,0 L-35,0" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+                        <path d="M60,0 L35,0" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+                    </g>
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#555" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 知识点 2,3,6,8: 分类方法 -->
+        <div class="knowledge-box">
+            <h3>2. 给食物分分类</h3>
+            <div class="k-point">🌿 <strong>按来源</strong>：
+                <br>- <span class="green-text">植物类 (素食)</span>：谷物、果蔬...
+                <br>- <span class="red-text">动物类 (荤食)</span>：肉、蛋、奶...
+            </div>
+            <div class="k-point">🍚 <strong>按生活习惯</strong>：粮食、蔬菜、肉类、奶制品、调味品等。</div>
+            <div class="k-point">💡 <strong>多重分类</strong>：同一种食物可以按不同标准分到不同类别里。</div>
+            
+            <div class="svg-stage">
+                <svg width="100%" height="140" viewBox="0 0 300 140">
+                    <!-- 中心食物 -->
+                    <circle cx="150" cy="70" r="30" fill="#FFF9C4" stroke="#FBC02D"/>
+                    <text x="150" y="75" text-anchor="middle" font-size="12">鸡蛋</text>
+                    
+                    <!-- 分类连线 -->
+                    <line x1="150" y1="40" x2="150" y2="10" stroke="#555" stroke-dasharray="4"/>
+                    <text x="150" y="10" text-anchor="middle" font-size="10" fill="#D84315">按来源: 动物类</text>
+
+                    <line x1="120" y1="70" x2="50" y2="70" stroke="#555" stroke-dasharray="4"/>
+                    <text x="50" y="65" text-anchor="middle" font-size="10" fill="#D84315">按习惯: 蛋类</text>
+
+                    <line x1="180" y1="70" x2="250" y2="70" stroke="#555" stroke-dasharray="4"/>
+                    <text x="250" y="65" text-anchor="middle" font-size="10" fill="#D84315">按生熟: 熟食(煮)</text>
+                    
+                    <line x1="150" y1="100" x2="150" y2="130" stroke="#555" stroke-dasharray="4"/>
+                    <text x="150" y="135" text-anchor="middle" font-size="10" fill="#D84315">按主副: 副食</text>
+                </svg>
+                <div class="svg-caption">同一种食物有多种分类</div>
+            </div>
+        </div>
+
+        <!-- 知识点 4 & 5: 生食与熟食 -->
+        <div class="knowledge-box">
+            <h3>3. 生食与熟食</h3>
+            <div class="k-point">🔥 <strong>熟食</strong>：肉类、馒头（必须煮熟杀菌、助消化）。</div>
+            <div class="k-point">🥗 <strong>生食</strong>：水果、黄瓜（保持维生素）。</div>
+            <div class="k-point">🍅 <strong>两栖</strong>：西红柿（可生吃糖拌，也可熟吃蛋汤）。</div>
+            
+            <div class="svg-stage">
+                <div style="display:flex; justify-content:space-around;">
+                    <svg width="80" height="80">
+                        <circle cx="40" cy="40" r="30" fill="#81C784"/>
+                        <text x="40" y="45" text-anchor="middle" fill="white">生食</text>
+                        <text x="40" y="65" text-anchor="middle" font-size="8">苹果/黄瓜</text>
+                    </svg>
+                    <svg width="80" height="80">
+                        <rect x="10" y="10" width="60" height="60" rx="10" fill="#EF5350"/>
+                        <text x="40" y="45" text-anchor="middle" fill="white">熟食</text>
+                        <text x="40" y="65" text-anchor="middle" font-size="8">猪肉/米饭</text>
+                    </svg>
+                    <svg width="80" height="80">
+                        <path d="M40,10 L70,70 L10,70 Z" fill="#FFCA28"/>
+                        <text x="40" y="50" text-anchor="middle" fill="#3E2723">均可</text>
+                        <text x="40" y="65" text-anchor="middle" font-size="8">西红柿</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 知识点 7: 记录方法 -->
+        <div class="knowledge-box">
+            <h3>4. 怎样记录食物？</h3>
+            <div class="k-point">📝 <strong>拆分记录</strong>：混合食物要拆开记。
+                <br>例如：<span class="highlight">蛋炒饭</span> = 鸡蛋 + 米饭
+            </div>
+            <div class="svg-stage">
+                <svg width="100%" height="100" viewBox="0 0 300 100">
+                    <!-- 蛋炒饭 -->
+                    <ellipse cx="60" cy="50" rx="40" ry="25" fill="#FFE082" stroke="#FFB300"/>
+                    <text x="60" y="55" text-anchor="middle" font-size="12">蛋炒饭</text>
+                    
+                    <!-- 箭头 -->
+                    <path d="M110,50 L140,50" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+                    
+                    <!-- 拆分结果 -->
+                    <circle cx="180" cy="50" r="20" fill="#FFF9C4" stroke="#FBC02D"/>
+                    <text x="180" y="55" text-anchor="middle" font-size="10">鸡蛋</text>
+                    <text x="215" y="55" font-size="12">+</text>
+                    <circle cx="250" cy="50" r="20" fill="#F5F5F5" stroke="#BDBDBD"/>
+                    <text x="250" y="55" text-anchor="middle" font-size="10">米饭</text>
+                </svg>
+                <div class="svg-caption">记为2种食物</div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">进入35题闯关塔！🚀</button>
+    </div>
+
+    <!-- 2. 闯关区 -->
+    <div id="section-quiz" class="container section">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="text-align:right; font-size:0.9em; color:#E65100;">题目：<span id="q-index">1</span> / 35</div>
+
+        <div id="question-area"></div>
+        
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题 ▶</button>
+    </div>
+
+    <!-- 3. 结算区 -->
+    <div id="section-result" class="container section">
+        <h1>🏆 闯关成绩</h1>
+        <div class="score-display"><span id="final-score">0</span>分</div>
+        <p id="reward-text"></p>
+        
+        <div id="wrong-list" style="display:none;">
+            <h3 style="color:#D32F2F;">❌ 错题解析</h3>
+            <!-- 错题内容 -->
+        </div>
+        <button class="btn" onclick="location.reload()">🔄 重新挑战</button>
+    </div>
+
+    <script>
+        // --- 即时反馈系统 ---
+        const InstantFeedback = {
+            audioCtx: null,
+            encouragements: ['太棒了！继续加油！🌟', '你真聪明！👍', '完全正确！真厉害！🎯', '答对了！你是最棒的！⭐', '太优秀了！继续保持！🏆', '真是个小天才！💡', '回答得非常好！👏', '你掌握得很好！📚'],
+            hints: ['再想想哦！你可以的！💪', '别灰心，再试一次！🌈', '加油！仔细看看题目！👀', '没关系，继续努力！💫', '再看看知识点吧！📖', '不要放弃，你能行！🚀', '思考一下，你一定能想到！🤔', '加油！相信自己！✨'],
+            
+            init() { if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            
+            playCorrectSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    const now = this.audioCtx.currentTime; const start = now + i * 0.1;
+                    osc.frequency.value = freq; osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.15, start); gain.gain.exponentialRampToValueAtTime(0.01, start + 0.3);
+                    osc.start(start); osc.stop(start + 0.3);
+                });
+            },
+            
+            playWrongSound() {
+                this.init(); if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                const osc = this.audioCtx.createOscillator(); const gain = this.audioCtx.createGain();
+                osc.connect(gain); gain.connect(this.audioCtx.destination);
+                const now = this.audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            },
+            
+            showConfetti() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(() => {
+                        const c = document.createElement('div'); c.className = 'confetti';
+                        c.style.cssText = `width: ${Math.random() * 10 + 5}px; height: ${Math.random() * 10 + 5}px; background: ${colors[Math.floor(Math.random() * colors.length)]}; left: ${Math.random() * 100}%; top: -20px; border-radius: ${Math.random() > 0.5 ? '50%' : '0'}; animation: confetti-fall ${Math.random() * 2 + 2}s linear forwards; transform: rotate(${Math.random() * 360}deg);`;
+                        document.body.appendChild(c);
+                        setTimeout(() => c.remove(), 4000);
+                    }, i * 30);
+                }
+            },
+            
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `feedback-toast feedback-${type}`;
+                toast.innerHTML = `<div class="toast-icon">${type === 'success' ? '✓' : '✗'}</div><div class="toast-message">${message}</div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 2500);
+            },
+            
+            onCorrect(element) {
+                this.playCorrectSound(); this.showConfetti();
+                const msg = this.encouragements[Math.floor(Math.random() * this.encouragements.length)];
+                this.showToast(msg, 'success');
+                if (element) { element.classList.add('correct-feedback'); setTimeout(() => element.classList.remove('correct-feedback'), 600); }
+            },
+            
+            onWrong(element, hint = '') {
+                this.playWrongSound();
+                const msg = this.hints[Math.floor(Math.random() * this.hints.length)] + (hint ? `<br><small style="font-size:0.85em;">💡 ${hint}</small>` : '');
+                this.showToast(msg, 'error');
+                if (element) { element.classList.add('wrong-feedback'); setTimeout(() => element.classList.remove('wrong-feedback'), 500); }
+            }
+        };
+        InstantFeedback.init();
+
+        // --- 35道题库 ---
+        const quizData = [
+            // 1. 能量与重要性 (5题)
+            { type: 'mcq', q: '除了呼吸，我们从外界获得能量的另一重要活动是？', opts: ['睡眠', '运动', '饮食'], a: 2, exp: '饮食摄入能量。' },
+            { type: 'mcq', q: '人体的能量主要来自？', opts: ['食物', '空气', '水'], a: 0, exp: '食物提供化学能。' },
+            { type: 'fill', q: '我们每天都要吃食物，是为了获得____。', a: ['能量', '营养'], exp: '维持生命活动。' },
+            { type: 'mcq', q: '下列关于饮食的说法，正确的是？', opts: ['想吃多少吃多少', '只吃喜欢的', '合理搭配，均衡饮食'], a: 2, exp: '健康饮食原则。' },
+            { type: 'mcq', q: '如果不吃早餐，我们上课时可能会？', opts: ['更有精神', '头晕无力', '没感觉'], a: 1, exp: '能量不足。' },
+
+            // 2. 食物分类 (10题)
+            { type: 'mcq', q: '按来源分，牛肉属于？', opts: ['植物类', '动物类', '调味品'], a: 1, exp: '肉类来自本身。' },
+            { type: 'mcq', q: '按来源分，米饭属于？', opts: ['植物类', '动物类', '矿物类'], a: 0, exp: '水稻是植物。' },
+            { type: 'sort', q: '请将下列食物按来源分类(先植物后动物)：', items: ['白菜', '鸡蛋', '苹果'], answerOrder: ['白菜', '苹果', '鸡蛋'], exp: '白菜苹果是植物，鸡蛋是动物。' },
+            { type: 'mcq', q: '下列食物中，属于主食的是？', opts: ['红烧肉', '馒头', '青菜'], a: 1, exp: '馒头面食为主食。' },
+            { type: 'mcq', q: '根据生活习惯，牛奶通常被归为？', opts: ['肉类', '蔬菜', '奶制品'], a: 2, exp: '生活习惯分类法。' },
+            { type: 'mcq', q: '我们可以按照不同的____给食物分类。', opts: ['价格', '标准', '重量'], a: 1, exp: '标准不同，类别不同。' },
+            { type: 'mcq', q: '同一种食物（如黄瓜）____被分到不同的类别里。', opts: ['可以', '不可以'], a: 0, exp: '既是蔬菜也是植物类。' },
+            { type: 'mcq', q: '下列属于素食（植物类）的是？', opts: ['豆腐', '火腿', '酸奶'], a: 0, exp: '豆腐是大豆做的。' },
+            { type: 'mcq', q: '下列属于荤食（动物类）的是？', opts: ['土豆', '鱼', '花生'], a: 1, exp: '鱼是动物。' },
+            { type: 'fill', q: '按来源分，食物可分为植物类食物和____食物。', a: ['动物类', '动物'], exp: '两大来源。' },
+
+            // 3. 生食与熟食 (8题)
+            { type: 'mcq', q: '下列食物中，通常必须煮熟吃的是？', opts: ['香蕉', '猪肉', '黄瓜'], a: 1, exp: '生肉含寄生虫细菌。' },
+            { type: 'mcq', q: '下列食物中，适合生吃的是？', opts: ['大米', '鸡肉', '梨'], a: 2, exp: '水果适合生吃。' },
+            { type: 'mcq', q: '既可以生吃，又可以熟吃的食物是？', opts: ['西红柿', '土豆', '牛肉'], a: 0, exp: '西红柿两栖。' },
+            { type: 'mcq', q: '食物煮熟后，通常会？', opts: ['营养全没了', '更难消化', '更易消化，杀灭细菌'], a: 2, exp: '熟食的优点。' },
+            { type: 'mcq', q: '生吃食物的好处是？', opts: ['味道更好', '减少维生素损失', '更卫生'], a: 1, exp: '高温会破坏部分维生素。' },
+            { type: 'sort', q: '请按生食、熟食、均可排序：', items: ['猪肉', '苹果', '萝卜'], answerOrder: ['苹果', '猪肉', '萝卜'], exp: '苹果生，猪肉熟，萝卜均可。' },
+            { type: 'mcq', q: '凉拌黄瓜属于？', opts: ['生食', '熟食'], a: 0, exp: '未加热。' },
+            { type: 'mcq', q: '生吃蔬菜水果时，最重要的注意事项是？', opts: ['洗干净', '煮熟', '多放糖'], a: 0, exp: '卫生安全。' },
+
+            // 4. 记录统计 (7题)
+            { type: 'mcq', q: '记录一天吃的食物时，这顿饭吃的“牛肉面”应该记为？', opts: ['1种食物', '2种食物(牛肉+面)', '不记录'], a: 1, exp: '混合食物拆分记。' },
+            { type: 'mcq', q: '“番茄炒蛋”应该记为几种食物？', opts: ['1种', '2种', '3种'], a: 1, exp: '番茄+蛋。' },
+            { type: 'mcq', q: '统计食物数量时，零食____记录。', opts: ['不需要', '需要', '看心情'], a: 1, exp: '凡入口皆需记录。' },
+            { type: 'mcq', q: '一天中喝的水____食物。', opts: ['属于', '不属于'], a: 0, exp: '水也是人体重要营养来源，广义上算。' },
+            { type: 'fill', q: '记录“八宝粥”时，我们应该把它____成多种食材记录。', a: ['拆分', '分解'], exp: '拆分记录法。' },
+            { type: 'mcq', q: '如果早餐吃了2个包子，记录时记为？', opts: ['包子*2', '包子*1'], a: 0, exp: '同种食物记1次或标数量，种类算1种。' },
+            { type: 'mcq', q: '做食物记录卡片时，重复吃的食物（如每顿都吃米饭）？', opts: ['不用记', '要分顿记录', '记一次就行'], a: 1, exp: '统计一天总量时需分顿或累计。' },
+
+            // 5. 综合探究 (5题)
+            { type: 'mcq', q: '下列属于调味品的是？', opts: ['米饭', '盐/酱油', '苹果'], a: 1, exp: '调味品分类。' },
+            { type: 'mcq', q: '下列搭配中，营养更均衡的是？', opts: ['米饭+红烧肉', '米饭+青菜+鱼', '薯条+可乐'], a: 1, exp: '荤素搭配。' },
+            { type: 'sort', q: '请按主食、副食排列：', items: ['米饭', '炒青菜'], answerOrder: ['米饭', '炒青菜'], exp: '米饭主食。' },
+            { type: 'mcq', q: '我们在给食物分类时，第一步应该是？', opts: ['确定分类标准', '随便分', '数数量'], a: 0, exp: '标准先行。' },
+            { type: 'mcq', q: '下列关于“一天的食物”说法错误的是？', opts: ['食物种类很丰富', '我们每天吃很多种食物', '只吃肉就够了'], a: 2, exp: '需多样化。' }
+        ];
+
+        // --- 逻辑控制 ---
+        let currentQIndex = 0;
+        let userScoreRaw = 0;
+        let userMistakes = [];
+        let selectedOption = null;
+        let sortOrder = []; 
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'click') {
+                osc.frequency.setValueAtTime(400, now); gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('section-review').classList.remove('active');
+            document.getElementById('section-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = quizData[currentQIndex];
+            const area = document.getElementById('question-area');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            document.getElementById('q-index').innerText = currentQIndex + 1;
+            document.getElementById('progressBar').style.width = ((currentQIndex) / quizData.length * 100) + "%";
+            
+            area.innerHTML = '';
+            nextBtn.disabled = true; nextBtn.style.opacity = 0.5;
+            selectedOption = null;
+            sortOrder = [];
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            let tagText = qData.type === 'mcq' ? '选择题' : (qData.type === 'fill' ? '填空题' : '排序题');
+            card.innerHTML = `<div class="q-content"><span class="q-tag">${tagText}</span>${qData.q}</div>`;
+
+            if (qData.type === 'mcq') {
+                qData.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-item'; btn.innerText = opt;
+                    btn.onclick = () => selectMCQ(btn, idx);
+                    card.appendChild(btn);
+                });
+            } else if (qData.type === 'fill') {
+                const input = document.createElement('input');
+                input.className = 'fill-input'; input.type = 'text'; input.placeholder = '输入答案';
+                input.oninput = (e) => {
+                    selectedOption = e.target.value.trim();
+                    nextBtn.disabled = !selectedOption;
+                    nextBtn.style.opacity = selectedOption ? 1 : 0.5;
+                };
+                // 添加失焦即时反馈
+                input.onblur = () => {
+                    if (selectedOption) {
+                        const isCorrect = qData.a.some(ans => selectedOption.includes(ans));
+                        setTimeout(() => {
+                            if (isCorrect) {
+                                InstantFeedback.onCorrect(input);
+                            } else {
+                                InstantFeedback.onWrong(input, qData.exp);
+                            }
+                        }, 200);
+                    }
+                };
+                card.appendChild(input);
+            } else if (qData.type === 'sort') {
+                renderSort(card, qData);
+            }
+            area.appendChild(card);
+        }
+
+        function selectMCQ(el, idx) {
+            playSound('click');
+            document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected', 'correct-feedback', 'wrong-feedback'));
+            el.classList.add('selected');
+            selectedOption = idx;
+            
+            // 立即检查答案并给出反馈
+            const qData = quizData[currentQIndex];
+            const isCorrect = (idx === qData.a);
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    InstantFeedback.onCorrect(el);
+                } else {
+                    InstantFeedback.onWrong(el, qData.exp);
+                }
+            }, 200);
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').style.opacity = 1;
+        }
+
+        function renderSort(card, qData) {
+            const container = document.createElement('div');
+            const sourceDiv = document.createElement('div'); sourceDiv.className = 'sort-container';
+            const targetDiv = document.createElement('div'); targetDiv.className = 'sort-box';
+            targetDiv.innerHTML = '<div class="sort-placeholder">点击选项按顺序排列</div>';
+
+            let items = [...qData.items].sort(()=>Math.random()-0.5);
+            
+            items.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'sort-item';
+                btn.innerText = item;
+                btn.onclick = () => {
+                    playSound('click');
+                    if(targetDiv.contains(btn)) {
+                        sourceDiv.appendChild(btn);
+                        sortOrder = sortOrder.filter(i => i !== item);
+                    } else {
+                        if(targetDiv.querySelector('.sort-placeholder')) targetDiv.innerHTML = '';
+                        targetDiv.appendChild(btn);
+                        sortOrder.push(item);
+                    }
+                    if(sortOrder.length === qData.items.length) {
+                         document.getElementById('nextBtn').disabled = false;
+                         document.getElementById('nextBtn').style.opacity = 1;
+                    } else {
+                         document.getElementById('nextBtn').disabled = true;
+                         document.getElementById('nextBtn').style.opacity = 0.5;
+                    }
+                };
+                sourceDiv.appendChild(btn);
+            });
+
+            container.appendChild(sourceDiv); container.appendChild(targetDiv);
+            card.appendChild(container);
+        }
+
+        function nextQuestion() {
+            const qData = quizData[currentQIndex];
+            let isCorrect = false;
+            let myAns = "";
+
+            if (qData.type === 'mcq') {
+                if (selectedOption === qData.a) isCorrect = true;
+                myAns = qData.opts[selectedOption];
+            } else if (qData.type === 'fill') {
+                if (qData.a.some(ans => selectedOption.includes(ans))) isCorrect = true;
+                myAns = selectedOption;
+            } else if (qData.type === 'sort') {
+                if (JSON.stringify(sortOrder) === JSON.stringify(qData.answerOrder)) isCorrect = true;
+                myAns = sortOrder.join(' -> ');
+            }
+
+            if (isCorrect) {
+                userScoreRaw++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+                userMistakes.push({ q: qData.q, my: myAns, exp: qData.exp });
+            }
+
+            currentQIndex++;
+            if (currentQIndex < quizData.length) renderQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('section-quiz').classList.remove('active');
+            document.getElementById('section-result').classList.add('active');
+            
+            let finalScore = Math.round((userScoreRaw / quizData.length) * 100);
+            let temp = 0;
+            const scoreEl = document.getElementById('final-score');
+            const timer = setInterval(() => {
+                if(temp >= finalScore) { clearInterval(timer); scoreEl.innerText = finalScore; }
+                else { temp++; scoreEl.innerText = temp; }
+            }, 20);
+
+            const reward = document.getElementById('reward-text');
+            if(finalScore === 100) reward.innerText = "🎉 完美！你是美食分类专家！";
+            else if(finalScore >= 80) reward.innerText = "🌟 优秀！对食物很了解！";
+            else reward.innerText = "💪 加油！吃饭时多观察一下！";
+
+            if (userMistakes.length > 0) {
+                const list = document.getElementById('wrong-list');
+                list.style.display = 'block';
+                let html = '';
+                userMistakes.forEach((m, i) => {
+                    html += `<div class="wrong-item"><strong>${i+1}. ${m.q}</strong><br><span style="font-size:0.9em; color:#D32F2F">你的回答：${m.my}</span><br><span style="font-size:0.9em; color:#388E3C">💡 解析：${m.exp}</span></div>`;
+                });
+                list.innerHTML += html;
+            }
+        }
+    </script>
+</body>
+</html>
